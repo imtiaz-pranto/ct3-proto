@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Platforms: Microsoft · Conversion Tracking 3.0 prototype</title>
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/components.css">
+</head>
+<body data-page="platforms-microsoft" data-nav="platforms">
+<div class="wp-content">
+<main class="page wcct-app" id="wcct-app">
+
+	<div class="page-head">
+		<div>
+			<h1 class="page-title">Platforms</h1>
+			<p class="page-sub">Connect each place you run ads. The recommended setup is on by default, so most stores only need an ID.</p>
+		</div>
+	</div>
+
+	<div class="card master-detail">
+		<nav class="master" aria-labelledby="plist-label">
+			<div class="master-label" id="plist-label">Your platforms</div>
+			<ul class="platform-list">
+				<li><a class="platform-list-item" href="platforms.html"><span class="logo sm"><img src="assets/logos/meta.svg" alt=""></span>Meta<span class="pill ok is-dot"><span class="sr-only">Working</span></span></a></li>
+				<li><a class="platform-list-item" href="platforms-google.html"><span class="logo sm"><img src="assets/logos/google-analytics.svg" alt=""></span>Google<span class="pill warn is-dot"><span class="sr-only">Needs attention</span></span></a></li>
+				<li><a class="platform-list-item" href="platforms-x.html"><span class="logo sm"><img src="assets/logos/x.svg" alt=""></span>X<span class="pill ok is-dot"><span class="sr-only">Working</span></span></a></li>
+				<li><a class="platform-list-item" href="platforms-microsoft.html" aria-current="page"><span class="logo sm"><img src="assets/logos/microsoft.svg" alt=""></span>Microsoft<span class="pro-badge" data-when="plan=free"><span data-icon="pui-crown"></span>PRO</span><span class="pill ok is-dot" data-when="plan=pro;connection=connected"><span class="sr-only">Working</span></span><span class="pill off is-dot" data-when="plan=pro;connection=not"><span class="sr-only">Not set up</span></span></a></li>
+				<li><a class="platform-list-item" href="platforms-custom.html"><span class="logo sm"><img src="assets/logos/custom.svg" alt=""></span>Custom script<span class="pill off is-dot"><span class="sr-only">Not set up</span></span></a></li>
+			</ul>
+			<p class="master-foot">TikTok and Pinterest come in a later update.</p>
+		</nav>
+
+		<section class="detail" aria-labelledby="detail-title">
+			<div class="detail-head">
+				<span class="logo"><img src="assets/logos/microsoft.svg" alt=""></span>
+				<div class="detail-head-text">
+					<h2 class="detail-title" id="detail-title">Microsoft Advertising <span class="pro-badge" data-when="plan=free"><span data-icon="pui-crown"></span>PRO</span></h2>
+					<p class="detail-desc">Sends your store's events to the UET tag for Bing and Microsoft Start ads. <a href="#">Learn more</a></p>
+				</div>
+				<span class="pill off" data-when="plan=free">Not set up</span>
+				<span data-when="plan=pro;connection=connected"><span class="pill ok" data-when-paused="no">Working</span><span class="pill off" data-when-paused="yes">Paused</span></span>
+				<span class="pill off" data-when="plan=pro;connection=not">Not set up</span>
+			</div>
+
+			<!-- Free: inline upgrade, never a modal, Continue with Free always visible -->
+			<div class="detail-body" data-when="plan=free">
+				<div class="detail-form">
+					<div class="stack-sm">
+						<span class="stat-icon is-off"><span data-icon="lock"></span></span>
+						<h3 class="summary-title">Microsoft Advertising is part of Pro</h3>
+						<p class="muted">Track purchases from Bing and Microsoft Start ads with the UET tag, counted once like your other platforms. Everything you set up for Meta, Google and X keeps working on Free.</p>
+					</div>
+					<ul class="feature-list">
+						<li><span data-icon="check"></span>UET tag on every page, purchases with order value</li>
+						<li><span data-icon="check"></span>Start checkout on classic and block checkout</li>
+						<li><span data-icon="check"></span>Respects cookie choices like the other platforms</li>
+					</ul>
+					<div class="row wrap">
+						<a class="btn primary" href="settings.html#plan">Compare plans</a>
+						<a class="btn ghost" href="platforms.html">Continue with Free</a>
+					</div>
+				</div>
+				<aside class="help" aria-label="What you get">
+					<div>
+						<h3>Also in Pro</h3>
+						<ul class="feature-list">
+							<li><span data-icon="check"></span>More than one Meta pixel</li>
+							<li><span data-icon="check"></span>Missed-sale emails and a weekly health email</li>
+							<li><span data-icon="check"></span>Activity log kept 30 days (up to 90), search and export</li>
+						</ul>
+					</div>
+				</aside>
+			</div>
+
+			<!-- Pro: UET tag form -->
+			<div class="detail-body" data-when="plan=pro">
+				<div class="detail-form" data-platform-form>
+					<div class="field">
+						<label for="uet-id">UET tag ID</label>
+						<input type="text" id="uet-id" value="343012345" placeholder="7 to 9 digits, numbers only" inputmode="numeric" autocomplete="off" aria-describedby="uet-good">
+						<p class="field-good" id="uet-good"><span data-icon="circle-check"></span><span>Looks like a UET tag ID.</span></p>
+					</div>
+					<section class="events" data-events="microsoft" aria-label="Events"></section>
+
+					<section data-server-section="microsoft"></section>
+					<div class="option-row">
+						<div><div class="option-title">Respect cookie choices</div><div class="option-desc">Required if you sell to Europe. Works with your cookie plugin.</div></div>
+						<label class="switch"><input type="checkbox" role="switch"><span class="switch-track"></span><span class="sr-only">Respect cookie choices</span></label>
+					</div>
+
+					<details class="advanced-settings" id="advanced-settings">
+						<summary><span data-icon="chevron-right"></span>Advanced settings<span class="advanced-sub">Order value, who to track, developer details</span></summary>
+						<div class="advanced-body">
+							<div class="field">
+								<label for="microsoft-value">Order value includes</label>
+								<select id="microsoft-value">
+									<option value="items" selected>Items only (recommended)</option>
+									<option value="shipping">Items and shipping</option>
+									<option value="all">Items, tax and shipping</option>
+								</select>
+								<p class="field-hint">Sent with Purchase. Items only keeps ad results in line with product revenue.</p>
+							</div>
+
+							<div class="field">
+								<label for="microsoft-roles">Skip these roles</label>
+								<select id="microsoft-roles">
+									<option value="admin-shop" selected>Administrator, Shop manager</option>
+									<option value="admin">Administrator only</option>
+									<option value="none">Track everyone</option>
+								</select>
+								<p class="field-hint">Your own visits won't count as shoppers.</p>
+							</div>
+
+							<div data-server-settings="microsoft"></div>
+
+							<section class="dev-block" aria-labelledby="dev-title">
+								<h3 id="dev-title"><span data-icon="terminal"></span>For developers</h3>
+								<dl class="dev-list">
+									<dt>Integration key</dt><dd><code>bing</code></dd>
+									<dt>Event IDs</dt><dd><code>wcct_{order_id}_purchase</code></dd>
+									<dt>Filters</dt><dd><code>wcct_event_value</code><code>wcct_consent_allows</code><code>wcct_platforms</code></dd>
+									<dt>Terms</dt><dd>"Counted once" = deduplication by event ID. "Respect cookie choices" = Consent Mode v2 and the WP Consent API.</dd>
+								</dl>
+								<a class="small" href="#">Hook reference</a>
+							</section>
+						</div>
+					</details>
+				</div>
+				<aside class="help" aria-label="Help">
+					<div>
+						<h3>Where to find your UET tag ID</h3>
+						<ol>
+							<li>In <a href="#">Microsoft Advertising</a>, open <b>Tools</b>, then <b>UET tag</b>.</li>
+							<li>Find the tag for this store. The ID is the number in the <b>Tag ID</b> column.</li>
+							<li>Paste it into the UET tag ID field. We check the format as you type.</li>
+						</ol>
+					</div>
+					<div class="clip"><span data-icon="play"></span>Clip: finding the UET tag ID, 20 s</div>
+				</aside>
+			</div>
+
+			<div class="detail-foot" data-when="plan=pro;connection=connected">
+				<button type="button" class="link-danger" data-dialog-open="pause-dialog" data-when-paused="no">Pause tracking</button>
+				<span class="foot-note" data-when-paused="no" data-saved-note>Saved today</span>
+				<button type="button" class="btn primary push" data-save data-when-paused="no" disabled>Saved</button>
+				<span class="foot-note" data-when-paused="yes"><span data-icon="pause"></span>Tracking paused. Nothing is sent to Microsoft until you resume.</span>
+				<button type="button" class="btn primary push" data-resume data-when-paused="yes">Resume tracking</button>
+			</div>
+			<div class="detail-foot" data-when="plan=pro;connection=not">
+				<span class="foot-note">Not connected yet. After you connect, we wait for the first event from your store.</span>
+				<a class="btn secondary push" href="index.html">Cancel</a>
+				<button type="button" class="btn primary" data-connect>Connect</button>
+			</div>
+		</section>
+	</div>
+
+	<dialog class="dialog" id="pause-dialog" aria-labelledby="pause-title">
+		<form method="dialog">
+			<div class="dialog-body">
+				<h2 class="dialog-title" id="pause-title">Pause tracking on Microsoft Advertising?</h2>
+				<p class="dialog-text">Nothing is sent to Microsoft until you resume. Your UET tag ID stays saved. Your ads keep running, but Microsoft won't see new sales from this store while it's paused.</p>
+			</div>
+			<div class="dialog-foot">
+				<button type="submit" class="btn secondary" value="cancel">Keep tracking</button>
+				<button type="submit" class="btn destructive" value="pause">Pause tracking</button>
+			</div>
+		</form>
+	</dialog>
+
+</main>
+</div>
+<script src="assets/icons.js"></script>
+<script src="assets/config.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

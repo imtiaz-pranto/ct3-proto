@@ -1,0 +1,18 @@
+# Older prototypes and reference mockups stay out of this repo
+prototype-v1/
+prototype-v2/
+mockup-ref/
+
+# Dependencies
+node_modules/
+
+# macOS
+.DS_Store
+
+# Screenshots and test output
+screenshots/
+prototype/tools/rendered/
+prototype/tools/contrast-report.txt
+test-results/
+playwright-report/
+*.png

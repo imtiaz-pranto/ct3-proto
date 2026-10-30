@@ -1,0 +1,27 @@
+/*
+ * Weekly health email preview (Pro). 640 px, no app chrome.
+ * The real email is a WC_Email template with inline styles and tables;
+ * this file only fixes the look. Colours still come from tokens.css.
+ */
+.email-preview { width: 640px; max-width: calc(100vw - 32px); margin: 32px auto; display: flex; flex-direction: column; gap: 12px; }
+.email-envelope { display: flex; flex-direction: column; gap: 4px; }
+.email-meta { margin: 0; font-size: 12px; color: var(--page-muted-foreground); display: flex; justify-content: space-between; gap: 12px; }
+.email-subject { margin: 0; font-size: 14px; }
+.email { background: var(--card); border: 1px solid var(--card-ring); border-radius: var(--radius-xl); box-shadow: var(--shadow-xs); overflow: hidden; }
+.email-head { padding: 20px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+.email-range { margin-left: auto; font-size: 13px; color: var(--muted-foreground); }
+.email-body { padding: 28px; display: flex; flex-direction: column; gap: 22px; }
+.email-body p { margin: 0; }
+.email-hero { font-size: 40px; font-weight: 700; line-height: 1; }
+.email-body .email-hero-sub { font-size: 15px; margin-top: 6px; }
+.email-section { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-foreground); margin-bottom: 4px; }
+.email-bar-row { display: grid; grid-template-columns: 140px 1fr 80px; gap: 12px; align-items: center; font-size: 14px; padding: 10px 0; border-top: 1px solid var(--border); }
+.email-bar-row:first-of-type { border-top: 0; }
+.email-bar { height: 8px; border-radius: 999px; background: var(--border); overflow: hidden; display: block; }
+.email-bar-fill { display: block; height: 100%; background: var(--primary); border-radius: 999px; }
+.email-bar-fill.w-98 { width: 98%; }
+.email-bar-fill.w-100 { width: 100%; }
+.email-bar-num { text-align: right; }
+.email-callout { border-left: 3px solid var(--warning); border-radius: 3px; background: var(--warning-10); padding: 12px 16px; display: flex; gap: 12px; align-items: flex-start; font-size: 14px; }
+.email-callout .pill { margin-top: 2px; }
+.email-foot { font-size: 12px; color: var(--muted-foreground); border-top: 1px solid var(--border); padding-top: 14px; }

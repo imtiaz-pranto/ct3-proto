@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settings · Conversion Tracking 3.0 prototype</title>
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/components.css">
+</head>
+<body data-page="settings" data-nav="settings">
+<div class="wp-content">
+<main class="page wcct-app" id="wcct-app">
+
+	<div class="page-head">
+		<div>
+			<h1 class="page-title">Settings</h1>
+			<p class="page-sub">Alerts, who can manage tracking, and your plan.</p>
+		</div>
+	</div>
+
+	<div class="settings-layout">
+		<nav class="settings-nav" aria-label="Settings sections">
+			<a href="#alerts" data-settings-link="alerts"><span data-icon="bell"></span>Alerts</a>
+			<a href="#access" data-settings-link="access"><span data-icon="users"></span>Integration access<span class="pro-badge" data-when="plan=free"><span data-icon="pui-crown"></span>PRO</span></a>
+			<a href="#plan" data-settings-link="plan"><span data-icon="crown"></span>Plan</a>
+		</nav>
+
+		<div class="settings-panels">
+			<section class="card is-clip" id="alerts" data-settings-panel aria-labelledby="notify-title">
+				<div class="detail-head">
+					<span class="logo"><span data-icon="bell"></span></span>
+					<div class="detail-head-text">
+						<h2 class="detail-title" id="notify-title">Alerts</h2>
+						<p class="detail-desc">We tell you when a sale didn't reach a platform. Every alert ends in something you can do.</p>
+					</div>
+				</div>
+				<div>
+					<div class="card-row">
+						<div class="event-row-text"><div class="option-title">Missed sales, on the dashboard</div><div class="option-desc">A badge and a card when a paid order didn't reach a connected platform within 10 minutes.</div></div>
+						<label class="switch"><input type="checkbox" role="switch" checked><span class="switch-track"></span><span class="sr-only">Missed sales on the dashboard</span></label>
+					</div>
+
+					<div class="card-row">
+						<div class="event-row-text"><div class="option-title">Missed sales, by email <span class="pro-badge" data-when="plan=free"><span data-icon="pui-crown"></span>PRO</span></div><div class="option-desc">One email per platform per day at most. Order numbers only.</div></div>
+						<label class="switch" data-when="plan=pro"><input type="checkbox" role="switch" checked><span class="switch-track"></span><span class="sr-only">Missed sales by email</span></label>
+						<a class="crown-link" href="#plan" data-when="plan=free"><span data-icon="pui-crown"></span>Upgrade</a>
+					</div>
+
+					<div class="card-row">
+						<div class="event-row-text"><div class="option-title">Daily digest instead of one email per incident <span class="pro-badge" data-when="plan=free"><span data-icon="pui-crown"></span>PRO</span></div><div class="option-desc">One email at 09:00 with everything missed yesterday.</div></div>
+						<label class="switch" data-when="plan=pro"><input type="checkbox" role="switch"><span class="switch-track"></span><span class="sr-only">Daily digest</span></label>
+						<a class="crown-link" href="#plan" data-when="plan=free"><span data-icon="pui-crown"></span>Upgrade</a>
+					</div>
+
+					<div class="card-row">
+						<div class="event-row-text"><div class="option-title">Weekly health email <span class="pro-badge" data-when="plan=free"><span data-icon="pui-crown"></span>PRO</span></div><div class="option-desc">Monday morning: purchases tracked per platform, missed count, Doctor summary. <a href="email-weekly.html">Preview</a></div></div>
+						<label class="switch" data-when="plan=pro"><input type="checkbox" role="switch" checked><span class="switch-track"></span><span class="sr-only">Weekly health email</span></label>
+						<a class="crown-link" href="#plan" data-when="plan=free"><span data-icon="pui-crown"></span>Upgrade</a>
+					</div>
+
+					<div class="card-row">
+						<div class="event-row-text"><div class="option-title">Doctor found something new</div><div class="option-desc">After a plugin is activated, a quiet re-check. Dashboard only, never a popup.</div></div>
+						<label class="switch"><input type="checkbox" role="switch" checked><span class="switch-track"></span><span class="sr-only">Doctor found something new</span></label>
+					</div>
+
+					<div class="card-row is-stacked" data-when="plan=pro">
+						<div class="field">
+							<label for="alert-email">Send emails to</label>
+							<input type="email" id="alert-email" value="owner@example.com" autocomplete="email">
+						</div>
+						<div><button type="button" class="btn outline" data-send-test><span data-icon="send"></span>Send a test</button></div>
+					</div>
+				</div>
+				<div class="card-foot end"><button type="button" class="btn primary" data-toast="Alert settings saved.">Save settings</button></div>
+			</section>
+
+		<section class="card is-clip" id="access" data-settings-panel aria-labelledby="access-title">
+			<div class="detail-head">
+				<span class="logo"><span data-icon="users"></span></span>
+				<div class="detail-head-text">
+					<h2 class="detail-title" id="access-title">Integration access <span class="pro-badge" data-when="plan=free"><span data-icon="pui-crown"></span>PRO</span></h2>
+					<p class="detail-desc">Let people other than administrators manage tracking, without giving them the rest of WordPress.</p>
+				</div>
+			</div>
+
+			<!-- Free: Pro-locked preview, same treatment as Microsoft -->
+			<div class="detail-body" data-when="plan=free">
+				<div class="detail-form">
+					<div class="stack-sm">
+						<span class="stat-icon is-off"><span data-icon="lock"></span></span>
+						<h3 class="summary-title">Role access is part of Pro</h3>
+						<p class="muted">On Free, only administrators can open Conversion Tracking. Pro lets you pick any role on your site, so a shop manager, an editor or your agency can fix a pixel without full admin rights.</p>
+					</div>
+					<ul class="feature-list">
+						<li><span data-icon="check"></span>Every role on your site, including Shop manager and Dokan vendors</li>
+						<li><span data-icon="check"></span>Access to tracking settings only, nothing else in WordPress</li>
+						<li><span data-icon="check"></span>Administrators always keep access</li>
+					</ul>
+					<div class="row wrap">
+						<a class="btn primary" href="#plan">Compare plans</a>
+						<a class="btn ghost" href="index.html">Continue with Free</a>
+					</div>
+				</div>
+				<aside class="help" aria-label="What you get">
+					<div>
+						<h3>Also in Pro</h3>
+						<ul class="feature-list">
+							<li><span data-icon="check"></span>Microsoft Advertising</li>
+							<li><span data-icon="check"></span><a href="catalog.html">Meta catalog feed</a></li>
+							<li><span data-icon="check"></span>Missed-sale emails and a weekly health email</li>
+						</ul>
+					</div>
+				</aside>
+			</div>
+
+			<!-- Pro: role picker -->
+			<div class="detail-body" data-when="plan=pro">
+				<div class="detail-form" data-platform-form>
+					<fieldset class="check-list">
+						<legend>Roles that can manage tracking</legend>
+						<label class="check"><input type="checkbox" checked disabled><span>Administrator<span class="check-desc">Always has access.</span></span></label>
+						<label class="check"><input type="checkbox" name="access-role[]" value="shop_manager" checked><span>Shop manager</span></label>
+						<label class="check"><input type="checkbox" name="access-role[]" value="editor"><span>Editor</span></label>
+						<label class="check"><input type="checkbox" name="access-role[]" value="author"><span>Author</span></label>
+						<label class="check"><input type="checkbox" name="access-role[]" value="contributor"><span>Contributor</span></label>
+						<label class="check"><input type="checkbox" name="access-role[]" value="subscriber"><span>Subscriber</span></label>
+						<label class="check"><input type="checkbox" name="access-role[]" value="customer"><span>Customer</span></label>
+						<label class="check"><input type="checkbox" name="access-role[]" value="seller"><span>Vendor<span class="check-desc">Added by Dokan.</span></span></label>
+					</fieldset>
+					<p class="small muted">People with these roles see Conversion Tracking under WooCommerce and can change every setting in it. They can't install plugins or edit other parts of your site.</p>
+				</div>
+				<aside class="help" aria-label="Help">
+					<div>
+						<h3>Who should get access</h3>
+						<p>Give it to the person who runs your ads. Most stores add Shop manager. Customer, Subscriber and Vendor are listed because they are roles on your site, not because they need it.</p>
+					</div>
+				</aside>
+			</div>
+
+			<div class="detail-foot" data-when="plan=pro">
+				<span class="foot-note" data-saved-note>Saved last week</span>
+				<button type="button" class="btn primary push" data-save disabled>Saved</button>
+			</div>
+		</section>
+
+			<section class="card is-clip" id="plan" data-settings-panel aria-labelledby="tiers-title">
+				<div class="detail-head">
+					<span class="logo"><span data-icon="crown"></span></span>
+					<div class="detail-head-text">
+						<h2 class="detail-title" id="tiers-title">Plan</h2>
+						<p class="detail-desc" data-when="plan=free">You're on Free. Here's what Pro adds.</p>
+						<p class="detail-desc" data-when="plan=pro">You're on Pro. Thanks for supporting the plugin.</p>
+					</div>
+				</div>
+				<div class="tiers">
+					<div class="tier">
+						<div class="tier-name">Free</div>
+						<div class="tier-sub">Tracking that works</div>
+						<ul class="feature-list">
+							<li><span data-icon="check"></span>Meta, Google, X, custom scripts</li>
+							<li><span data-icon="check"></span>Counted once, failed orders skipped</li>
+							<li><span data-icon="check"></span>Respect cookie choices</li>
+							<li><span data-icon="check"></span>Tracking Doctor</li>
+							<li><span data-icon="check"></span>Activity log, 24 hours</li>
+							<li><span data-icon="check"></span>Missed-sale badge on the dashboard</li>
+						</ul>
+						<span class="pill ok" data-when="plan=free">Your plan</span>
+					</div>
+					<div class="tier">
+						<div class="tier-name">Pro <span class="pro-badge"><span data-icon="pui-crown"></span>PRO</span></div>
+						<div class="tier-sub">Control and peace of mind</div>
+						<ul class="feature-list">
+							<li><span data-icon="check"></span>Everything in Free</li>
+							<li><span data-icon="check"></span>Microsoft Advertising</li>
+							<li><span data-icon="check"></span>More than one Meta pixel, each with its own events</li>
+							<li><span data-icon="check"></span>Richer customer matching, Enhanced conversions</li>
+							<li><span data-icon="check"></span>Activity log kept 30 days (up to 90), search, export</li>
+							<li><span data-icon="check"></span>Missed-sale emails, weekly health email</li>
+							<li><span data-icon="check"></span><a href="catalog.html">Meta catalog feed</a></li>
+							<li><span data-icon="check"></span><a href="#access">Choose which roles can manage tracking</a></li>
+						</ul>
+						<div class="stack-sm" data-when="plan=free">
+							<a class="btn pro" href="#">Upgrade to Pro<span data-icon="pui-crown"></span></a>
+							<p class="xsmall muted">[PRICE] per year. 14-day refund. Free keeps working if you don't.</p>
+						</div>
+						<span class="pill ok" data-when="plan=pro">Active until [DATE]</span>
+					</div>
+				</div>
+			</section>
+		</div>
+	</div>
+
+</main>
+</div>
+<script src="assets/icons.js"></script>
+<script src="assets/config.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

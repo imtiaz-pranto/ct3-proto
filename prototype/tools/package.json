@@ -1,0 +1,19 @@
+{
+  "name": "wcct-prototype-tools",
+  "private": true,
+  "description": "Review tooling for the CT 3.0 HTML prototype. Not needed to open the prototype.",
+  "type": "module",
+  "scripts": {
+    "validate": "html-validate ../*.html",
+    "links": "node check-links.mjs",
+    "contrast": "node contrast.mjs && html-validate rendered/*.html",
+    "interactions": "node interactions.mjs",
+    "screenshots": "node screenshot.mjs",
+    "grep30": "node grep-30.mjs",
+    "verify": "npm run validate && npm run links && npm run contrast && npm run interactions && npm run grep30 && npm run screenshots"
+  },
+  "devDependencies": {
+    "html-validate": "^9.0.0",
+    "playwright": "^1.50.0"
+  }
+}

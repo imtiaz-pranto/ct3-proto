@@ -1,0 +1,121 @@
+/*
+ * Conversion Tracking 3.0 design tokens (prototype).
+ *
+ * Source of truth: @wedevs/plugin-ui `src/styles.css` (.pui-root tokens)
+ * at getdokan/plugin-ui acc2771 (2026-09-30). Every token plugin-ui defines
+ * is here under the same name. CT overrides only what Texty 2.0 overrides
+ * through ThemeProvider (primary and ring blue) plus `success` (emerald,
+ * fixing Texty's success = primary), so task 0.4 passes the overrides as
+ * ThemeProvider `tokens` and gets everything else from plugin-ui.
+ *
+ * Rule: no colour literal appears anywhere else in the prototype. Tints are
+ * derived from these tokens with color-mix(), the CSS equivalent of
+ * Tailwind's `bg-primary/10` opacity modifiers that plugin-ui uses.
+ */
+:root {
+	/* ---- plugin-ui core tokens (defaults unless marked CT) ---- */
+	--background: oklch(1 0 0);
+	--foreground: oklch(0.145 0 0);
+	--card: oklch(1 0 0);
+	--card-foreground: oklch(0.145 0 0);
+	--popover: oklch(1 0 0);
+	--popover-foreground: oklch(0.145 0 0);
+	--primary: oklch(0.52 0.13 248);              /* CT (Texty): WP-like blue; plugin-ui default is near-black */
+	--primary-foreground: oklch(1 0 0);           /* CT (Texty) */
+	--secondary: oklch(0.97 0 0);
+	--secondary-foreground: oklch(0.205 0 0);
+	--muted: oklch(0.97 0 0);
+	--muted-foreground: oklch(0.556 0 0);
+	--accent: oklch(0.97 0 0);
+	--accent-foreground: oklch(0.205 0 0);
+	--destructive: oklch(0.577 0.245 27.325);
+	--destructive-foreground: oklch(1 0 0);
+	--success: oklch(0.696 0.17 162);             /* CT: emerald; plugin-ui default oklch(0.647 0.178 145) */
+	--success-foreground: oklch(1 0 0);
+	--warning: oklch(0.769 0.188 70.08);
+	--warning-foreground: oklch(0.21 0.034 32);
+	--info: oklch(0.623 0.214 255.09);
+	--info-foreground: oklch(1 0 0);
+	--border: oklch(0.922 0 0);
+	--input: oklch(0.922 0 0);
+	--ring: oklch(0.52 0.13 248);                 /* CT (Texty): ring = primary */
+	--chart-1: oklch(0.81 0.1 252);
+	--chart-2: oklch(0.62 0.19 260);
+	--chart-3: oklch(0.55 0.22 263);
+	--chart-4: oklch(0.49 0.22 264);
+	--chart-5: oklch(0.42 0.18 266);
+	--radius: 0.625rem;
+
+	/* plugin-ui radius scale (@theme inline) */
+	--radius-sm: calc(var(--radius) - 4px);       /* 6px */
+	--radius-md: calc(var(--radius) - 2px);       /* 8px: buttons, inputs, selects, popovers */
+	--radius-lg: var(--radius);                   /* 10px: alerts, tab list, dialog */
+	--radius-xl: calc(var(--radius) + 4px);       /* 14px: Card, AlertDialog */
+	--radius-4xl: 9999px;                         /* Badge */
+
+	/* plugin-ui shadows */
+	--shadow-xs: 0 1px 3px 0 hsl(0 0% 0% / 0.05);
+	--shadow-sm: 0 1px 3px 0 hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+	--shadow-md: 0 1px 3px 0 hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.1);
+	--shadow-lg: 0 1px 3px 0 hsl(0 0% 0% / 0.1), 0 4px 6px -1px hsl(0 0% 0% / 0.1);
+
+	/* plugin-ui typography */
+	--font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+	--font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+	/* ---- CT additions (not in plugin-ui), accepted as decision 4 on 2026-10-28:
+	   --page-muted-foreground and the status tone map below. ---- */
+	/* PRO affordance colour: plugin-ui's TopBar default #FFBC00 (decision 1, 2026-10-28). */
+	--pro: #ffbc00;
+	--pro-foreground: var(--foreground);
+	/* --muted-foreground is 4.2:1 on the WP admin grey #f0f0f1, below 4.5:1, so
+	   secondary text that sits directly on the page (not in a card) uses this. */
+	--page-muted-foreground: oklch(0.48 0 0);
+
+	/* Status tone map (UI-RESEARCH §1): Texty puts these Tailwind palette
+	   classes on plugin-ui <Badge>; CT names them once. */
+	--tone-ok-bg: #d1fae5;     /* emerald-100 */
+	--tone-ok-fg: #047857;     /* emerald-700 */
+	--tone-ok-dot: #10b981;    /* emerald-500 */
+	--tone-warn-bg: #fef3c7;   /* amber-100 */
+	--tone-warn-fg: #b45309;   /* amber-700 */
+	--tone-warn-dot: #f59e0b;  /* amber-500 */
+	--tone-bad-bg: #ffe4e6;    /* rose-100, log rows only */
+	--tone-bad-fg: #be123c;    /* rose-700 */
+	--tone-bad-dot: #f43f5e;   /* rose-500 */
+	--tone-off-bg: #f3f4f6;    /* gray-100 */
+	--tone-off-fg: #4b5563;    /* gray-600 */
+	--tone-off-dot: #9ca3af;   /* gray-400 */
+
+	/* Opacity-modifier equivalents (Tailwind `x/10` etc.) */
+	--card-ring: color-mix(in srgb, var(--foreground) 10%, transparent);   /* ring-foreground/10 */
+	--primary-5: color-mix(in srgb, var(--primary) 5%, var(--background));
+	--primary-10: color-mix(in srgb, var(--primary) 10%, var(--background));
+	--primary-30: color-mix(in srgb, var(--primary) 30%, var(--background));
+	--primary-hover: color-mix(in srgb, var(--primary) 80%, var(--background)); /* hover:bg-primary/80 */
+	--ring-50: color-mix(in srgb, var(--ring) 50%, transparent);           /* ring-ring/50 */
+	--warning-10: color-mix(in srgb, var(--warning) 10%, var(--background));
+	--info-10: color-mix(in srgb, var(--info) 10%, var(--background));
+	--success-10: color-mix(in srgb, var(--success) 10%, var(--background));
+	--destructive-10: color-mix(in srgb, var(--destructive) 10%, var(--background));
+	--pro-soft: color-mix(in srgb, var(--pro) 8%, var(--background));
+	--muted-50: color-mix(in srgb, var(--muted) 50%, var(--background));  /* bg-muted/50 on white */
+
+	/* Simulated WordPress admin chrome (prototype only; WP core owns these) */
+	--wp-bar: #1d2327;
+	--wp-submenu: #2c3338;
+	--wp-menu-text: #f0f0f1;
+	--wp-submenu-text: #c3c4c7;
+	--wp-current: #2271b1;
+	--wp-page: #f0f0f1;
+
+	/* Layout */
+	--wp-bar-h: 32px;
+	--wp-menu-w: 160px;
+	--topbar-h: 66px;           /* plugin-ui TopBar max-h-16.5 */
+	--page-pad-y: 32px;
+	--page-pad-x: 32px;         /* full width beside the WP menu, 32 px each side (A1) */
+	--input-max: 560px;         /* text inputs stop here; cards and tables use the column (A2) */
+	--master-w: 240px;          /* Platforms: platform list column */
+	--help-w: 320px;            /* Platforms: help column, a drawer below 1280 px */
+}

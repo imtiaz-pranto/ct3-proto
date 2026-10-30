@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Catalog · Conversion Tracking 3.0 prototype</title>
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/components.css">
+</head>
+<body data-page="catalog" data-nav="catalog">
+<div class="wp-content">
+<main class="page wcct-app" id="wcct-app">
+
+	<div class="page-head">
+		<div>
+			<h1 class="page-title">Catalog</h1>
+			<p class="page-sub">Send your products to Meta so dynamic ads and shops always show the right item, price and stock.</p>
+		</div>
+	</div>
+
+	<div class="card is-clip">
+		<!-- One tab per destination. Built for more destinations later; only Meta today. -->
+		<nav class="dest-tabs" aria-label="Catalog destinations">
+			<a href="catalog.html" aria-current="page"><span class="logo xs"><img src="assets/logos/meta.svg" alt=""></span>Meta</a>
+		</nav>
+
+		<!-- Free: Pro-locked preview, same treatment as Microsoft -->
+		<div class="detail-body" data-when="plan=free">
+			<div class="detail-form">
+				<div class="stack-sm">
+					<span class="stat-icon is-off"><span data-icon="lock"></span></span>
+					<h2 class="summary-title">The Meta catalog feed is part of Pro</h2>
+					<p class="muted">A product feed Meta reads on a schedule, so dynamic ads and shops always show the right item, price and stock. Your pixel and events keep working on Free.</p>
+				</div>
+				<ul class="feature-list">
+					<li><span data-icon="check"></span>One feed URL that Meta refreshes every day</li>
+					<li><span data-icon="check"></span>Leave out product types or categories</li>
+					<li><span data-icon="check"></span>Product IDs that match what your pixel sends, checked by the Doctor</li>
+				</ul>
+				<div class="row wrap">
+					<a class="btn primary" href="settings.html#plan">Compare plans</a>
+					<a class="btn ghost" href="platforms.html">Continue with Free</a>
+				</div>
+			</div>
+			<aside class="help" aria-label="What you get">
+				<div>
+					<h3>Also in Pro</h3>
+					<ul class="feature-list">
+						<li><span data-icon="check"></span>Microsoft Advertising</li>
+						<li><span data-icon="check"></span>More than one Meta pixel</li>
+						<li><span data-icon="check"></span>Missed-sale emails and a weekly health email</li>
+					</ul>
+				</div>
+			</aside>
+		</div>
+
+		<!-- Pro: feed -->
+		<div class="detail-body" data-when="plan=pro">
+			<div class="detail-form" data-platform-form>
+				<section class="feed-summary" aria-labelledby="feed-title">
+					<div class="feed-summary-head">
+						<span class="summary-icon ok" data-when="feed=ok"><span data-icon="circle-check"></span></span>
+						<span class="summary-icon warn" data-when="feed=fail"><span data-icon="triangle-alert"></span></span>
+						<div class="feed-summary-text">
+							<h2 class="summary-title" id="feed-title"><span data-when="feed=ok">Your feed is healthy</span><span data-when="feed=fail">Meta couldn't fetch your feed</span></h2>
+							<p class="summary-sub"><span data-when="feed=ok">248 products. Generated today at 06:00, every 24 hours. Meta fetched it at 06:02.</span><span data-when="feed=fail">248 products, generated today at 06:00. At 06:02 your site answered Meta with "401 Unauthorized".</span></p>
+						</div>
+						<span class="pill ok" data-when="feed=ok">Healthy</span>
+						<span class="pill warn" data-when="feed=fail">Not fetched</span>
+					</div>
+					<div class="feed-url">
+						<span class="feed-url-label">Feed URL</span>
+						<code id="feed-url">https://store.example.com/?action=wcct-product-export</code>
+						<button type="button" class="btn secondary sm" data-copy="feed-url"><span data-icon="copy"></span>Copy URL</button>
+					</div>
+					<p class="notice warning small" data-when="feed=fail"><b>Usually a security plugin or a cache rule blocks Meta.</b> Allow the feed URL in that plugin, then wait for the next fetch. The <a href="doctor.html">Doctor</a> shows what answered instead.</p>
+				</section>
+
+				<section class="set-section" id="id-matching" aria-labelledby="ids-title">
+					<div class="set-head">
+						<h2 id="ids-title">Product IDs</h2>
+						<p>Meta matches pixel events to catalog items by ID, so the feed and the pixel must use the same one.</p>
+					</div>
+					<div class="set-card">
+						<div class="set-row">
+							<div class="field">
+								<label for="feed-id-type">ID used in the feed</label>
+								<select id="feed-id-type" data-feed-id-type>
+									<option value="id">Product ID (recommended)</option>
+									<option value="sku">SKU</option>
+								</select>
+							</div>
+						</div>
+						<div class="set-row is-split">
+							<div><div class="option-title">Your Meta pixel sends</div><div class="option-desc">Set in Meta, Advanced settings, Product ID sent.</div></div>
+							<span class="set-value"><b data-pixel-id-label>Product ID</b><a href="platforms.html#product-id-sent">Change</a></span>
+						</div>
+						<div class="set-row">
+							<p class="field-good" data-id-match="yes"><span data-icon="circle-check"></span><span>They match, so Meta can tie ad clicks and purchases to products.</span></p>
+							<p class="notice warning small" data-id-match="no"><b>The feed and the pixel use different IDs.</b> Meta can't tie views and purchases to catalog items, so dynamic ads show the wrong products or none. Pick the same ID in both places.</p>
+						</div>
+					</div>
+				</section>
+
+				<section class="set-section" aria-labelledby="exclude-title">
+					<div class="set-head">
+						<h2 id="exclude-title">Leave out of the feed</h2>
+						<p>Products you never want in ads. Everything else goes into the feed.</p>
+					</div>
+					<div class="set-card">
+						<div class="set-row">
+							<fieldset class="check-list">
+								<legend>By product type</legend>
+								<label class="check"><input type="checkbox" name="exclude-type[]" value="simple"><span>Simple</span></label>
+								<label class="check"><input type="checkbox" name="exclude-type[]" value="grouped" checked><span>Grouped</span></label>
+								<label class="check"><input type="checkbox" name="exclude-type[]" value="external" checked><span>External / Affiliate</span></label>
+								<label class="check"><input type="checkbox" name="exclude-type[]" value="variable"><span>Variable</span></label>
+							</fieldset>
+						</div>
+						<div class="set-row">
+							<fieldset class="check-list">
+								<legend>By category</legend>
+								<div class="pick-box" data-cat-box>
+									<div class="pick-box-search">
+										<span data-icon="search"></span>
+										<label for="cat-search" class="sr-only">Find a category</label>
+										<input type="search" id="cat-search" class="input" placeholder="Find a category" autocomplete="off" data-cat-search>
+									</div>
+									<div class="pick-box-bar">
+										<span data-cat-count aria-live="polite">2 of 29 left out</span>
+										<button type="button" class="link-btn" data-cat-clear>Clear</button>
+									</div>
+									<div class="pick-box-list" role="group" aria-label="Categories" tabindex="0">
+										<ul class="tree" data-cat-tree>
+										<li><label class="check"><input type="checkbox" value="men"><span>Men</span></label>
+										<ul>
+											<li><label class="check"><input type="checkbox" value="men-tops"><span>Tops</span></label>
+											<ul>
+												<li><label class="check"><input type="checkbox" value="men-tshirts"><span>T-shirts</span></label></li>
+												<li><label class="check"><input type="checkbox" value="men-shirts"><span>Shirts</span></label></li>
+											</ul>
+											</li>
+											<li><label class="check"><input type="checkbox" value="men-bottoms"><span>Bottoms</span></label>
+											<ul>
+												<li><label class="check"><input type="checkbox" value="men-jeans"><span>Jeans</span></label></li>
+												<li><label class="check"><input type="checkbox" value="men-shorts"><span>Shorts</span></label></li>
+											</ul>
+											</li>
+											<li><label class="check"><input type="checkbox" value="men-shoes"><span>Shoes</span></label></li>
+										</ul>
+										</li>
+										<li><label class="check"><input type="checkbox" value="women"><span>Women</span></label>
+										<ul>
+											<li><label class="check"><input type="checkbox" value="women-tops"><span>Tops</span></label></li>
+											<li><label class="check"><input type="checkbox" value="women-dresses"><span>Dresses</span></label></li>
+											<li><label class="check"><input type="checkbox" value="women-skirts"><span>Skirts</span></label></li>
+											<li><label class="check"><input type="checkbox" value="women-shoes"><span>Shoes</span></label></li>
+										</ul>
+										</li>
+										<li><label class="check"><input type="checkbox" value="kids"><span>Kids</span></label>
+										<ul>
+											<li><label class="check"><input type="checkbox" value="kids-boys"><span>Boys</span></label></li>
+											<li><label class="check"><input type="checkbox" value="kids-girls"><span>Girls</span></label></li>
+											<li><label class="check"><input type="checkbox" value="kids-baby"><span>Baby</span></label></li>
+										</ul>
+										</li>
+										<li><label class="check"><input type="checkbox" value="accessories"><span>Accessories</span></label>
+										<ul>
+											<li><label class="check"><input type="checkbox" value="bags"><span>Bags</span></label></li>
+											<li><label class="check"><input type="checkbox" value="hats"><span>Hats</span></label></li>
+											<li><label class="check"><input type="checkbox" value="jewelry"><span>Jewelry</span></label></li>
+											<li><label class="check"><input type="checkbox" value="watches"><span>Watches</span></label></li>
+										</ul>
+										</li>
+										<li><label class="check"><input type="checkbox" value="home"><span>Home</span></label>
+										<ul>
+											<li><label class="check"><input type="checkbox" value="decor"><span>Decor</span></label></li>
+											<li><label class="check"><input type="checkbox" value="kitchen"><span>Kitchen</span></label></li>
+										</ul>
+										</li>
+										<li><label class="check"><input type="checkbox" value="gift-cards" checked><span>Gift cards</span></label></li>
+										<li><label class="check"><input type="checkbox" value="samples" checked><span>Free samples</span></label></li>
+										<li><label class="check"><input type="checkbox" value="sale"><span>Sale</span></label></li>
+										<li><label class="check"><input type="checkbox" value="uncategorized"><span>Uncategorized</span></label></li>
+										</ul>
+										<p class="small muted" data-cat-empty hidden>No categories match.</p>
+									</div>
+								</div>
+								<p class="field-hint">Ticking a parent leaves out everything under it.</p>
+							</fieldset>
+						</div>
+					</div>
+				</section>
+			</div>
+
+			<aside class="help" aria-label="Help">
+				<div>
+					<h3>Connect the feed in Commerce Manager</h3>
+					<ol>
+						<li>Open <a href="#">Commerce Manager</a> and choose <b>Create catalog</b>.</li>
+						<li>Pick <b>E-commerce</b> as the catalog type.</li>
+						<li>Name it, for example after your store.</li>
+						<li>In the new catalog, open <b>Data sources</b> and choose <b>Add items</b>.</li>
+						<li>Choose <b>Data feed</b>, then <b>Scheduled feed</b>.</li>
+						<li>Paste the feed URL from this page.</li>
+						<li>Set a daily schedule and choose <b>Start upload</b>.</li>
+					</ol>
+				</div>
+				<div class="clip"><span data-icon="play"></span>Clip: connecting the feed in Commerce Manager, 45 s</div>
+				<div>
+					<h3>After the first upload</h3>
+					<p>Meta takes up to an hour to read 248 products. The <a href="doctor.html">Doctor</a> checks every day that the feed is reachable and that its IDs match your pixel.</p>
+				</div>
+			</aside>
+		</div>
+
+		<div class="detail-foot" data-when="plan=pro">
+			<span class="foot-note" data-saved-note>Saved yesterday</span>
+			<button type="button" class="btn primary push" data-save disabled>Saved</button>
+		</div>
+	</div>
+
+</main>
+</div>
+<script src="assets/icons.js"></script>
+<script src="assets/config.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

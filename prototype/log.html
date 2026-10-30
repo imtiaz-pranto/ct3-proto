@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Activity log · Conversion Tracking 3.0 prototype</title>
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/components.css">
+</head>
+<body data-page="log" data-nav="log">
+<div class="wp-content">
+<main class="page wcct-app" id="wcct-app">
+
+	<div class="page-head">
+		<div>
+			<h1 class="page-title">Activity log</h1>
+			<p class="page-sub">What happened to each order. Order numbers and amounts only, never customer details.</p>
+		</div>
+		<span class="pill off no-dot" data-when="plan=free">Last 24 hours</span>
+		<div class="field is-compact" data-when="plan=pro">
+			<label for="log-keep">Keep history for</label>
+			<select id="log-keep" data-log-keep>
+				<option value="30" selected>30 days (default)</option>
+				<option value="60">60 days</option>
+				<option value="90">90 days</option>
+			</select>
+		</div>
+	</div>
+
+	<div class="grid-log">
+		<section class="card is-dataviews" aria-label="Events">
+			<div class="table-toolbar">
+				<div class="tabs" role="tablist" aria-label="Filter by status">
+					<button type="button" role="tab" aria-selected="true" aria-controls="log-panel" data-log-tab="all">All</button>
+					<button type="button" role="tab" aria-selected="false" aria-controls="log-panel" data-log-tab="tracked">Tracked</button>
+					<button type="button" role="tab" aria-selected="false" aria-controls="log-panel" data-log-tab="missed">Missed</button>
+					<button type="button" role="tab" aria-selected="false" aria-controls="log-panel" data-log-tab="pending">Pending</button>
+				</div>
+				<div class="search" data-when="plan=pro">
+					<span data-icon="search"></span>
+					<input type="search" class="input" id="log-search" placeholder="Search by order number" aria-label="Search by order number">
+				</div>
+				<button type="button" class="btn outline" data-when="plan=pro" data-toast="Exporting 142 events as CSV. Order numbers and amounts only."><span data-icon="download"></span>Export CSV</button>
+			</div>
+
+			<div id="log-panel" role="tabpanel" aria-label="Events">
+				<div class="table-wrap" data-log-table>
+					<table class="data-table">
+						<thead><tr><th scope="col">Time</th><th scope="col">Order</th><th scope="col">Reached</th><th scope="col">Status</th><th scope="col"><span class="sr-only">Details</span></th></tr></thead>
+						<tbody data-log-rows></tbody>
+					</table>
+				</div>
+				<div class="empty" data-log-empty hidden>
+					<span class="empty-art"><span data-icon="inbox"></span></span>
+					<p class="empty-title">Waiting for your first event</p>
+					<p class="empty-sub">No events yet. Place a test order and come back in a minute.</p>
+				</div>
+				<div class="empty" data-log-nomatch hidden>
+					<span class="empty-art"><span data-icon="search"></span></span>
+					<p class="empty-title">Nothing matches</p>
+					<p class="empty-sub">No orders match this filter. Try All, or clear the search.</p>
+				</div>
+			</div>
+			<div class="table-foot"><span data-log-count></span><span data-when="log=rows">1 of 20 pages</span></div>
+			<div class="card-body" data-when="plan=free">
+				<div class="upgrade-card"><span>Keep 30 days of history (up to 90), search by order number and export CSV with <b>Pro</b>.</span><a class="link-strong" href="settings.html#plan">Compare plans</a></div>
+			</div>
+		</section>
+
+		<section class="card card-body log-detail-pane" data-log-detail aria-live="polite" aria-label="Order details"></section>
+	</div>
+
+	<dialog class="dialog is-wide" id="log-dialog" aria-label="Order details">
+		<form method="dialog">
+			<div class="dialog-body" data-log-dialog-body></div>
+			<div class="dialog-foot"><button type="submit" class="btn secondary" value="close">Close</button></div>
+		</form>
+	</dialog>
+
+</main>
+</div>
+<script src="assets/icons.js"></script>
+<script src="assets/config.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

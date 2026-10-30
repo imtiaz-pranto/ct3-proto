@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Platforms: Custom script · Conversion Tracking 3.0 prototype</title>
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/components.css">
+</head>
+<body data-page="platforms-custom" data-nav="platforms">
+<div class="wp-content">
+<main class="page wcct-app" id="wcct-app">
+
+	<div class="page-head">
+		<div>
+			<h1 class="page-title">Platforms</h1>
+			<p class="page-sub">Connect each place you run ads. The recommended setup is on by default, so most stores only need an ID.</p>
+		</div>
+	</div>
+
+	<div class="card master-detail">
+		<nav class="master" aria-labelledby="plist-label">
+			<div class="master-label" id="plist-label">Your platforms</div>
+			<ul class="platform-list">
+				<li><a class="platform-list-item" href="platforms.html"><span class="logo sm"><img src="assets/logos/meta.svg" alt=""></span>Meta<span class="pill ok is-dot" data-when="connection=connected"><span class="sr-only">Working</span></span><span class="pill off is-dot" data-when="connection=not"><span class="sr-only">Not set up</span></span></a></li>
+				<li><a class="platform-list-item" href="platforms-google.html"><span class="logo sm"><img src="assets/logos/google-analytics.svg" alt=""></span>Google<span class="pill warn is-dot"><span class="sr-only">Needs attention</span></span></a></li>
+				<li><a class="platform-list-item" href="platforms-x.html"><span class="logo sm"><img src="assets/logos/x.svg" alt=""></span>X<span class="pill ok is-dot"><span class="sr-only">Working</span></span></a></li>
+				<li><a class="platform-list-item" href="platforms-microsoft.html"><span class="logo sm"><img src="assets/logos/microsoft.svg" alt=""></span>Microsoft<span class="pro-badge" data-when="plan=free"><span data-icon="pui-crown"></span>PRO</span><span class="pill off is-dot" data-when="plan=pro"><span class="sr-only">Not set up</span></span></a></li>
+				<li><a class="platform-list-item" href="platforms-custom.html" aria-current="page"><span class="logo sm"><img src="assets/logos/custom.svg" alt=""></span>Custom script<span class="pill off is-dot"><span class="sr-only">Not set up</span></span></a></li>
+			</ul>
+			<p class="master-foot">TikTok and Pinterest come in a later update.</p>
+		</nav>
+
+		<section class="detail" aria-labelledby="detail-title">
+			<div class="detail-head">
+				<span class="logo"><img src="assets/logos/custom.svg" alt=""></span>
+				<div class="detail-head-text">
+					<h2 class="detail-title" id="detail-title">Custom script</h2>
+					<p class="detail-desc">Paste a tag for any platform we don't support yet. It runs where you choose. <a href="#">Learn more</a></p>
+				</div>
+				<span class="pill off">Not set up</span>
+			</div>
+
+			<div class="detail-body">
+				<div class="detail-form" data-platform-form>
+					<section class="stack-sm" aria-labelledby="placements-title">
+						<h3 class="events-title" id="placements-title">Where it runs</h3>
+						<div class="event-row">
+							<div class="event-row-head">
+								<label class="switch"><input type="checkbox" role="switch" id="script-thankyou"><span class="switch-track"></span><span class="sr-only">Thank-you page</span></label>
+								<div class="event-row-text"><div class="option-title">Thank-you page</div><div class="option-desc">After a paid order. Order and customer placeholders fill in here.</div></div>
+								<span class="pill off">Off</span>
+							</div>
+							<div class="event-row-body">
+								<div class="field">
+									<label for="script-thankyou-code">Script for thank-you page</label>
+									<textarea id="script-thankyou-code" placeholder="Paste your tag here"></textarea>
+								</div>
+							</div>
+						</div>
+						<div class="event-row">
+							<div class="event-row-head">
+								<label class="switch"><input type="checkbox" role="switch" id="script-header"><span class="switch-track"></span><span class="sr-only">Every page, in the header</span></label>
+								<div class="event-row-text"><div class="option-title">Every page, in the header</div><div class="option-desc">Base tags and site-wide pixels. Order placeholders stay empty here.</div></div>
+								<span class="pill off">Off</span>
+							</div>
+							<div class="event-row-body">
+								<div class="field">
+									<label for="script-header-code">Script for every page, in the header</label>
+									<textarea id="script-header-code" placeholder="Paste your tag here"></textarea>
+								</div>
+							</div>
+						</div>
+						<div class="event-row">
+							<div class="event-row-head">
+								<label class="switch"><input type="checkbox" role="switch" id="script-signup"><span class="switch-track"></span><span class="sr-only">Sign-up</span></label>
+								<div class="event-row-text"><div class="option-title">Sign-up</div><div class="option-desc">After a shopper creates an account.</div></div>
+								<span class="pill off">Off</span>
+							</div>
+							<div class="event-row-body">
+								<div class="field">
+									<label for="script-signup-code">Script for sign-up</label>
+									<textarea id="script-signup-code" placeholder="Paste your tag here"></textarea>
+								</div>
+							</div>
+						</div>
+					</section>
+
+					<section class="stack-sm" aria-labelledby="ph-title">
+						<h3 class="events-title" id="ph-title">Placeholders</h3>
+						<p class="small muted">Type these into a script and we fill in the real value when it runs.</p>
+						<div class="field-label">Order</div>
+						<ul class="placeholder-list"><li><code>{order_number}</code></li><li><code>{order_total}</code></li><li><code>{order_subtotal}</code></li><li><code>{order_discount}</code></li><li><code>{order_shipping}</code></li><li><code>{currency}</code></li><li><code>{payment_method}</code></li></ul>
+						<div class="field-label">Customer <span class="tag">Personal data</span></div>
+						<ul class="placeholder-list"><li><code>{customer_id}</code></li><li><code>{customer_email}</code></li><li><code>{customer_first_name}</code></li><li><code>{customer_last_name}</code></li></ul>
+						<p class="notice info small">Customer placeholders fill in only for a verified order on the thank-you page, and only after the shopper allows marketing cookies. Everywhere else they stay empty, so personal data never lands in a page by accident.</p>
+					</section>
+				</div>
+
+				<aside class="help" aria-label="Help">
+					<div>
+						<h3>Adding a custom script</h3>
+						<ol>
+							<li>Copy the tag from the platform's setup page. Most give you a base tag and a purchase tag.</li>
+							<li>Paste the base tag into <b>Every page, in the header</b>.</li>
+							<li>Paste the purchase tag into <b>Thank-you page</b> and swap the fixed values for placeholders like <code>{order_total}</code>.</li>
+						</ol>
+					</div>
+					<div class="clip"><span data-icon="play"></span>Clip: adding a purchase tag with placeholders, 30 s</div>
+					<div>
+						<h3>Counted once</h3>
+						<p>The thank-you script runs once per order, even if the page reloads.</p>
+					</div>
+				</aside>
+			</div>
+
+			<div class="detail-foot">
+				<span class="foot-note" data-saved-note>Nothing saved yet</span>
+				<button type="button" class="btn primary push" data-save disabled>Saved</button>
+			</div>
+		</section>
+	</div>
+
+</main>
+</div>
+<script src="assets/icons.js"></script>
+<script src="assets/config.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

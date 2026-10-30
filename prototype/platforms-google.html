@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Platforms: Google · Conversion Tracking 3.0 prototype</title>
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/components.css">
+</head>
+<body data-page="platforms-google" data-nav="platforms">
+<div class="wp-content">
+<main class="page wcct-app" id="wcct-app">
+
+	<div class="page-head">
+		<div>
+			<h1 class="page-title">Platforms</h1>
+			<p class="page-sub">Google Analytics and Google Ads are two products with two IDs. This is one flow.</p>
+		</div>
+	</div>
+
+	<div class="card master-detail">
+		<nav class="master" aria-labelledby="plist-label">
+			<div class="master-label" id="plist-label">Your platforms</div>
+			<ul class="platform-list">
+				<li><a class="platform-list-item" href="platforms.html"><span class="logo sm"><img src="assets/logos/meta.svg" alt=""></span>Meta<span class="pill ok is-dot"><span class="sr-only">Working</span></span></a></li>
+				<li><a class="platform-list-item" href="platforms-google.html" aria-current="page"><span class="logo sm"><img src="assets/logos/google-analytics.svg" alt=""></span>Google<span class="pill warn is-dot" data-google-status="warn"><span class="sr-only">Needs attention</span></span><span class="pill ok is-dot" data-google-status="ok"><span class="sr-only">Working</span></span></a></li>
+				<li><a class="platform-list-item" href="platforms-x.html"><span class="logo sm"><img src="assets/logos/x.svg" alt=""></span>X<span class="pill ok is-dot"><span class="sr-only">Working</span></span></a></li>
+				<li><a class="platform-list-item" href="platforms-microsoft.html"><span class="logo sm"><img src="assets/logos/microsoft.svg" alt=""></span>Microsoft<span class="pro-badge" data-when="plan=free"><span data-icon="pui-crown"></span>PRO</span><span class="pill off is-dot" data-when="plan=pro"><span class="sr-only">Not set up</span></span></a></li>
+				<li><a class="platform-list-item" href="platforms-custom.html"><span class="logo sm"><img src="assets/logos/custom.svg" alt=""></span>Custom script<span class="pill off is-dot"><span class="sr-only">Not set up</span></span></a></li>
+			</ul>
+			<p class="master-foot">TikTok and Pinterest come in a later update.</p>
+		</nav>
+
+		<section class="detail" aria-labelledby="detail-title">
+			<div class="detail-head">
+				<span class="logo"><img src="assets/logos/google-analytics.svg" alt=""></span>
+				<div class="detail-head-text">
+					<h2 class="detail-title" id="detail-title">Google</h2>
+					<p class="detail-desc">Analytics shows you what happens; Ads counts conversions for your campaigns. <a href="#">Learn more</a></p>
+				</div>
+				<span class="pill warn" data-google-status="warn">Needs attention</span>
+				<span class="pill ok" data-google-status="ok">Working</span>
+			</div>
+
+			<div class="detail-body">
+				<div class="detail-form" data-platform-form>
+					<fieldset class="radio-list">
+						<legend>What do you use?</legend>
+						<label class="radio-card"><input type="radio" name="google-products" value="analytics"><span><span class="radio-title">Google Analytics</span><span class="radio-desc">See where sales come from. Free.</span></span><span class="logo xs"><img src="assets/logos/google-analytics.svg" alt=""></span></label>
+						<label class="radio-card"><input type="radio" name="google-products" value="ads"><span><span class="radio-title">Google Ads</span><span class="radio-desc">Count purchases as conversions for your campaigns.</span></span><span class="logo xs"><img src="assets/logos/google-ads.svg" alt=""></span></label>
+						<label class="radio-card"><input type="radio" name="google-products" value="both" checked><span><span class="radio-title">Both</span><span class="radio-desc">Most stores. One loader, no double counting.</span></span><span class="logo-stack"><span class="logo xs"><img src="assets/logos/google-analytics.svg" alt=""></span><span class="logo xs"><img src="assets/logos/google-ads.svg" alt=""></span></span></label>
+					</fieldset>
+
+					<div class="field" data-google="analytics">
+						<label for="ga-id">Analytics Measurement ID</label>
+						<input type="text" id="ga-id" value="G-7KQ2M9PX3L" placeholder="Starts with G-" autocomplete="off" aria-describedby="ga-good ga-bad">
+						<p class="field-good" id="ga-good"><span data-icon="circle-check"></span><span>Looks right. Events show in GA4 within a minute of a test order.</span></p>
+						<p class="field-bad" id="ga-bad" hidden><span data-icon="triangle-alert"></span><span>Measurement IDs start with G- followed by letters and numbers. Find it under Admin, then Data streams.</span></p>
+					</div>
+
+					<div class="field" data-google="ads">
+							<label for="aw-id">Ads conversion ID</label>
+							<input type="text" id="aw-id" value="AW-10938215" placeholder="Starts with AW-" autocomplete="off" aria-describedby="aw-bad">
+						<p class="field-bad" id="aw-bad" hidden><span data-icon="triangle-alert"></span><span>Starts with AW- followed by numbers.</span></p>
+					</div>
+
+					<div class="field" data-google="ads">
+							<label for="aw-label">Ads conversion label</label>
+							<input type="text" id="aw-label" value="AbC" placeholder="Letters and numbers after the slash" autocomplete="off" aria-describedby="label-good label-bad">
+							<p class="field-good" id="label-good" hidden><span data-icon="circle-check"></span><span>Looks right.</span></p>
+						<p class="field-bad" id="label-bad"><span data-icon="triangle-alert"></span><span>Looks incomplete. Labels are usually 10 or more letters and numbers. The Help panel shows where to copy it.</span></p>
+					</div>
+
+					<section class="events" data-events="google" aria-label="Events"></section>
+
+					<section data-server-section="google"></section>
+
+					<div class="option-row">
+						<div><div class="option-title">Respect cookie choices</div><div class="option-desc">Required if you sell to Europe. Works with your cookie plugin.</div></div>
+						<label class="switch"><input type="checkbox" role="switch" checked><span class="switch-track"></span><span class="sr-only">Respect cookie choices</span></label>
+					</div>
+
+					<div class="upgrade-card" data-when="plan=free"><span>Enhanced conversions (hashed customer details so Ads matches more sales) are <b>Pro</b>.</span><a class="link-strong" href="settings.html#plan">Compare plans</a></div>
+					<div class="option-row" data-when="plan=pro">
+						<div><div class="option-title">Enhanced conversions</div><div class="option-desc">Hashed customer details so Ads matches more sales. Needs cookie choices on.</div></div>
+						<label class="switch"><input type="checkbox" role="switch" checked><span class="switch-track"></span><span class="sr-only">Enhanced conversions</span></label>
+					</div>
+
+					<details class="advanced-settings" id="advanced-settings">
+						<summary><span data-icon="chevron-right"></span>Advanced settings<span class="advanced-sub">Order value, who to track, developer details</span></summary>
+						<div class="advanced-body">
+							<div class="field">
+								<label for="google-value">Order value includes</label>
+								<select id="google-value">
+									<option value="items" selected>Items only (recommended)</option>
+									<option value="shipping">Items and shipping</option>
+									<option value="all">Items, tax and shipping</option>
+								</select>
+								<p class="field-hint">Sent with Purchase. Items only keeps ad results in line with product revenue.</p>
+							</div>
+
+							<div class="field">
+								<label for="google-tag-id">Google tag ID (optional)</label>
+								<input type="text" id="google-tag-id" placeholder="Starts with GT-" autocomplete="off" aria-describedby="google-tag-hint">
+								<p class="field-hint" id="google-tag-hint">Only if your Analytics stream uses a combined Google tag. Leave empty to use the G- ID above.</p>
+							</div>
+
+							<div class="field">
+								<label for="google-roles">Skip these roles</label>
+								<select id="google-roles">
+									<option value="admin-shop" selected>Administrator, Shop manager</option>
+									<option value="admin">Administrator only</option>
+									<option value="none">Track everyone</option>
+								</select>
+								<p class="field-hint">Your own visits won't count as shoppers.</p>
+							</div>
+
+							<div data-server-settings="google"></div>
+
+							<section class="dev-block" aria-labelledby="dev-title">
+								<h3 id="dev-title"><span data-icon="terminal"></span>For developers</h3>
+								<dl class="dev-list">
+									<dt>Integration key</dt><dd><code>google</code></dd>
+									<dt>Event IDs</dt><dd><code>wcct_{order_id}_purchase</code></dd>
+									<dt>Filters</dt><dd><code>wcct_event_value</code><code>wcct_consent_allows</code><code>wcct_platforms</code></dd>
+									<dt>Terms</dt><dd>"Counted once" = deduplication by event ID. "Respect cookie choices" = Consent Mode v2 and the WP Consent API.</dd>
+								</dl>
+								<a class="small" href="#">Hook reference</a>
+							</section>
+						</div>
+					</details>
+				</div>
+
+				<aside class="help" aria-label="Help">
+					<div>
+						<h3>Finding the Ads conversion label</h3>
+						<ol>
+							<li>In <a href="#">Google Ads</a>, open <b>Goals</b>, then <b>Conversions</b>, then <b>Summary</b>.</li>
+							<li>Open your Purchase conversion and choose <b>Tag setup</b>, then <b>Use Google tag</b>.</li>
+							<li>The event snippet ends in <code>AW-10938215/AbCdEfGhIj</code>. The part after the slash is the label.</li>
+						</ol>
+					</div>
+					<div class="clip"><span data-icon="play"></span>Clip: finding the conversion label, 25 s</div>
+					<div>
+						<h3>Avoid double counting</h3>
+						<p>If Site Kit or Google for WooCommerce already sends purchases, the <a href="doctor.html">Doctor</a> will show it and offer to keep one.</p>
+					</div>
+				</aside>
+			</div>
+
+			<div class="detail-foot">
+				<button type="button" class="link-danger" data-dialog-open="pause-dialog" data-when-paused="no">Pause tracking</button>
+				<span class="foot-note" data-when-paused="no" data-saved-note>Saved yesterday</span>
+				<button type="button" class="btn primary push" data-save data-when-paused="no" disabled>Saved</button>
+				<span class="foot-note" data-when-paused="yes"><span data-icon="pause"></span>Tracking paused. Nothing is sent to Google until you resume.</span>
+				<button type="button" class="btn primary push" data-resume data-when-paused="yes">Resume tracking</button>
+			</div>
+		</section>
+	</div>
+
+	<dialog class="dialog" id="pause-dialog" aria-labelledby="pause-title">
+		<form method="dialog">
+			<div class="dialog-body">
+				<h2 class="dialog-title" id="pause-title">Pause tracking on Google?</h2>
+				<p class="dialog-text">Nothing is sent to Analytics or Ads until you resume. Your IDs stay saved. Your campaigns keep running, but they won't see new sales from this store while it's paused.</p>
+			</div>
+			<div class="dialog-foot">
+				<button type="submit" class="btn secondary" value="cancel">Keep tracking</button>
+				<button type="submit" class="btn destructive" value="pause">Pause tracking</button>
+			</div>
+		</form>
+	</dialog>
+
+</main>
+</div>
+<script src="assets/icons.js"></script>
+<script src="assets/config.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

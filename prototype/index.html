@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard · Conversion Tracking 3.0 prototype</title>
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/components.css">
+</head>
+<body data-page="index" data-nav="dashboard">
+<div class="wp-content">
+<main class="page wcct-app" id="wcct-app">
+
+	<div class="page-head">
+		<div>
+			<h1 class="page-title">Dashboard</h1>
+			<p class="page-sub">Is my tracking working? Last 7 days.</p>
+		</div>
+		<div class="page-head-actions" data-when="install!=new">
+			<a class="btn outline" href="doctor.html"><span data-icon="stethoscope"></span>Run the Doctor</a>
+		</div>
+	</div>
+
+	<!-- New install: nothing connected yet -->
+	<section class="card" data-when="install=new" aria-labelledby="welcome-title">
+		<div class="banner is-roomy">
+			<div class="stack-sm banner-text">
+				<h2 class="summary-title" id="welcome-title">Welcome. Let's get one platform working.</h2>
+				<p class="muted">Connect Meta or Google, place a test order, and this page turns green. No warnings and no upsells until then.</p>
+				<ul class="checklist">
+					<li><span class="check-dot is-done"><span data-icon="check"></span></span>Plugin installed</li>
+					<li><span class="check-dot"><span data-icon="clock"></span></span>Connect a platform, about 3 minutes</li>
+					<li><span class="check-dot"><span data-icon="clock"></span></span>Place a test order and see it in the Activity log</li>
+				</ul>
+			</div>
+			<a class="btn primary lg" href="pick-platforms.html">Choose where you run ads</a>
+		</div>
+	</section>
+
+	<section class="stack-sm" data-when="install=new" aria-labelledby="new-platforms">
+		<h2 class="section-label is-quiet" id="new-platforms">Platforms you can connect</h2>
+		<div class="platform-grid">
+			<div class="card platform-card">
+				<div class="platform-card-head">
+					<div class="platform-id"><span class="logo is-off"><img src="assets/logos/meta.svg" alt=""></span><div><div class="platform-name">Meta</div><div class="platform-meta">Facebook and Instagram ads</div></div></div>
+					<span class="pill off">Not set up</span>
+				</div>
+				<a class="btn outline" href="platforms.html">Connect</a>
+			</div>
+			<div class="card platform-card">
+				<div class="platform-card-head">
+					<div class="platform-id"><span class="logo is-off"><img src="assets/logos/google-analytics.svg" alt=""></span><div><div class="platform-name">Google</div><div class="platform-meta">Analytics, Ads, or both</div></div></div>
+					<span class="pill off">Not set up</span>
+				</div>
+				<a class="btn outline" href="platforms-google.html">Connect</a>
+			</div>
+			<div class="card platform-card">
+				<div class="platform-card-head">
+					<div class="platform-id"><span class="logo is-off"><img src="assets/logos/x.svg" alt=""></span><div><div class="platform-name">X</div><div class="platform-meta">formerly Twitter</div></div></div>
+					<span class="pill off">Not set up</span>
+				</div>
+				<a class="btn outline" href="platforms-x.html">Connect</a>
+			</div>
+		</div>
+	</section>
+
+	<!-- Upgraded from 2.x -->
+	<section class="notice info banner" data-when="install=upgrade" aria-label="Updated to 3.0">
+		<p class="banner-text"><b>Updated to 3.0.</b> Your settings carried over. Three fixes now apply to every store: purchases counted once, failed orders skipped, checkout tracked on the Checkout block.</p>
+		<a class="btn outline" href="whats-new.html">See what's new</a>
+	</section>
+
+	<div class="stack" data-when="install!=new">
+
+		<section class="stat-grid" aria-label="Last 7 days at a glance">
+			<div class="card stat-card">
+				<span class="stat-icon"><span data-icon="shopping-cart"></span></span>
+				<div><span class="stat-value">142</span><span class="stat-label">Purchases tracked</span></div>
+			</div>
+			<div class="card stat-card">
+				<span class="stat-icon is-warn"><span data-icon="triangle-alert"></span></span>
+				<div><span class="stat-value">3</span><span class="stat-label">Missed on Meta</span></div>
+			</div>
+			<div class="card stat-card">
+				<span class="stat-icon is-ok"><span data-icon="check"></span></span>
+				<div data-when="install!=upgrade"><span class="stat-value">2 of 3</span><span class="stat-label">Platforms working</span></div>
+				<div data-when="install=upgrade"><span class="stat-value">1 of 3</span><span class="stat-label">Platforms working</span></div>
+			</div>
+			<div class="card stat-card">
+				<span class="stat-icon is-off"><span data-icon="stethoscope"></span></span>
+				<div data-when="doctor=ran"><span class="stat-value">2 days ago</span><span class="stat-label">Last Doctor run</span></div>
+				<div data-when="doctor=not"><span class="stat-value">Not yet</span><span class="stat-label">Last Doctor run</span></div>
+			</div>
+		</section>
+
+		<section class="notice warning banner" aria-label="Missed sales">
+			<div class="row banner-text">
+				<span class="pill warn">Worth a look</span>
+				<p><b>3 purchases didn't reach Meta this week.</b> The browser pixel never fired for those visitors. <a href="log.html">See which orders</a></p>
+			</div>
+			<div class="upgrade-card" data-when="plan=free"><span>Pro emails you the moment this happens.</span><a class="link-strong" href="settings.html#plan">Compare plans</a></div>
+			<span class="small muted" data-when="plan=pro">Emailed to you today, 09:12</span>
+		</section>
+
+		<div class="grid-2-1">
+			<section class="card card-body chart" aria-labelledby="chart-title">
+				<div class="chart-head">
+					<h2 class="card-title" id="chart-title">Events per day</h2>
+					<select class="select" data-chart-period aria-label="Period">
+						<option value="7">Last 7 days</option>
+						<option value="30">Last 30 days</option>
+						<option value="month">This month</option>
+					</select>
+				</div>
+				<div data-chart></div>
+				<span class="chart-legend">All platforms, all events</span>
+			</section>
+
+			<section class="card card-body" aria-labelledby="doctor-title">
+				<h2 class="card-title" id="doctor-title">Tracking Doctor</h2>
+				<div class="stack-sm" data-when="doctor=ran">
+					<div><span class="pill warn">2 things worth a look</span></div>
+					<p class="small muted">Meta's own plugin is also sending purchases, and your cookie plugin isn't connected yet. Nothing is broken.</p>
+					<div><a class="btn outline" href="doctor.html">See the checklist</a></div>
+					<p class="xsmall muted" data-when="plan=pro">Weekly check: on. Next run Monday 09:00.</p>
+				</div>
+				<div class="stack-sm" data-when="doctor=not">
+					<p class="small muted">Want us to check your store for duplicate or broken tracking? Takes a few seconds and changes nothing.</p>
+					<div><a class="btn primary" href="doctor.html">Check my store</a></div>
+				</div>
+			</section>
+		</div>
+
+		<section class="stack-sm" aria-labelledby="connected-title">
+			<div class="row between wrap">
+				<h2 class="section-label" id="connected-title">Connected</h2>
+				<div class="chips" role="group" aria-label="Filter platforms">
+					<button type="button" class="chip" data-filter="all" aria-pressed="true">All</button>
+					<button type="button" class="chip" data-filter="working" aria-pressed="false">Working</button>
+					<button type="button" class="chip" data-filter="attention" aria-pressed="false">Needs attention</button>
+				</div>
+			</div>
+			<div class="platform-grid">
+				<a class="card platform-card" href="platforms.html" data-platform-status="ok">
+					<span class="platform-card-head">
+						<span class="platform-id"><span class="logo"><img src="assets/logos/meta.svg" alt=""></span><span><span class="platform-name">Meta</span><span class="platform-meta">Pixel 1234…456</span></span></span>
+						<span class="pill ok">Working</span>
+					</span>
+					<span class="platform-note">Last event 2 min ago, Purchase #1312</span>
+				</a>
+				<a class="card platform-card" href="platforms-google.html" data-platform-status="warn">
+					<span class="platform-card-head">
+						<span class="platform-id"><span class="logo"><img src="assets/logos/google-analytics.svg" alt=""></span><span><span class="platform-name">Google</span><span class="platform-meta">Analytics and Ads</span></span></span>
+						<span class="pill warn">Needs attention</span>
+					</span>
+					<span class="platform-note">The Ads conversion label looks incomplete. <span class="fix">Fix it</span></span>
+				</a>
+				<a class="card platform-card" href="platforms-x.html" data-platform-status="warn" data-when="install=upgrade">
+					<span class="platform-card-head">
+						<span class="platform-id"><span class="logo"><img src="assets/logos/x.svg" alt=""></span><span><span class="platform-name">X</span><span class="platform-meta">formerly Twitter</span></span></span>
+						<span class="pill warn">Needs attention</span>
+					</span>
+					<span class="platform-note">X retired the old event codes, so purchases need a new event ID. <span class="fix">Fix it</span></span>
+				</a>
+				<a class="card platform-card" href="platforms-x.html" data-platform-status="ok" data-when="install!=upgrade">
+					<span class="platform-card-head">
+						<span class="platform-id"><span class="logo"><img src="assets/logos/x.svg" alt=""></span><span><span class="platform-name">X</span><span class="platform-meta">formerly Twitter</span></span></span>
+						<span class="pill ok">Working</span>
+					</span>
+					<span class="platform-note">Last event 41 min ago, Add to cart</span>
+				</a>
+			</div>
+		</section>
+
+		<section class="stack-sm" aria-labelledby="not-connected-title">
+			<h2 class="section-label is-quiet" id="not-connected-title">Not connected</h2>
+			<div class="platform-grid">
+				<div class="card platform-card">
+					<div class="platform-card-head">
+						<div class="platform-id"><span class="logo is-off"><img src="assets/logos/microsoft.svg" alt=""></span><div><div class="platform-name">Microsoft Advertising <span class="pro-badge" data-when="plan=free"><span data-icon="pui-crown"></span>PRO</span></div><div class="platform-meta">UET tag</div></div></div>
+						<span class="pill off">Not set up</span>
+					</div>
+					<div class="upgrade-card" data-when="plan=free"><span>Track Bing and Microsoft ads with Pro.</span><a class="link-strong" href="settings.html#plan">Compare plans</a></div>
+					<a class="btn outline" href="platforms-microsoft.html" data-when="plan=pro">Connect</a>
+				</div>
+				<div class="card platform-card">
+					<div class="platform-card-head">
+						<div class="platform-id"><span class="logo is-off"><img src="assets/logos/custom.svg" alt=""></span><div><div class="platform-name">Custom script</div><div class="platform-meta">Any other tag</div></div></div>
+						<span class="pill off">Not set up</span>
+					</div>
+					<a class="btn outline" href="platforms-custom.html">Add a script</a>
+				</div>
+			</div>
+		</section>
+
+		<section class="card card-body" aria-labelledby="next-title">
+			<h2 class="card-title" id="next-title">What to do next</h2>
+			<ol class="small stack-sm">
+				<li>Finish the Google Ads conversion label. <a href="platforms-google.html">Open Google</a></li>
+				<li data-when="install=upgrade">Give X a new purchase event ID; the old codes were retired. <a href="platforms-x.html">Open X</a></li>
+				<li data-when="doctor=ran">Decide who sends purchases to Meta: this plugin or Meta's own. <a href="doctor.html">See the Doctor's note</a></li>
+				<li data-when="doctor=ran">Connect your cookie plugin so EU visitors' choices are respected. <a href="doctor.html">How</a></li>
+				<li data-when="doctor=not">Let the Doctor check for duplicate tracking. <a href="doctor.html">Check my store</a></li>
+			</ol>
+		</section>
+	</div>
+
+</main>
+</div>
+<script src="assets/icons.js"></script>
+<script src="assets/config.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Platforms: X · Conversion Tracking 3.0 prototype</title>
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/components.css">
+</head>
+<body data-page="platforms-x" data-nav="platforms">
+<div class="wp-content">
+<main class="page wcct-app" id="wcct-app">
+
+	<div class="page-head">
+		<div>
+			<h1 class="page-title">Platforms</h1>
+			<p class="page-sub">Connect each place you run ads. The recommended setup is on by default, so most stores only need an ID.</p>
+		</div>
+	</div>
+
+	<div class="card master-detail">
+		<nav class="master" aria-labelledby="plist-label">
+			<div class="master-label" id="plist-label">Your platforms</div>
+			<ul class="platform-list">
+				<li><a class="platform-list-item" href="platforms.html"><span class="logo sm"><img src="assets/logos/meta.svg" alt=""></span>Meta<span class="pill ok is-dot"><span class="sr-only">Working</span></span></a></li>
+				<li><a class="platform-list-item" href="platforms-google.html"><span class="logo sm"><img src="assets/logos/google-analytics.svg" alt=""></span>Google<span class="pill warn is-dot"><span class="sr-only">Needs attention</span></span></a></li>
+				<li><a class="platform-list-item" href="platforms-x.html" aria-current="page"><span class="logo sm"><img src="assets/logos/x.svg" alt=""></span>X<span class="pill ok is-dot" data-when="connection=connected;install!=upgrade"><span class="sr-only">Working</span></span><span class="pill warn is-dot" data-when="connection=connected;install=upgrade"><span class="sr-only">Needs attention</span></span><span class="pill off is-dot" data-when="connection=not"><span class="sr-only">Not set up</span></span></a></li>
+				<li><a class="platform-list-item" href="platforms-microsoft.html"><span class="logo sm"><img src="assets/logos/microsoft.svg" alt=""></span>Microsoft<span class="pro-badge" data-when="plan=free"><span data-icon="pui-crown"></span>PRO</span><span class="pill off is-dot" data-when="plan=pro"><span class="sr-only">Not set up</span></span></a></li>
+				<li><a class="platform-list-item" href="platforms-custom.html"><span class="logo sm"><img src="assets/logos/custom.svg" alt=""></span>Custom script<span class="pill off is-dot"><span class="sr-only">Not set up</span></span></a></li>
+			</ul>
+			<p class="master-foot">TikTok and Pinterest come in a later update.</p>
+		</nav>
+
+		<section class="detail" aria-labelledby="detail-title">
+			<div class="detail-head">
+				<span class="logo"><img src="assets/logos/x.svg" alt=""></span>
+				<div class="detail-head-text">
+					<h2 class="detail-title" id="detail-title">X <span class="muted small">(formerly Twitter)</span></h2>
+					<p class="detail-desc">Sends your store's events to the X Pixel for X ads. <a href="#">Learn more</a></p>
+				</div>
+				<span data-when="connection=connected;install!=upgrade"><span class="pill ok" data-when-paused="no">Working</span><span class="pill off" data-when-paused="yes">Paused</span></span>
+				<span class="pill warn" data-when="connection=connected;install=upgrade">Needs attention</span>
+				<span class="pill off" data-when="connection=not">Not set up</span>
+			</div>
+
+			<div class="detail-body">
+				<div class="detail-form" data-platform-form>
+					<section class="notice warning stack-sm" data-when="connection=connected;install=upgrade" aria-labelledby="x-resetup-title">
+						<div class="row"><span class="pill warn">Needs a re-setup</span></div>
+						<h3 class="card-title" id="x-resetup-title">X retired the old single-event codes</h3>
+						<p class="small">Your base tag carried over and still tracks page views and add to cart. Purchases need a new event ID from X Ads Manager; until then X doesn't see your sales. It takes about 2 minutes.</p>
+						<div><button type="button" class="btn primary" data-focus="x-event-id">Set up the purchase event</button></div>
+					</section>
+
+					<div class="field">
+						<label for="x-pixel-id">Pixel ID</label>
+						<input type="text" id="x-pixel-id" value="o8x2k" placeholder="5 letters and numbers, like o8x2k" autocomplete="off" aria-describedby="x-pixel-good">
+						<p class="field-good" id="x-pixel-good"><span data-icon="circle-check"></span><span>Looks right. This is the base tag on every page.</span></p>
+					</div>
+
+					<div class="field">
+						<label for="x-event-id">Purchase event ID</label>
+						<input type="text" id="x-event-id" value="tw-o8x2k-o8x3a" placeholder="Starts with tw-" autocomplete="off" aria-describedby="x-event-hint">
+						<p class="field-hint" id="x-event-hint">Starts with tw-, then your Pixel ID and the event code. One ID for Purchase is enough; the others are optional.</p>
+					</div>
+
+					<section class="events" data-events="x" aria-label="Events"></section>
+
+					<section data-server-section="x"></section>
+
+					<div class="option-row">
+						<div><div class="option-title">Respect cookie choices</div><div class="option-desc">Required if you sell to Europe. Works with your cookie plugin.</div></div>
+						<label class="switch"><input type="checkbox" role="switch"><span class="switch-track"></span><span class="sr-only">Respect cookie choices</span></label>
+					</div>
+
+					<details class="advanced-settings" id="advanced-settings">
+						<summary><span data-icon="chevron-right"></span>Advanced settings<span class="advanced-sub">Order value, who to track, developer details</span></summary>
+						<div class="advanced-body">
+							<div class="field">
+								<label for="x-value">Order value includes</label>
+								<select id="x-value">
+									<option value="items" selected>Items only (recommended)</option>
+									<option value="shipping">Items and shipping</option>
+									<option value="all">Items, tax and shipping</option>
+								</select>
+								<p class="field-hint">Sent with Purchase. Items only keeps ad results in line with product revenue.</p>
+							</div>
+
+							<div class="field">
+								<label for="x-roles">Skip these roles</label>
+								<select id="x-roles">
+									<option value="admin-shop" selected>Administrator, Shop manager</option>
+									<option value="admin">Administrator only</option>
+									<option value="none">Track everyone</option>
+								</select>
+								<p class="field-hint">Your own visits won't count as shoppers.</p>
+							</div>
+
+							<div data-server-settings="x"></div>
+
+							<section class="dev-block" aria-labelledby="dev-title">
+								<h3 id="dev-title"><span data-icon="terminal"></span>For developers</h3>
+								<dl class="dev-list">
+									<dt>Integration key</dt><dd><code>twitter</code></dd>
+									<dt>Event IDs</dt><dd><code>wcct_{order_id}_purchase</code></dd>
+									<dt>Filters</dt><dd><code>wcct_event_value</code><code>wcct_consent_allows</code><code>wcct_platforms</code></dd>
+									<dt>Terms</dt><dd>"Counted once" = deduplication by event ID. "Respect cookie choices" = Consent Mode v2 and the WP Consent API.</dd>
+								</dl>
+								<a class="small" href="#">Hook reference</a>
+							</section>
+						</div>
+					</details>
+				</div>
+
+				<aside class="help" aria-label="Help">
+					<div>
+						<h3>Where to find the event ID</h3>
+						<ol>
+							<li>In <a href="#">X Ads Manager</a>, open <b>Tools</b>, then <b>Events Manager</b>.</li>
+							<li>Choose <b>Add event</b>, pick <b>Purchase</b> and the <b>Pixel</b> install method.</li>
+							<li>Copy the ID that starts with <code>tw-</code> and paste it into the Purchase event ID field.</li>
+						</ol>
+					</div>
+					<div class="clip"><span data-icon="play"></span>Clip: creating the X purchase event, 30 s</div>
+					<div>
+						<h3>Why a re-setup</h3>
+						<p>X moved from one code per event to one pixel with named events. Your old codes stopped counting, so we ask once instead of guessing.</p>
+					</div>
+				</aside>
+			</div>
+
+			<div class="detail-foot" data-when="connection=connected">
+				<button type="button" class="link-danger" data-dialog-open="pause-dialog" data-when-paused="no">Pause tracking</button>
+				<span class="foot-note" data-when-paused="no" data-saved-note>Saved 3 days ago</span>
+				<button type="button" class="btn primary push" data-save data-when-paused="no" disabled>Saved</button>
+				<span class="foot-note" data-when-paused="yes"><span data-icon="pause"></span>Tracking paused. Nothing is sent to X until you resume.</span>
+				<button type="button" class="btn primary push" data-resume data-when-paused="yes">Resume tracking</button>
+			</div>
+			<div class="detail-foot" data-when="connection=not">
+				<span class="foot-note">Not connected yet. After you connect, we wait for the first event from your store.</span>
+				<a class="btn secondary push" href="index.html">Cancel</a>
+				<button type="button" class="btn primary" data-connect>Connect</button>
+			</div>
+		</section>
+	</div>
+
+	<dialog class="dialog" id="pause-dialog" aria-labelledby="pause-title">
+		<form method="dialog">
+			<div class="dialog-body">
+				<h2 class="dialog-title" id="pause-title">Pause tracking on X?</h2>
+				<p class="dialog-text">Nothing is sent to X until you resume. Your Pixel ID and event IDs stay saved. Your ads keep running, but X won't see new sales from this store while it's paused.</p>
+			</div>
+			<div class="dialog-foot">
+				<button type="submit" class="btn secondary" value="cancel">Keep tracking</button>
+				<button type="submit" class="btn destructive" value="pause">Pause tracking</button>
+			</div>
+		</form>
+	</dialog>
+
+</main>
+</div>
+<script src="assets/icons.js"></script>
+<script src="assets/config.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What's new in 3.0 · Conversion Tracking 3.0 prototype</title>
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/components.css">
+</head>
+<body data-page="whats-new" data-nav="dashboard">
+<div class="wp-content">
+<main class="page wcct-app" id="wcct-app">
+
+	<div class="stack-sm">
+		<div><span class="pill ok">Updated to 3.0</span></div>
+		<h1 class="page-title is-hero">Your tracking is still running. Here's what changed.</h1>
+		<p class="lead">Every pixel ID, event choice and custom script carried over as it was. Nothing new is sent until you turn it on. Three fixes apply to everyone because they were bugs.</p>
+	</div>
+
+	<section class="notice warning banner" data-when="oldPro=yes" aria-label="Action needed">
+		<div class="row banner-text">
+			<span class="pill warn">Action needed</span>
+			<p><b>Conversion Tracking Pro 1.1.4 is installed but paused.</b> It was built for the old version. Your standard tracking keeps running from the carried-over settings, and your <a href="catalog.html">Meta catalog feed</a> keeps serving. Update Pro to 3.0 to get your second pixel and other Pro features back.</p>
+		</div>
+		<a class="btn primary" href="#">Update Pro</a>
+	</section>
+
+	<section class="notice info banner" data-when="plan=pro;oldPro=no" aria-label="Pro is up to date">
+		<p class="banner-text"><b>Pro 3.0 is active.</b> Your second pixel, <a href="catalog.html">catalog feed</a> and role access carried over. New in Pro: missed-sale emails and the weekly health email, both off until you turn them on in <a href="settings.html#alerts">Settings, Alerts</a>.</p>
+	</section>
+
+	<section class="card" aria-labelledby="fixed-title">
+		<h2 class="card-head" id="fixed-title">Fixed for every store</h2>
+		<div class="step-row"><span class="step-icon"><span data-icon="check"></span></span><p class="step-row-text"><b>Purchases are counted once.</b> Reloading the thank-you page no longer sends a second purchase to Meta, Google Ads, X or Microsoft.</p></div>
+		<div class="step-row"><span class="step-icon"><span data-icon="check"></span></span><p class="step-row-text"><b>Failed and cancelled orders are skipped.</b> They used to count as sales on every platform except Google Analytics.</p></div>
+		<div class="step-row"><span class="step-icon"><span data-icon="check"></span></span><p class="step-row-text"><b>Checkout is tracked on the Checkout block.</b> Meta and Microsoft now see "started checkout" on block-based checkouts.</p></div>
+	</section>
+
+	<section class="card" aria-labelledby="try-title">
+		<h2 class="card-head" id="try-title">Try when you have a minute</h2>
+		<div class="step-row"><span class="step-icon is-off"><span data-icon="stethoscope"></span></span><p class="step-row-text"><b>Tracking Doctor.</b> Finds duplicate or broken tracking and says what to do. Optional.</p><a class="btn outline" href="doctor.html">Start</a></div>
+		<div class="step-row"><span class="step-icon is-off"><span data-icon="activity"></span></span><p class="step-row-text"><b>Activity log.</b> Every event your store sent, by order number. Already recording.</p><a class="btn outline" href="log.html">Open</a></div>
+		<div class="step-row"><span class="step-icon is-off"><span data-icon="cookie"></span></span><p class="step-row-text"><b>Respect cookie choices.</b> Off for existing stores so your numbers don't shift overnight. Turn it on if you sell to Europe.</p><a class="btn outline" href="platforms.html">Review</a></div>
+		<div class="step-row"><span class="step-icon is-off"><span data-icon="triangle-alert"></span></span><p class="step-row-text"><b>X needs a re-setup.</b> X retired the old single-event codes. Your base tag carried over; purchases need a new event ID.</p><a class="btn outline" href="platforms-x.html">Re-setup</a></div>
+	</section>
+
+	<div class="end"><a class="btn primary lg" href="index.html">Done, show me the dashboard</a></div>
+
+</main>
+</div>
+<script src="assets/icons.js"></script>
+<script src="assets/config.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
