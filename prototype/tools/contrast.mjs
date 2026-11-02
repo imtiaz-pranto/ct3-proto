@@ -17,7 +17,10 @@ const root = path.resolve(here, '..');
 const renderedDir = path.join(here, 'rendered');
 mkdirSync(renderedDir, { recursive: true });
 const pages = readdirSync(root).filter((f) => f.endsWith('.html')).map((f) => f.replace('.html', ''));
-const base = { install: 'working', doctor: 'ran', connection: 'connected', doctorResult: 'findings', log: 'rows', oldPro: 'no' };
+const base = { install: 'working', doctor: 'ran', connection: 'connected', doctorResult: 'findings', log: 'rows', oldPro: 'no', onbAt: '1' };
+const wizard = { onbPicked: 'meta,google,x,microsoft,custom', onbConnected: 'meta,google,x', eu: 'yes' };
+// Opens the role access modal on the Access panel.
+const openRole = (page) => page.click('label:has(input[value="customer"])');
 const runs = [];
 // Every page in both plans and both versions (3.1 with the server connected).
 for (const p of pages) for (const plan of ['free', 'pro']) {
@@ -28,20 +31,28 @@ runs.push(['platforms', { plan: 'free', version: '3.1', server: 'not' }], ['plat
 runs.push(['index', { plan: 'free', install: 'new' }], ['index', { plan: 'free', install: 'upgrade' }], ['index', { plan: 'pro', doctor: 'not' }],
 	['platforms', { plan: 'free', connection: 'not' }], ['platforms-x', { plan: 'free', install: 'upgrade' }], ['log', { plan: 'free', log: 'empty' }],
 	['doctor', { plan: 'free', doctorResult: 'clear' }], ['whats-new', { plan: 'pro', oldPro: 'yes' }],
-	['catalog', { plan: 'pro', feed: 'fail', feedId: 'sku' }], ['doctor', { plan: 'pro', feed: 'fail', feedId: 'sku' }]);
+	['catalog', { plan: 'pro', feed: 'fail', feedId: 'sku' }], ['doctor', { plan: 'pro', feed: 'fail', feedId: 'sku' }],
+	['index', { plan: 'free', install: 'new', onbAt: '4' }], ['index', { plan: 'pro', doctor: 'plugin' }], ['catalog', { plan: 'pro', install: 'upgrade' }],
+	['settings#access', { plan: 'pro' }, openRole], ['settings#access', { plan: 'pro', install: 'upgrade' }]);
+for (const step of [2, 3, 4, 5, 6]) for (const plan of ['free', 'pro']) runs.push([`onboarding?step=${step}`, { plan, ...wizard, verified: step === 6 ? 'yes' : 'no' }]);
+runs.push(['onboarding?step=5', { plan: 'free', ...wizard, verified: 'yes' }]);
+for (const migration of ['done', 'progress', 'attention']) for (const plan of ['free', 'pro']) runs.push(['whats-new', { plan, install: 'upgrade', migration }]);
 
 const browser = await chromium.launch();
 const pairs = new Map();
+const focusPairs = new Map();
 
-for (const [name, state] of runs) {
+for (const [name, state, prep] of runs) {
 	const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
 	await context.addInitScript((s) => window.localStorage.setItem('wcct-proto-v1', JSON.stringify(s)), { ...base, ...state });
 	const page = await context.newPage();
-	await page.goto(pathToFileURL(path.join(root, `${name}.html`)).href);
-	// Measure collapsed content too: Advanced settings.
+	const [file, rest] = name.split(/(?=[?#])/);
+	await page.goto(pathToFileURL(path.join(root, `${file}.html`)).href + (rest || ''));
+	if (prep) await prep(page);
+	// Measure collapsed content too: Advanced settings, the Doctor's Working list.
 	await page.evaluate(() => {
-		document.querySelectorAll('details.advanced-settings').forEach((d) => { d.open = true; });
-		document.querySelectorAll('[data-settings-panel]').forEach((p) => { p.hidden = false; });
+		document.querySelectorAll('details.advanced-settings, details.working-list').forEach((d) => { d.open = true; });
+		if (!document.querySelector('dialog[open]')) document.querySelectorAll('[data-settings-panel]').forEach((p) => { p.hidden = false; });
 	});
 	await page.waitForTimeout(100);
 	const is31Meta = name === 'platforms' && state.version === '3.1' && state.server === 'connected';
@@ -110,6 +121,53 @@ for (const [name, state] of runs) {
 		pairs.get(key).pages.add(name);
 		if (pairs.get(key).samples.size < 3) pairs.get(key).samples.add(f.text);
 	}
+	// Focus indicators (added 2026-11-02): every enabled focusable control in
+	// the plugin area, focused after a key press so :focus-visible applies.
+	// The indicator is the outline, or for text fields the border, measured
+	// against the surface it sits on. Threshold 3:1 (WCAG 1.4.11).
+	await page.addStyleTag({ content: '*, *::before, *::after { transition: none !important; }' }); // read end states, not mid-transition
+	await page.keyboard.press('Shift');
+	const focused = await page.evaluate(() => {
+		const cv = document.createElement('canvas');
+		cv.width = cv.height = 1;
+		const ctx = cv.getContext('2d', { willReadFrequently: true });
+		const rgba = (c) => { ctx.clearRect(0, 0, 1, 1); ctx.fillStyle = '#000'; ctx.fillStyle = c; ctx.fillRect(0, 0, 1, 1); const d = ctx.getImageData(0, 0, 1, 1).data; return [d[0], d[1], d[2], d[3] / 255]; };
+		const over = (top, under) => [0, 1, 2].map((i) => top[i] * top[3] + under[i] * (1 - top[3])).concat(1);
+		const bgOf = (el) => {
+			const stack = [];
+			for (let n = el; n && n.nodeType === 1; n = n.parentElement) { const c = rgba(getComputedStyle(n).backgroundColor); if (c[3] > 0) stack.push(c); if (c[3] === 1) break; }
+			let out = [255, 255, 255, 1];
+			for (let i = stack.length - 1; i >= 0; i--) out = over(stack[i], out);
+			return out;
+		};
+		const lum = (c) => { const ch = c.slice(0, 3).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2]; };
+		const hex = (c) => '#' + c.slice(0, 3).map((v) => Math.round(v).toString(16).padStart(2, '0')).join('');
+		const out = [];
+		const sel = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), summary, [tabindex]:not([tabindex="-1"])';
+		for (const el of document.querySelectorAll(`.wp-content :is(${sel})`)) {
+			if (el.closest('.state-bar, [hidden], dialog:not([open]), [aria-disabled="true"]')) continue;
+			const target = el.matches('.switch input') ? el.nextElementSibling : el;
+			const r = target.getBoundingClientRect();
+			if (!r.width || !r.height || getComputedStyle(target).visibility === 'hidden') continue;
+			el.focus({ preventScroll: true });
+			if (document.activeElement !== el || !el.matches(':focus-visible')) continue;
+			const cs = getComputedStyle(target);
+			const outline = cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) >= 1;
+			const ind = rgba(outline ? cs.outlineColor : cs.borderTopColor);
+			const surface = outline && parseFloat(cs.outlineOffset) < 0 ? bgOf(target) : bgOf(target.parentElement);
+			const fg = over(ind, surface);
+			const L1 = lum(fg), L2 = lum(surface);
+			out.push({ kind: outline ? `outline ${cs.outlineWidth}` : 'border', fg: hex(fg), bg: hex(surface), ratio: Math.round(((Math.max(L1, L2) + 0.05) / (Math.min(L1, L2) + 0.05)) * 100) / 100, text: (el.className && typeof el.className === 'string' ? el.tagName.toLowerCase() + '.' + el.className.trim().split(/\s+/)[0] + ' ' : el.tagName.toLowerCase() + ' ') + (el.textContent || el.getAttribute('aria-label') || '').trim().replace(/\s+/g, ' ').slice(0, 30) });
+			el.blur();
+		}
+		return out;
+	});
+	for (const f of focused) {
+		const key = `${f.kind} ${f.fg} on ${f.bg}`;
+		if (!focusPairs.has(key)) focusPairs.set(key, { ...f, pages: new Set(), samples: new Set() });
+		focusPairs.get(key).pages.add(name);
+		if (focusPairs.get(key).samples.size < 3) focusPairs.get(key).samples.add(f.text);
+	}
 	await context.close();
 }
 await browser.close();
@@ -126,4 +184,18 @@ if (fails.length) {
 	process.exitCode = 1;
 } else {
 	console.log('\nAll enabled text passes 4.5:1.');
+}
+
+const frows = [...focusPairs.values()].sort((a, b) => a.ratio - b.ratio);
+const ffails = frows.filter((r) => r.ratio < 3);
+console.log(`\nFocus indicators: ${frows.length} unique indicator/surface pairs\n`);
+console.log('ratio  | indicator  | colour  | surface | example');
+for (const r of frows) {
+	console.log(`${r.ratio.toFixed(2).padStart(6)} | ${r.kind.padEnd(10)} | ${r.fg} | ${r.bg} | "${[...r.samples][0]}" (${[...r.pages].slice(0, 3).join(', ')}${r.pages.size > 3 ? ', …' : ''})`);
+}
+if (ffails.length) {
+	console.log(`\nFAIL: ${ffails.length} focus indicator(s) below 3:1`);
+	process.exitCode = 1;
+} else {
+	console.log('\nEvery focus indicator is at least 3:1 against its surface.');
 }

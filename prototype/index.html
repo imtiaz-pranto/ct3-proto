@@ -21,19 +21,15 @@
 		</div>
 	</div>
 
-	<!-- New install: nothing connected yet -->
+	<!-- New install: the setup steps still open, from onboarding -->
 	<section class="card" data-when="install=new" aria-labelledby="welcome-title">
 		<div class="banner is-roomy">
 			<div class="stack-sm banner-text">
 				<h2 class="summary-title" id="welcome-title">Welcome. Let's get one platform working.</h2>
-				<p class="muted">Connect Meta or Google, place a test order, and this page turns green. No warnings and no upsells until then.</p>
-				<ul class="checklist">
-					<li><span class="check-dot is-done"><span data-icon="check"></span></span>Plugin installed</li>
-					<li><span class="check-dot"><span data-icon="clock"></span></span>Connect a platform, about 3 minutes</li>
-					<li><span class="check-dot"><span data-icon="clock"></span></span>Place a test order and see it in the Activity log</li>
-				</ul>
+				<p class="muted">Pick up setup where you left off. This page turns green when your store sends its first event. No warnings and no upsells until then.</p>
+				<ul class="checklist" data-onb-checklist></ul>
 			</div>
-			<a class="btn primary lg" href="pick-platforms.html">Choose where you run ads</a>
+			<a class="btn primary lg" href="onboarding.html" data-onb-continue>Continue setup</a>
 		</div>
 	</section>
 
@@ -66,7 +62,7 @@
 
 	<!-- Upgraded from 2.x -->
 	<section class="notice info banner" data-when="install=upgrade" aria-label="Updated to 3.0">
-		<p class="banner-text"><b>Updated to 3.0.</b> Your settings carried over. Three fixes now apply to every store: purchases counted once, failed orders skipped, checkout tracked on the Checkout block.</p>
+		<p class="banner-text"><b>Updated to 3.0.</b> Your settings carried over. Three fixes now apply to every store: purchases counted once, failed orders skipped, checkout tracked on the Checkout block.<span data-when="migration=progress"> Your order history is still updating in the background; tracking keeps running.</span><span data-when="migration=attention"> 2 settings need a quick check.</span></p>
 		<a class="btn outline" href="whats-new.html">See what's new</a>
 	</section>
 
@@ -83,23 +79,33 @@
 			</div>
 			<div class="card stat-card">
 				<span class="stat-icon is-ok"><span data-icon="check"></span></span>
-				<div data-when="install!=upgrade"><span class="stat-value">2 of 3</span><span class="stat-label">Platforms working</span></div>
-				<div data-when="install=upgrade"><span class="stat-value">1 of 3</span><span class="stat-label">Platforms working</span></div>
+				<div data-when="install!=upgrade||migration!=attention"><span class="stat-value">2 of 3</span><span class="stat-label">Platforms working</span></div>
+				<div data-when="install=upgrade;migration=attention"><span class="stat-value">1 of 3</span><span class="stat-label">Platforms working</span></div>
 			</div>
 			<div class="card stat-card">
 				<span class="stat-icon is-off"><span data-icon="stethoscope"></span></span>
 				<div data-when="doctor=ran"><span class="stat-value">2 days ago</span><span class="stat-label">Last Doctor run</span></div>
+				<div data-when="doctor=plugin"><span class="stat-value">Just now</span><span class="stat-label">Last Doctor run</span></div>
 				<div data-when="doctor=not"><span class="stat-value">Not yet</span><span class="stat-label">Last Doctor run</span></div>
 			</div>
 		</section>
 
 		<section class="notice warning banner" aria-label="Missed sales">
-			<div class="row banner-text">
-				<span class="pill warn">Worth a look</span>
-				<p><b>3 purchases didn't reach Meta this week.</b> The browser pixel never fired for those visitors. <a href="log.html">See which orders</a></p>
+			<div class="stack-sm banner-text">
+				<div class="row">
+					<span class="pill warn">Worth a look</span>
+					<p><b>3 purchases weren't sent to Meta this week.</b> The browser pixel didn't fire for those visitors, most often because of an ad blocker or a declined cookie banner.</p>
+				</div>
+				<div class="row wrap">
+					<a class="btn outline sm" href="log.html?tab=missed">Open the orders in the Activity log</a>
+					<a class="btn outline sm" href="platforms.html#cookie-choices">Check cookie choices</a>
+					<a class="btn outline sm" href="doctor.html">Run the Doctor</a>
+				</div>
 			</div>
-			<div class="upgrade-card" data-when="plan=free"><span>Pro emails you the moment this happens.</span><a class="link-strong" href="settings.html#plan">Compare plans</a></div>
-			<span class="small muted" data-when="plan=pro">Emailed to you today, 09:12</span>
+			<template data-v31>
+				<div class="upgrade-card" data-when="plan=free"><span>Pro emails you the moment this happens.</span><a class="link-strong" href="settings.html#plan">Compare plans</a></div>
+				<span class="small muted" data-when="plan=pro">Emailed to you today, 09:12</span>
+			</template>
 		</section>
 
 		<div class="grid-2-1">
@@ -118,11 +124,25 @@
 
 			<section class="card card-body" aria-labelledby="doctor-title">
 				<h2 class="card-title" id="doctor-title">Tracking Doctor</h2>
-				<div class="stack-sm" data-when="doctor=ran">
-					<div><span class="pill warn">2 things worth a look</span></div>
-					<p class="small muted">Meta's own plugin is also sending purchases, and your cookie plugin isn't connected yet. Nothing is broken.</p>
+				<template data-v30>
+					<div class="stack-sm" data-when="doctor=ran">
+						<div><span class="pill warn">3 things worth a look</span></div>
+						<p class="small muted">Facebook for WooCommerce is also active, your Google Ads label looks incomplete, and no cookie plugin is connected. Nothing is broken.</p>
+						<div><a class="btn outline" href="doctor.html">See the checklist</a></div>
+					</div>
+				</template>
+				<template data-v31>
+					<div class="stack-sm" data-when="doctor=ran">
+						<div><span class="pill warn">2 things worth a look</span></div>
+						<p class="small muted">Meta's own plugin is also sending purchases, and your cookie plugin isn't connected yet. Nothing is broken.</p>
+						<div><a class="btn outline" href="doctor.html">See the checklist</a></div>
+						<p class="xsmall muted" data-when="plan=pro">Weekly check: on. Next run Monday 09:00.</p>
+					</div>
+				</template>
+				<div class="stack-sm" data-when="doctor=plugin">
+					<div><span class="pill warn">1 new thing worth a look</span></div>
+					<p class="small muted">PixelYourSite was just activated, so we checked again. It can send purchases to Meta too.</p>
 					<div><a class="btn outline" href="doctor.html">See the checklist</a></div>
-					<p class="xsmall muted" data-when="plan=pro">Weekly check: on. Next run Monday 09:00.</p>
 				</div>
 				<div class="stack-sm" data-when="doctor=not">
 					<p class="small muted">Want us to check your store for duplicate or broken tracking? Takes a few seconds and changes nothing.</p>
@@ -155,14 +175,14 @@
 					</span>
 					<span class="platform-note">The Ads conversion label looks incomplete. <span class="fix">Fix it</span></span>
 				</a>
-				<a class="card platform-card" href="platforms-x.html" data-platform-status="warn" data-when="install=upgrade">
+				<a class="card platform-card" href="platforms-x.html" data-platform-status="warn" data-when="install=upgrade;migration=attention">
 					<span class="platform-card-head">
 						<span class="platform-id"><span class="logo"><img src="assets/logos/x.svg" alt=""></span><span><span class="platform-name">X</span><span class="platform-meta">formerly Twitter</span></span></span>
 						<span class="pill warn">Needs attention</span>
 					</span>
 					<span class="platform-note">X retired the old event codes, so purchases need a new event ID. <span class="fix">Fix it</span></span>
 				</a>
-				<a class="card platform-card" href="platforms-x.html" data-platform-status="ok" data-when="install!=upgrade">
+				<a class="card platform-card" href="platforms-x.html" data-platform-status="ok" data-when="install!=upgrade||migration!=attention">
 					<span class="platform-card-head">
 						<span class="platform-id"><span class="logo"><img src="assets/logos/x.svg" alt=""></span><span><span class="platform-name">X</span><span class="platform-meta">formerly Twitter</span></span></span>
 						<span class="pill ok">Working</span>
@@ -197,9 +217,9 @@
 			<h2 class="card-title" id="next-title">What to do next</h2>
 			<ol class="small stack-sm">
 				<li>Finish the Google Ads conversion label. <a href="platforms-google.html">Open Google</a></li>
-				<li data-when="install=upgrade">Give X a new purchase event ID; the old codes were retired. <a href="platforms-x.html">Open X</a></li>
-				<li data-when="doctor=ran">Decide who sends purchases to Meta: this plugin or Meta's own. <a href="doctor.html">See the Doctor's note</a></li>
-				<li data-when="doctor=ran">Connect your cookie plugin so EU visitors' choices are respected. <a href="doctor.html">How</a></li>
+				<li data-when="install=upgrade;migration=attention">Give X a new purchase event ID; the old codes were retired. <a href="platforms-x.html">Open X</a></li>
+				<li data-when="doctor=ran|plugin">Decide who sends purchases to Meta: this plugin or Meta's own. <a href="doctor.html">See the Doctor's note</a></li>
+				<li data-when="doctor=ran|plugin">Connect your cookie plugin so EU visitors' choices are respected. <a href="doctor.html">How</a></li>
 				<li data-when="doctor=not">Let the Doctor check for duplicate tracking. <a href="doctor.html">Check my store</a></li>
 			</ol>
 		</section>

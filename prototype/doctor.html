@@ -14,126 +14,238 @@
 	<div class="page-head">
 		<div>
 			<h1 class="page-title">Tracking Doctor</h1>
-			<p class="page-sub">Finds duplicate or broken tracking and says what to do. Never changes anything without asking.</p>
+			<p class="page-sub">Finds duplicate or broken tracking and says what to do. It never changes your settings or other plugins.</p>
 		</div>
 		<div class="page-head-actions">
 			<span class="small page-sub" data-last-check>Last check: today 10:50</span>
-			<button type="button" class="btn primary" data-check-again><span data-icon="refresh-cw"></span>Check again</button>
+			<button type="button" class="btn primary" data-doctor-run><span data-icon="refresh-cw"></span>Check my store</button>
 		</div>
 	</div>
 
-	<section class="card summary-card" data-doctor-running hidden aria-live="polite">
-		<span class="summary-icon busy"><span data-icon="loader-circle"></span></span>
-		<div><p class="summary-title">Checking <span data-check-total>9</span> things on your store…</p><p class="summary-sub">Your theme, other tracking plugins, your cookie plugin and the last 50 orders. Nothing is changed.</p></div>
-	</section>
-
-	<div class="stack" data-doctor-results>
-
-		<section class="card summary-card" data-when="doctorResult=clear">
-			<span class="summary-icon ok"><span data-icon="circle-check"></span></span>
-			<div><h2 class="summary-title">Everything looks good</h2><p class="summary-sub">No duplicate tracking, IDs look right, cookie choices are respected. We checked <span data-check-total>9</span> things.</p></div>
+	<template data-v30>
+		<section class="card summary-card" data-doctor-running hidden aria-live="polite">
+			<span class="summary-icon busy"><span data-icon="loader-circle"></span></span>
+			<div><p class="summary-title">Checking <span data-check-total>7</span> things…</p><p class="summary-sub">Your active plugins, your saved settings and your order log. Nothing is changed.</p></div>
 		</section>
 
-		<div class="stack" data-when="doctorResult=findings">
-			<section class="card summary-card" data-clean-after-dismiss hidden>
-				<span class="summary-icon ok"><span data-icon="circle-check"></span></span>
-				<div><h2 class="summary-title">Nothing left to look at</h2><p class="summary-sub">You dismissed the open items. Check again any time; dismissed items come back only if something changes.</p></div>
+		<div class="stack" data-doctor-results>
+			<section class="card summary-card" aria-labelledby="doctor-head">
+				<span class="summary-icon warn" data-doctor-icon="warn"><span data-icon="stethoscope"></span></span>
+				<span class="summary-icon ok" data-doctor-icon="ok" hidden><span data-icon="circle-check"></span></span>
+				<div><h2 class="summary-title" id="doctor-head">We checked <span data-check-total>7</span> things.</h2><p class="summary-sub" data-doctor-sub>3 are worth a look. Nothing is broken.</p></div>
 			</section>
 
-			<div class="stack" data-findings>
-				<section class="card summary-card">
-					<span class="summary-icon warn"><span data-icon="stethoscope"></span></span>
-					<div><h2 class="summary-title" data-findings-title>7 things are working. 2 are worth a look.</h2><p class="summary-sub">Nothing is broken. Both items below can double count sales if left as they are.</p></div>
-				</section>
+			<h2 class="section-label" data-findings-label>Worth a look</h2>
 
-				<h2 class="section-label">Worth a look</h2>
+			<section class="card finding" data-finding data-check="plugins" aria-labelledby="cf1-title">
+				<span class="pill warn">Duplicate</span>
+				<div class="finding-main">
+					<h3 class="finding-title" id="cf1-title">Facebook for WooCommerce is also active</h3>
+					<div class="tags"><span class="tag">Meta</span><span class="tag">Sure it's active</span><span class="tag">Not sure it sends purchases</span></div>
+					<p class="finding-why">If its pixel is on, each sale reaches Meta twice and your ad results double.</p>
+					<ol class="finding-steps">
+						<li>Pick one plugin to send to Meta.</li>
+						<li>To keep this one, deactivate Facebook for WooCommerce, or turn off its pixel (Marketing, then Facebook) if you use its catalog sync.</li>
+						<li>To keep Meta's plugin, pause Meta in <a href="platforms.html">Platforms</a>.</li>
+						<li>Then check again.</li>
+					</ol>
+				</div>
+				<div class="finding-actions">
+					<button type="button" class="btn primary" data-finding-recheck>Check again</button>
+					<button type="button" class="link-btn is-quiet" data-finding-dismiss>Dismiss</button>
+				</div>
+			</section>
 
-				<section class="card finding" data-finding aria-labelledby="f1-title">
-					<span class="pill warn">Duplicate</span>
-					<div class="finding-main">
-						<h3 class="finding-title" id="f1-title">Meta's own plugin is also sending purchases</h3>
-						<div class="tags"><span class="tag">Meta</span><span class="tag">Double counting</span><span class="tag">Sure</span></div>
-						<p class="finding-why">"Facebook for WooCommerce" is active with its pixel turned on. Each sale can reach Meta twice, once from it and once from us. Keep one. If you keep ours, we can turn its pixel off for you; your catalog sync in that plugin stays untouched.</p>
-					</div>
-					<div class="finding-actions">
-						<button type="button" class="btn primary" data-toast="Done. Facebook for WooCommerce's pixel is off; its catalog sync still runs.">Keep this plugin's tracking</button>
-						<button type="button" class="btn outline" data-toast="Done. We stopped sending to Meta; Meta's plugin keeps it.">Keep Meta's plugin instead</button>
-						<button type="button" class="link-btn is-quiet" data-finding-dismiss>Dismiss</button>
-					</div>
-				</section>
+			<section class="card finding" data-finding data-check="ids" aria-labelledby="cf2-title">
+				<span class="pill warn">ID</span>
+				<div class="finding-main">
+					<h3 class="finding-title" id="cf2-title">Your Google Ads conversion label looks incomplete</h3>
+					<div class="tags"><span class="tag">Google</span><span class="tag">Sure</span></div>
+					<p class="finding-why">Ads can't count purchases for your campaigns until the label is complete.</p>
+				</div>
+				<div class="finding-actions">
+					<a class="btn primary" href="platforms-google.html">Open Google</a>
+					<button type="button" class="link-btn is-quiet" data-finding-dismiss>Dismiss</button>
+				</div>
+			</section>
 
-				<section class="card finding" data-finding aria-labelledby="f2-title">
-					<span class="pill warn">Cookie choices</span>
-					<div class="finding-main">
-						<h3 class="finding-title" id="f2-title">"Respect cookie choices" is on, but no cookie plugin is connected</h3>
-						<div class="tags"><span class="tag">All platforms</span><span class="tag">Europe</span><span class="tag">Sure</span></div>
-						<p class="finding-why">Your tags wait for a cookie choice that never arrives for EU visitors, so those sales go untracked. Install a cookie plugin that supports the WordPress Consent API (Complianz, CookieYes, Cookiebot), or turn the setting off if you don't sell to Europe.</p>
-					</div>
-					<div class="finding-actions">
-						<a class="btn primary" href="#">See compatible plugins</a>
-						<a class="btn outline" href="platforms-google.html">Turn the setting off</a>
-						<button type="button" class="link-btn is-quiet" data-finding-dismiss>Dismiss</button>
-					</div>
-				</section>
+			<section class="card finding" data-finding data-check="consent" aria-labelledby="cf3-title">
+				<span class="pill warn">Cookie choices</span>
+				<div class="finding-main">
+					<h3 class="finding-title" id="cf3-title">Cookie choices are on, but no consent plugin is connected</h3>
+					<div class="tags"><span class="tag">All platforms</span><span class="tag">Europe</span><span class="tag">Sure</span></div>
+					<p class="finding-why">Your tags wait for a cookie choice that never comes, so those visitors' sales aren't tracked.</p>
+				</div>
+				<div class="finding-actions">
+					<a class="btn primary" href="#">See compatible plugins</a>
+					<button type="button" class="link-btn is-quiet" data-finding-dismiss>Dismiss</button>
+				</div>
+			</section>
 
-				<section class="card finding" data-finding data-when="plan=pro;feed=fail" aria-labelledby="f4-title">
-					<span class="pill warn">Catalog</span>
-					<div class="finding-main">
-						<h3 class="finding-title" id="f4-title">Meta couldn't fetch your catalog feed</h3>
-						<div class="tags"><span class="tag">Meta</span><span class="tag">Catalog</span><span class="tag">Sure</span></div>
-						<p class="finding-why">At 06:02 Meta asked for the feed and your site answered "401 Unauthorized". A security plugin or a cache rule usually does this. Until it's fixed, prices and stock in your ads go stale.</p>
-					</div>
-					<div class="finding-actions">
-						<a class="btn primary" href="catalog.html">Open Catalog</a>
-						<button type="button" class="link-btn is-quiet" data-finding-dismiss>Dismiss</button>
-					</div>
-				</section>
+			<section class="card finding" data-finding data-check="ids-match" aria-labelledby="cf7-title">
+				<span class="pill warn">Catalog</span>
+				<div class="finding-main">
+					<h3 class="finding-title" id="cf7-title">Your catalog feed and your Meta pixel use different product IDs</h3>
+					<div class="tags"><span class="tag">Meta</span><span class="tag">Dynamic ads</span><span class="tag">Sure</span></div>
+					<p class="finding-why">Meta can't match views and purchases to products, so dynamic ads show the wrong items or none.</p>
+				</div>
+				<div class="finding-actions">
+					<a class="btn primary" href="catalog.html#id-matching">Make them match</a>
+					<button type="button" class="link-btn is-quiet" data-finding-dismiss>Dismiss</button>
+				</div>
+			</section>
 
-				<section class="card finding" data-finding data-when="plan=pro" data-id-match="no" aria-labelledby="f5-title">
-					<span class="pill warn">Catalog</span>
-					<div class="finding-main">
-						<h3 class="finding-title" id="f5-title">Your feed and your pixel use different product IDs</h3>
-						<div class="tags"><span class="tag">Meta</span><span class="tag">Dynamic ads</span><span class="tag">Sure</span></div>
-						<p class="finding-why">The catalog feed sends one kind of ID and the Meta pixel sends the other, so Meta can't match views and purchases to products. Dynamic ads show the wrong items or none.</p>
-					</div>
-					<div class="finding-actions">
-						<a class="btn primary" href="catalog.html#id-matching">Make them match</a>
-						<button type="button" class="link-btn is-quiet" data-finding-dismiss>Dismiss</button>
-					</div>
-				</section>
+			<section class="card finding is-unsure" data-finding data-check="gtm" aria-labelledby="cf4-title">
+				<span class="pill off">Not sure</span>
+				<div class="finding-main">
+					<h3 class="finding-title" id="cf4-title">A Google Tag Manager plugin is active</h3>
+					<div class="tags"><span class="tag">Google</span><span class="tag">Can't see inside</span></div>
+					<p class="finding-why">If your container also has a purchase tag, Google counts each sale twice.</p>
+				</div>
+				<div class="finding-actions">
+					<a class="btn outline" href="#">How to check</a>
+					<button type="button" class="link-btn is-quiet" data-finding-dismiss>Dismiss</button>
+				</div>
+			</section>
 
-				<section class="card finding is-unsure" data-finding aria-labelledby="f3-title">
-					<span class="pill off">Not sure</span>
-					<div class="finding-main">
-						<h3 class="finding-title" id="f3-title">Google Tag Manager is on your site</h3>
-						<div class="tags"><span class="tag">Google</span><span class="tag">Can't see inside</span></div>
-						<p class="finding-why">We can't read what your container sends. If it has a purchase tag for Analytics or Ads, you'd be double counting. <a href="#">How to check in 2 minutes</a></p>
-					</div>
-					<div class="finding-actions">
-						<button type="button" class="link-btn is-quiet" data-finding-dismiss>Dismiss</button>
-					</div>
-				</section>
-			</div>
+			<section class="card summary-card" data-clean-after-dismiss hidden>
+				<span class="summary-icon ok"><span data-icon="circle-check"></span></span>
+				<div><h2 class="summary-title">Nothing left to look at</h2><p class="summary-sub">Dismissed items come back only if something changes. Check again any time.</p></div>
+			</section>
+
+			<details class="card working-list" data-working>
+				<summary><span data-icon="chevron-right"></span>Working<span class="pill ok no-dot" data-working-count>3</span></summary>
+				<div class="working-body">
+					<div class="check-row" data-check="plugins" data-pass><span class="pill ok is-dot"><span class="sr-only">Passed</span></span><span>No other tracking plugin is active</span></div>
+					<div class="check-row" data-check="ids" data-pass><span class="pill ok is-dot"><span class="sr-only">Passed</span></span><span>Your Meta, Google and X IDs look valid</span></div>
+					<div class="check-row" data-check="consent" data-pass><span class="pill ok is-dot"><span class="sr-only">Passed</span></span><span>Cookie choices reach your tags through your consent plugin</span></div>
+					<div class="check-row" data-check="gtm" data-pass><span class="pill ok is-dot"><span class="sr-only">Passed</span></span><span>No Google Tag Manager plugin is active</span></div>
+					<div class="check-row" data-check="purchase" data-pass><span class="pill ok is-dot"><span class="sr-only">Passed</span></span><span>Purchase is on for every connected platform</span></div>
+					<div class="check-row" data-check="orders" data-pass><span class="pill ok is-dot"><span class="sr-only">Passed</span></span><span>Orders came in this week and were sent. We sent each of your last 50 purchases once.</span></div>
+					<div class="check-row" data-check="ids-match" data-pass><span class="pill ok is-dot"><span class="sr-only">Passed</span></span><span>Your catalog feed and your Meta pixel use the same product IDs</span></div>
+				</div>
+			</details>
 		</div>
+	</template>
 
-		<h2 class="section-label is-quiet">Working</h2>
-		<section class="card" aria-label="Checks that passed">
-			<div class="check-row"><span class="pill ok is-dot"><span class="sr-only">Passed</span></span><span>Meta Pixel ID looks right and fired on the storefront</span><span class="when">checked just now</span></div>
-			<div class="check-row"><span class="pill ok is-dot"><span class="sr-only">Passed</span></span><span>Google Analytics ID looks right, one loader on the page</span></div>
-			<div class="check-row"><span class="pill ok is-dot"><span class="sr-only">Passed</span></span><span>No second Meta pixel found in your theme or header</span></div>
-			<div class="check-row"><span class="pill ok is-dot"><span class="sr-only">Passed</span></span><span>Site Kit and Google for WooCommerce are not sending purchases</span></div>
-			<div class="check-row"><span class="pill ok is-dot"><span class="sr-only">Passed</span></span><span>PixelYourSite, Pixel Manager and Conversios are not active</span></div>
-			<div class="check-row"><span class="pill ok is-dot"><span class="sr-only">Passed</span></span><span>Purchases are counted once; the last 50 orders had no duplicates</span></div>
-			<div class="check-row"><span class="pill ok is-dot"><span class="sr-only">Passed</span></span><span>Your cache plugin serves the cookie script uncached</span></div>
-			<div class="check-row" data-when="doctorResult=clear"><span class="pill ok is-dot"><span class="sr-only">Passed</span></span><span>No other plugin sends purchases to Meta</span></div>
-			<div class="check-row" data-when="doctorResult=clear"><span class="pill ok is-dot"><span class="sr-only">Passed</span></span><span>Cookie choices reach your tags through your cookie plugin</span></div>
-			<div class="check-row" data-when="plan=pro;feed=ok"><span class="pill ok is-dot"><span class="sr-only">Passed</span></span><span>Catalog feed is reachable; Meta fetched it today at 06:02</span></div>
-			<div class="check-row" data-when="plan=pro" data-id-match="yes"><span class="pill ok is-dot"><span class="sr-only">Passed</span></span><span>Catalog feed product IDs match the product IDs your Meta pixel sends</span></div>
-			<div class="check-row" data-when="plan=pro" data-info><span class="pill ok is-dot"><span class="sr-only">Passed</span></span><span>Weekly check is on. Next run Monday 09:00.</span></div>
+	<template data-v31>
+		<section class="card summary-card" data-doctor-running hidden aria-live="polite">
+			<span class="summary-icon busy"><span data-icon="loader-circle"></span></span>
+			<div><p class="summary-title">Checking <span data-check-total>9</span> things on your store…</p><p class="summary-sub">Your theme, other tracking plugins, your cookie plugin and the last 50 orders. Nothing is changed.</p></div>
 		</section>
 
-		<div class="upgrade-card" data-when="plan=free"><span>Want this check to run every week and email you if something changes? That's <b>Pro</b>.</span><a class="link-strong" href="settings.html#plan">Compare plans</a></div>
-	</div>
+		<div class="stack" data-doctor-results>
+
+			<section class="card summary-card" data-when="doctorResult=clear">
+				<span class="summary-icon ok"><span data-icon="circle-check"></span></span>
+				<div><h2 class="summary-title">Everything looks good</h2><p class="summary-sub">No duplicate tracking, IDs look right, cookie choices are respected. We checked <span data-check-total>9</span> things.</p></div>
+			</section>
+
+			<div class="stack" data-when="doctorResult=findings">
+				<section class="card summary-card" data-clean-after-dismiss hidden>
+					<span class="summary-icon ok"><span data-icon="circle-check"></span></span>
+					<div><h2 class="summary-title">Nothing left to look at</h2><p class="summary-sub">You dismissed the open items. Check again any time; dismissed items come back only if something changes.</p></div>
+				</section>
+
+				<div class="stack" data-findings>
+					<section class="card summary-card">
+						<span class="summary-icon warn"><span data-icon="stethoscope"></span></span>
+						<div><h2 class="summary-title" data-findings-title>7 things are working. 2 are worth a look.</h2><p class="summary-sub">Nothing is broken. Both items below can double count sales if left as they are.</p></div>
+					</section>
+
+					<h2 class="section-label">Worth a look</h2>
+
+					<section class="card finding" data-finding aria-labelledby="f1-title">
+						<span class="pill warn">Duplicate</span>
+						<div class="finding-main">
+							<h3 class="finding-title" id="f1-title">Meta's own plugin is also sending purchases</h3>
+							<div class="tags"><span class="tag">Meta</span><span class="tag">Double counting</span><span class="tag">Sure</span></div>
+							<p class="finding-why">"Facebook for WooCommerce" is active with its pixel turned on. Each sale can reach Meta twice, once from it and once from us. Keep one.</p>
+							<ol class="finding-steps">
+								<li>To keep this plugin's tracking, turn off the pixel in Facebook for WooCommerce (Marketing, then Facebook). Its catalog sync keeps running.</li>
+								<li>To keep Meta's plugin instead, pause Meta in <a href="platforms.html">Platforms</a>.</li>
+								<li>Then check again.</li>
+							</ol>
+						</div>
+						<div class="finding-actions">
+							<button type="button" class="btn primary" data-finding-recheck>Check again</button>
+							<button type="button" class="link-btn is-quiet" data-finding-dismiss>Dismiss</button>
+						</div>
+					</section>
+
+					<section class="card finding" data-finding aria-labelledby="f2-title">
+						<span class="pill warn">Cookie choices</span>
+						<div class="finding-main">
+							<h3 class="finding-title" id="f2-title">"Respect cookie choices" is on, but no cookie plugin is connected</h3>
+							<div class="tags"><span class="tag">All platforms</span><span class="tag">Europe</span><span class="tag">Sure</span></div>
+							<p class="finding-why">Your tags wait for a cookie choice that never arrives for EU visitors, so those sales go untracked. Install a cookie plugin that supports the WordPress Consent API (Complianz, CookieYes, Cookiebot), or turn the setting off if you don't sell to Europe.</p>
+						</div>
+						<div class="finding-actions">
+							<a class="btn primary" href="#">See compatible plugins</a>
+							<a class="btn outline" href="platforms-google.html">Turn the setting off</a>
+							<button type="button" class="link-btn is-quiet" data-finding-dismiss>Dismiss</button>
+						</div>
+					</section>
+
+					<section class="card finding" data-finding data-when="plan=pro;feed=fail" aria-labelledby="f4-title">
+						<span class="pill warn">Catalog</span>
+						<div class="finding-main">
+							<h3 class="finding-title" id="f4-title">Meta couldn't fetch your catalog feed</h3>
+							<div class="tags"><span class="tag">Meta</span><span class="tag">Catalog</span><span class="tag">Sure</span></div>
+							<p class="finding-why">At 06:02 Meta asked for the feed and your site answered "401 Unauthorized". A security plugin or a cache rule usually does this. Until it's fixed, prices and stock in your ads go stale.</p>
+						</div>
+						<div class="finding-actions">
+							<a class="btn primary" href="catalog.html">Open Catalog</a>
+							<button type="button" class="link-btn is-quiet" data-finding-dismiss>Dismiss</button>
+						</div>
+					</section>
+
+					<section class="card finding" data-finding data-when="plan=pro" data-id-match="no" aria-labelledby="f5-title">
+						<span class="pill warn">Catalog</span>
+						<div class="finding-main">
+							<h3 class="finding-title" id="f5-title">Your feed and your pixel use different product IDs</h3>
+							<div class="tags"><span class="tag">Meta</span><span class="tag">Dynamic ads</span><span class="tag">Sure</span></div>
+							<p class="finding-why">The catalog feed sends one kind of ID and the Meta pixel sends the other, so Meta can't match views and purchases to products. Dynamic ads show the wrong items or none.</p>
+						</div>
+						<div class="finding-actions">
+							<a class="btn primary" href="catalog.html#id-matching">Make them match</a>
+							<button type="button" class="link-btn is-quiet" data-finding-dismiss>Dismiss</button>
+						</div>
+					</section>
+
+					<section class="card finding is-unsure" data-finding aria-labelledby="f3-title">
+						<span class="pill off">Not sure</span>
+						<div class="finding-main">
+							<h3 class="finding-title" id="f3-title">Google Tag Manager is on your site</h3>
+							<div class="tags"><span class="tag">Google</span><span class="tag">Can't see inside</span></div>
+							<p class="finding-why">We can't read what your container sends. If it has a purchase tag for Analytics or Ads, you'd be double counting. <a href="#">How to check in 2 minutes</a></p>
+						</div>
+						<div class="finding-actions">
+							<button type="button" class="link-btn is-quiet" data-finding-dismiss>Dismiss</button>
+						</div>
+					</section>
+				</div>
+			</div>
+
+			<h2 class="section-label is-quiet">Working</h2>
+			<section class="card" aria-label="Checks that passed">
+				<div class="check-row"><span class="pill ok is-dot"><span class="sr-only">Passed</span></span><span>Meta Pixel ID looks right and fired on the storefront</span><span class="when">checked just now</span></div>
+				<div class="check-row"><span class="pill ok is-dot"><span class="sr-only">Passed</span></span><span>Google Analytics ID looks right, one loader on the page</span></div>
+				<div class="check-row"><span class="pill ok is-dot"><span class="sr-only">Passed</span></span><span>No second Meta pixel found in your theme or header</span></div>
+				<div class="check-row"><span class="pill ok is-dot"><span class="sr-only">Passed</span></span><span>Site Kit and Google for WooCommerce are not sending purchases</span></div>
+				<div class="check-row"><span class="pill ok is-dot"><span class="sr-only">Passed</span></span><span>PixelYourSite, Pixel Manager and Conversios are not active</span></div>
+				<div class="check-row"><span class="pill ok is-dot"><span class="sr-only">Passed</span></span><span>We sent each of your last 50 purchases once</span></div>
+				<div class="check-row"><span class="pill ok is-dot"><span class="sr-only">Passed</span></span><span>Your cache plugin serves the cookie script uncached</span></div>
+				<div class="check-row" data-when="doctorResult=clear"><span class="pill ok is-dot"><span class="sr-only">Passed</span></span><span>No other plugin sends purchases to Meta</span></div>
+				<div class="check-row" data-when="doctorResult=clear"><span class="pill ok is-dot"><span class="sr-only">Passed</span></span><span>Cookie choices reach your tags through your cookie plugin</span></div>
+				<div class="check-row" data-when="plan=pro;feed=ok"><span class="pill ok is-dot"><span class="sr-only">Passed</span></span><span>Catalog feed is reachable; Meta fetched it today at 06:02</span></div>
+				<div class="check-row" data-when="plan=pro" data-id-match="yes"><span class="pill ok is-dot"><span class="sr-only">Passed</span></span><span>Catalog feed product IDs match the product IDs your Meta pixel sends</span></div>
+				<div class="check-row" data-when="plan=pro" data-info><span class="pill ok is-dot"><span class="sr-only">Passed</span></span><span>Weekly check is on. Next run Monday 09:00.</span></div>
+			</section>
+
+			<div class="upgrade-card" data-when="plan=free"><span>Want this check to run every week and email you if something changes? That's <b>Pro</b>.</span><a class="link-strong" href="settings.html#plan">Compare plans</a></div>
+		</div>
+	</template>
 
 </main>
 </div>

@@ -31,45 +31,49 @@
 					<span class="logo"><span data-icon="bell"></span></span>
 					<div class="detail-head-text">
 						<h2 class="detail-title" id="notify-title">Alerts</h2>
-						<p class="detail-desc">We tell you when a sale didn't reach a platform. Every alert ends in something you can do.</p>
+						<p class="detail-desc">We tell you when a sale wasn't sent to a platform. Every alert ends in something you can do.</p>
 					</div>
 				</div>
 				<div>
 					<div class="card-row">
-						<div class="event-row-text"><div class="option-title">Missed sales, on the dashboard</div><div class="option-desc">A badge and a card when a paid order didn't reach a connected platform within 10 minutes.</div></div>
+						<div class="event-row-text"><div class="option-title">Missed sales, on the dashboard</div><div class="option-desc">A badge and a card when a paid order wasn't sent to a connected platform within 10 minutes.</div></div>
 						<label class="switch"><input type="checkbox" role="switch" checked><span class="switch-track"></span><span class="sr-only">Missed sales on the dashboard</span></label>
 					</div>
 
-					<div class="card-row">
-						<div class="event-row-text"><div class="option-title">Missed sales, by email <span class="pro-badge" data-when="plan=free"><span data-icon="pui-crown"></span>PRO</span></div><div class="option-desc">One email per platform per day at most. Order numbers only.</div></div>
-						<label class="switch" data-when="plan=pro"><input type="checkbox" role="switch" checked><span class="switch-track"></span><span class="sr-only">Missed sales by email</span></label>
-						<a class="crown-link" href="#plan" data-when="plan=free"><span data-icon="pui-crown"></span>Upgrade</a>
-					</div>
+					<template data-v31>
+						<div class="card-row">
+							<div class="event-row-text"><div class="option-title">Missed sales, by email <span class="pro-badge" data-when="plan=free"><span data-icon="pui-crown"></span>PRO</span></div><div class="option-desc">One email per platform per day at most. Order numbers only.</div></div>
+							<label class="switch" data-when="plan=pro"><input type="checkbox" role="switch" checked><span class="switch-track"></span><span class="sr-only">Missed sales by email</span></label>
+							<a class="crown-link" href="#plan" data-when="plan=free"><span data-icon="pui-crown"></span>Upgrade</a>
+						</div>
 
-					<div class="card-row">
-						<div class="event-row-text"><div class="option-title">Daily digest instead of one email per incident <span class="pro-badge" data-when="plan=free"><span data-icon="pui-crown"></span>PRO</span></div><div class="option-desc">One email at 09:00 with everything missed yesterday.</div></div>
-						<label class="switch" data-when="plan=pro"><input type="checkbox" role="switch"><span class="switch-track"></span><span class="sr-only">Daily digest</span></label>
-						<a class="crown-link" href="#plan" data-when="plan=free"><span data-icon="pui-crown"></span>Upgrade</a>
-					</div>
+						<div class="card-row">
+							<div class="event-row-text"><div class="option-title">Daily digest instead of one email per incident <span class="pro-badge" data-when="plan=free"><span data-icon="pui-crown"></span>PRO</span></div><div class="option-desc">One email at 09:00 with everything missed yesterday.</div></div>
+							<label class="switch" data-when="plan=pro"><input type="checkbox" role="switch"><span class="switch-track"></span><span class="sr-only">Daily digest</span></label>
+							<a class="crown-link" href="#plan" data-when="plan=free"><span data-icon="pui-crown"></span>Upgrade</a>
+						</div>
 
-					<div class="card-row">
-						<div class="event-row-text"><div class="option-title">Weekly health email <span class="pro-badge" data-when="plan=free"><span data-icon="pui-crown"></span>PRO</span></div><div class="option-desc">Monday morning: purchases tracked per platform, missed count, Doctor summary. <a href="email-weekly.html">Preview</a></div></div>
-						<label class="switch" data-when="plan=pro"><input type="checkbox" role="switch" checked><span class="switch-track"></span><span class="sr-only">Weekly health email</span></label>
-						<a class="crown-link" href="#plan" data-when="plan=free"><span data-icon="pui-crown"></span>Upgrade</a>
-					</div>
+						<div class="card-row">
+							<div class="event-row-text"><div class="option-title">Weekly health email <span class="pro-badge" data-when="plan=free"><span data-icon="pui-crown"></span>PRO</span></div><div class="option-desc">Monday morning: purchases tracked per platform, missed count, Doctor summary. <a href="email-weekly.html">Preview</a></div></div>
+							<label class="switch" data-when="plan=pro"><input type="checkbox" role="switch" checked><span class="switch-track"></span><span class="sr-only">Weekly health email</span></label>
+							<a class="crown-link" href="#plan" data-when="plan=free"><span data-icon="pui-crown"></span>Upgrade</a>
+						</div>
+					</template>
 
 					<div class="card-row">
 						<div class="event-row-text"><div class="option-title">Doctor found something new</div><div class="option-desc">After a plugin is activated, a quiet re-check. Dashboard only, never a popup.</div></div>
 						<label class="switch"><input type="checkbox" role="switch" checked><span class="switch-track"></span><span class="sr-only">Doctor found something new</span></label>
 					</div>
 
-					<div class="card-row is-stacked" data-when="plan=pro">
-						<div class="field">
-							<label for="alert-email">Send emails to</label>
-							<input type="email" id="alert-email" value="owner@example.com" autocomplete="email">
+					<template data-v31>
+						<div class="card-row is-stacked" data-when="plan=pro">
+							<div class="field">
+								<label for="alert-email">Send emails to</label>
+								<input type="email" id="alert-email" value="owner@example.com" autocomplete="email">
+							</div>
+							<div><button type="button" class="btn outline" data-send-test><span data-icon="send"></span>Send a test</button></div>
 						</div>
-						<div><button type="button" class="btn outline" data-send-test><span data-icon="send"></span>Send a test</button></div>
-					</div>
+					</template>
 				</div>
 				<div class="card-foot end"><button type="button" class="btn primary" data-toast="Alert settings saved.">Save settings</button></div>
 			</section>
@@ -107,7 +111,8 @@
 						<ul class="feature-list">
 							<li><span data-icon="check"></span>Microsoft Advertising</li>
 							<li><span data-icon="check"></span><a href="catalog.html">Meta catalog feed</a></li>
-							<li><span data-icon="check"></span>Missed-sale emails and a weekly health email</li>
+							<li><span data-icon="check"></span>More than one Meta pixel</li>
+							<template data-v31><li><span data-icon="check"></span>Missed-sale emails and a weekly health email</li></template>
 						</ul>
 					</div>
 				</aside>
@@ -119,15 +124,16 @@
 					<fieldset class="check-list">
 						<legend>Roles that can manage tracking</legend>
 						<label class="check"><input type="checkbox" checked disabled><span>Administrator<span class="check-desc">Always has access.</span></span></label>
-						<label class="check"><input type="checkbox" name="access-role[]" value="shop_manager" checked><span>Shop manager</span></label>
-						<label class="check"><input type="checkbox" name="access-role[]" value="editor"><span>Editor</span></label>
-						<label class="check"><input type="checkbox" name="access-role[]" value="author"><span>Author</span></label>
-						<label class="check"><input type="checkbox" name="access-role[]" value="contributor"><span>Contributor</span></label>
-						<label class="check"><input type="checkbox" name="access-role[]" value="subscriber"><span>Subscriber</span></label>
-						<label class="check"><input type="checkbox" name="access-role[]" value="customer"><span>Customer</span></label>
-						<label class="check"><input type="checkbox" name="access-role[]" value="seller"><span>Vendor<span class="check-desc">Added by Dokan.</span></span></label>
+						<label class="check"><input type="checkbox" name="access-role[]" value="shop_manager" data-role="Shop manager" data-carried><span>Shop manager<span class="check-desc" data-when="install=upgrade">Had access before the update.</span></span></label>
+						<label class="check"><input type="checkbox" name="access-role[]" value="editor" data-role="Editor"><span>Editor</span></label>
+						<label class="check"><input type="checkbox" name="access-role[]" value="author" data-role="Author"><span>Author</span></label>
+						<label class="check"><input type="checkbox" name="access-role[]" value="contributor" data-role="Contributor"><span>Contributor</span></label>
+						<label class="check"><input type="checkbox" name="access-role[]" value="subscriber" data-role="Subscriber" data-outside><span>Subscriber</span></label>
+						<label class="check"><input type="checkbox" name="access-role[]" value="customer" data-role="Customer" data-outside><span>Customer</span></label>
+						<label class="check"><input type="checkbox" name="access-role[]" value="seller" data-role="Vendor" data-outside><span>Vendor<span class="check-desc">Added by Dokan.</span></span></label>
 					</fieldset>
-					<p class="small muted">People with these roles see Conversion Tracking under WooCommerce and can change every setting in it. They can't install plugins or edit other parts of your site.</p>
+					<p class="small muted" data-when="install!=upgrade">Only administrators have access until you tick a role. People with a ticked role see Conversion Tracking under WooCommerce and can change every setting in it. They can't install plugins or edit other parts of your site.</p>
+					<p class="small muted" data-when="install=upgrade">The roles that had access before the update still have it. People with a ticked role see Conversion Tracking under WooCommerce and can change every setting in it. They can't install plugins or edit other parts of your site.</p>
 				</div>
 				<aside class="help" aria-label="Help">
 					<div>
@@ -142,6 +148,22 @@
 				<button type="button" class="btn primary push" data-save disabled>Saved</button>
 			</div>
 		</section>
+
+		<dialog class="dialog" id="role-dialog" aria-labelledby="role-dialog-title" aria-describedby="role-dialog-text">
+			<form method="dialog">
+				<div class="dialog-body">
+					<h2 class="dialog-title" id="role-dialog-title">Give <span data-role-name>Editor</span> access to Conversion Tracking?</h2>
+					<div id="role-dialog-text" class="stack-sm">
+						<p class="dialog-text">People with this role can change every tracking setting, including custom scripts that run on every page of your store. Only give access to people you trust with your site.</p>
+						<p class="dialog-text" data-role-outside hidden>This role usually belongs to people outside your business.</p>
+					</div>
+				</div>
+				<div class="dialog-foot">
+					<button type="submit" class="btn secondary" value="cancel">Cancel</button>
+					<button type="submit" class="btn primary" value="give">Give access</button>
+				</div>
+			</form>
+		</dialog>
 
 			<section class="card is-clip" id="plan" data-settings-panel aria-labelledby="tiers-title">
 				<div class="detail-head">
@@ -168,22 +190,26 @@
 					</div>
 					<div class="tier">
 						<div class="tier-name">Pro <span class="pro-badge"><span data-icon="pui-crown"></span>PRO</span></div>
-						<div class="tier-sub">Control and peace of mind</div>
+						<div class="tier-sub">Everything in Free, plus</div>
 						<ul class="feature-list">
-							<li><span data-icon="check"></span>Everything in Free</li>
 							<li><span data-icon="check"></span>Microsoft Advertising</li>
 							<li><span data-icon="check"></span>More than one Meta pixel, each with its own events</li>
 							<li><span data-icon="check"></span>Richer customer matching, Enhanced conversions</li>
-							<li><span data-icon="check"></span>Activity log kept 30 days (up to 90), search, export</li>
-							<li><span data-icon="check"></span>Missed-sale emails, weekly health email</li>
+							<li><span data-icon="check"></span>Extra events: View category, Add to wishlist, Registration</li>
+							<li><span data-icon="check"></span>Custom parameters on any event</li>
 							<li><span data-icon="check"></span><a href="catalog.html">Meta catalog feed</a></li>
 							<li><span data-icon="check"></span><a href="#access">Choose which roles can manage tracking</a></li>
+							<template data-v31>
+								<li><span data-icon="check"></span>Activity log kept 30 days (up to 90), search, export</li>
+								<li><span data-icon="check"></span>Missed-sale emails, weekly health email</li>
+								<li><span data-icon="check"></span>Refunds sent to Analytics</li>
+							</template>
 						</ul>
 						<div class="stack-sm" data-when="plan=free">
 							<a class="btn pro" href="#">Upgrade to Pro<span data-icon="pui-crown"></span></a>
-							<p class="xsmall muted">[PRICE] per year. 14-day refund. Free keeps working if you don't.</p>
+							<p class="xsmall muted"><span class="ph">[PRICE]</span> per year, 14-day money-back guarantee. Free keeps working if you don't.</p>
 						</div>
-						<span class="pill ok" data-when="plan=pro">Active until [DATE]</span>
+						<span class="pill ok" data-when="plan=pro">Active until <span class="ph">[DATE]</span></span>
 					</div>
 				</div>
 			</section>

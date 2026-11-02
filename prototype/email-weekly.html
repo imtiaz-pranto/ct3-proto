@@ -11,45 +11,49 @@
 <body data-page="email-weekly" data-shell="none">
 <main class="email-preview" id="wcct-app">
 
-	<div class="email-envelope">
-		<p class="email-meta"><span>From: Conversion Tracking (store.example.com)</span><span>Mon 09:00</span></p>
-		<p class="email-subject"><b>Subject:</b> 142 purchases tracked this week, 3 missed on Meta</p>
-	</div>
+	<template data-v30><p class="email-meta">This screen isn't part of this version. <a href="index.html">Back to the dashboard</a></p></template>
 
-	<article class="email" aria-label="Email body">
-		<header class="email-head">
-			<span class="brand-mark"><span data-icon="activity"></span></span>
-			<span class="strong">Conversion Tracking</span>
-			<span class="email-range">Weekly health, Oct 13 to 19</span>
-		</header>
-
-		<div class="email-body">
-			<div>
-				<p class="email-hero">142</p>
-				<p class="email-hero-sub">purchases tracked this week on store.example.com. <b>Everything is healthy</b>, with one thing worth a look.</p>
-			</div>
-
-			<section aria-labelledby="reached-title">
-				<h1 class="email-section" id="reached-title">Purchases reached</h1>
-				<div class="email-bar-row"><span>Meta</span><span class="email-bar"><span class="email-bar-fill w-98"></span></span><span class="email-bar-num">139 of 142</span></div>
-				<div class="email-bar-row"><span>Google Analytics</span><span class="email-bar"><span class="email-bar-fill w-100"></span></span><span class="email-bar-num">142 of 142</span></div>
-				<div class="email-bar-row"><span>Google Ads</span><span class="email-bar"><span class="email-bar-fill w-100"></span></span><span class="email-bar-num">142 of 142</span></div>
-				<div class="email-bar-row"><span>X</span><span class="email-bar"><span class="email-bar-fill w-100"></span></span><span class="email-bar-num">142 of 142</span></div>
-			</section>
-
-			<div class="email-callout">
-				<span class="pill warn">Worth a look</span>
-				<p><b>3 purchases didn't reach Meta.</b> Orders #1311, #1298, #1287. The pixel never fired for those visitors, most likely an ad blocker. <a href="log.html">See the orders</a></p>
-			</div>
-
-			<p class="row small"><span class="pill ok">Doctor</span><span>Weekly check ran Monday 09:00. 11 of 11 checks passed.</span></p>
-			<p class="row small"><span class="pill ok">Cookie choices</span><span>Respected. 61% of EU visitors allowed marketing cookies.</span></p>
-
-			<div><a class="btn primary lg" href="index.html">Open the dashboard</a></div>
-
-			<p class="email-foot">You get this because the weekly health email is on in Conversion Tracking Pro. Order numbers only, no customer details. <a href="settings.html#alerts">Change what you receive</a> or <a href="settings.html#alerts">turn it off</a>.</p>
+	<template data-v31>
+		<div class="email-envelope">
+			<p class="email-meta"><span>From: Conversion Tracking (store.example.com)</span><span>Mon 09:00</span></p>
+			<p class="email-subject"><b>Subject:</b> 142 purchases tracked this week, 3 missed on Meta</p>
 		</div>
-	</article>
+
+		<article class="email" aria-label="Email body">
+			<header class="email-head">
+				<span class="brand-mark"><span data-icon="activity"></span></span>
+				<span class="strong">Conversion Tracking</span>
+				<span class="email-range">Weekly health, Oct 13 to 19</span>
+			</header>
+
+			<div class="email-body">
+				<div>
+					<p class="email-hero">142</p>
+					<p class="email-hero-sub">purchases tracked this week on store.example.com. <b>Everything is healthy</b>, with one thing worth a look.</p>
+				</div>
+
+				<section aria-labelledby="reached-title">
+					<h1 class="email-section" id="reached-title">Purchases reached</h1>
+					<div class="email-bar-row"><span>Meta</span><span class="email-bar"><span class="email-bar-fill w-98"></span></span><span class="email-bar-num">139 of 142</span></div>
+					<div class="email-bar-row"><span>Google Analytics</span><span class="email-bar"><span class="email-bar-fill w-100"></span></span><span class="email-bar-num">142 of 142</span></div>
+					<div class="email-bar-row"><span>Google Ads</span><span class="email-bar"><span class="email-bar-fill w-100"></span></span><span class="email-bar-num">142 of 142</span></div>
+					<div class="email-bar-row"><span>X</span><span class="email-bar"><span class="email-bar-fill w-100"></span></span><span class="email-bar-num">142 of 142</span></div>
+				</section>
+
+				<div class="email-callout">
+					<span class="pill warn">Worth a look</span>
+					<p><b>3 purchases didn't reach Meta.</b> Orders #1311, #1298, #1287. The pixel never fired for those visitors, most likely an ad blocker. <a href="log.html">See the orders</a></p>
+				</div>
+
+				<p class="row small"><span class="pill ok">Doctor</span><span>Weekly check ran Monday 09:00. 11 of 11 checks passed.</span></p>
+				<p class="row small"><span class="pill ok">Cookie choices</span><span>Respected. 61% of EU visitors allowed marketing cookies.</span></p>
+
+				<div><a class="btn primary lg" href="index.html">Open the dashboard</a></div>
+
+				<p class="email-foot">You get this because the weekly health email is on in Conversion Tracking Pro. Order numbers only, no customer details. <a href="settings.html#alerts">Change what you receive</a> or <a href="settings.html#alerts">turn it off</a>.</p>
+			</div>
+		</article>
+	</template>
 
 </main>
 <script src="assets/icons.js"></script>

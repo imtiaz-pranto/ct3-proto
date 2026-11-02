@@ -28,6 +28,12 @@ async function check(name, fn) {
 function expect(cond, msg) { if (!cond) throw new Error(msg); }
 const visible = (page, sel) => page.locator(sel).first().isVisible();
 const st = (page, key, val) => page.evaluate(([k, v]) => window.WCCT_PROTO.setState(k, v), [key, val]);
+// Version is stamped at load, so changing it reloads the page.
+async function setVersion(page, v) {
+	await Promise.all([page.waitForEvent('load'), st(page, 'version', v).catch(() => {})]);
+}
+const onb = (page, step) => page.goto(url('onboarding') + (step ? `?step=${step}` : ''));
+const shownStep = (page) => page.$eval('[data-onb-step]:not([hidden])', (s) => s.getAttribute('data-onb-step'));
 
 const { page } = await fresh();
 
@@ -38,46 +44,139 @@ await check('State bar: Plan Pro persists across pages (localStorage)', async ()
 	await page.click('[data-state-key="plan"][data-state-val="pro"]');
 	await page.click('#proto-state summary');
 	await page.waitForTimeout(100); // the details toggle event that stores "closed" is async
-	await page.goto(url('log'));
-	expect(await visible(page, '#log-search'), 'Pro search not shown after navigating');
+	await page.goto(url('platforms-microsoft'));
+	expect(await visible(page, '#uet-id'), 'Pro UET field not shown after navigating');
 	await page.goto(url('index'));
 	await st(page, 'plan', 'free');
 });
 
-await check('Dashboard: Install New shows welcome banner and hides stats', async () => {
+await check('Dashboard: Install New shows the setup checklist and hides stats', async () => {
 	await page.goto(url('index'));
+	await st(page, 'onbAt', '1');
 	await st(page, 'install', 'new');
 	expect(await visible(page, '#welcome-title'), 'welcome missing');
+	expect((await page.textContent('[data-onb-continue]')).trim() === 'Continue setup', 'Continue setup missing');
 	expect(!(await visible(page, '.stat-grid')), 'stats still shown');
 	await st(page, 'install', 'upgrade');
 	expect(await page.getByText('Updated to 3.0.').isVisible(), 'upgrade banner missing');
 	await st(page, 'install', 'working');
+	await st(page, 'onbAt', '0');
 });
 
-await check('Dashboard: Doctor ran / not run', async () => {
+await check('Dashboard: Doctor ran / not run / quiet re-check after a plugin is activated', async () => {
 	await st(page, 'doctor', 'not');
 	expect(await page.getByRole('link', { name: 'Check my store' }).first().isVisible(), 'invite missing');
+	await st(page, 'doctor', 'plugin');
+	expect(await page.getByText('1 new thing worth a look').isVisible() && (await page.locator('dialog[open]').count()) === 0, 'plugin re-check card missing, or a popup opened');
 	await st(page, 'doctor', 'ran');
-	expect(await page.getByText('2 things worth a look').isVisible(), 'ran state missing');
+	expect(await page.getByText('3 things worth a look').isVisible(), 'ran state missing');
+});
+
+await check('Dashboard 3.0: missed-sale card offers only 3.0 actions', async () => {
+	const links = await page.locator('[aria-label="Missed sales"] a:visible').evaluateAll((a) => a.map((l) => `${l.textContent.trim()} -> ${l.getAttribute('href')}`));
+	expect(links.join('; ') === 'Open the orders in the Activity log -> log.html?tab=missed; Check cookie choices -> platforms.html#cookie-choices; Run the Doctor -> doctor.html', links.join('; '));
+	await page.click('text=Open the orders in the Activity log');
+	expect((await page.getAttribute('[data-log-tab="missed"]', 'aria-selected')) === 'true' && (await page.textContent('[data-log-detail]')).includes('Order #1311'), 'missed tab or order not opened');
 });
 
 await check('Dashboard: filter chips', async () => {
+	await page.goto(url('index'));
 	await page.click('[data-filter="attention"]');
 	expect(await page.locator('[data-platform-status]:visible').count() === 1, 'attention filter');
 	await page.click('[data-filter="all"]');
 	expect(await page.locator('[data-platform-status]:visible').count() === 3, 'all filter');
 });
 
-await check('Pick platforms: count updates as tiles toggle', async () => {
-	await page.goto(url('pick-platforms'));
+await check('Onboarding: Install New opens the wizard; 6-step indicator; opt-in off; What\'s shared', async () => {
+	await page.goto(url('index'));
+	await st(page, 'install', 'new');
+	await page.goto(url('index'));
+	await page.waitForURL(/onboarding\.html/);
+	expect((await page.locator('.topbar-steps .step').allTextContents()).join(',') === '1Welcome,2Platforms,3Connect,4Europe,5Verify,6Done', 'step indicator');
+	expect((await shownStep(page)) === '1' && (await page.getAttribute('[data-step-dot="1"]', 'aria-current')) === 'step', 'not on step 1');
+	expect(await page.getByText('about 3 minutes').isVisible(), 'about 3 minutes missing');
+	expect(!(await page.isChecked('#onb-usage')), 'usage opt-in should start off');
+	expect(!(await visible(page, '#onb-shared')), 'shared list should start closed');
+	await page.click('[data-onb-shared]');
+	expect(await visible(page, '#onb-shared') && (await page.locator('#onb-shared li').count()) === 4, 'shared list did not open');
+	for (const n of [1, 2, 3, 4, 5]) expect(await page.locator(`[data-onb-step="${n}"] [data-onb-skip]`).count() === 1, `step ${n} has no Skip for now`);
+	expect((await page.locator('.wcct-app .upgrade-card, .wcct-app .crown-link, .wcct-app a[href*="#plan"]').count()) === 0, 'upsell inside onboarding');
+});
+
+await check('Onboarding: pick platforms multi-select, Microsoft PRO but not pushed', async () => {
+	await page.click('[data-onb-step="1"] [data-onb-next]');
+	expect((await shownStep(page)) === '2', 'Start did not open step 2');
+	expect((await page.textContent('[data-pick-count]')) === '2 selected.', 'default pick');
 	await page.click('[data-platform="x"]');
-	expect((await page.textContent('[data-pick-count]')).startsWith('3 selected'), 'count not 3');
+	expect((await page.textContent('[data-pick-count]')) === '3 selected.', 'count not 3');
 	await page.click('[data-platform="meta"]');
 	await page.click('[data-platform="google"]');
 	await page.click('[data-platform="x"]');
-	expect((await page.textContent('[data-pick-count]')).startsWith('Nothing selected'), 'count not 0');
-	await page.click('[data-platform="google"]');
-	expect((await page.getAttribute('[data-pick-continue]', 'href')) === 'platforms-google.html', 'continue link');
+	expect((await page.textContent('[data-pick-count]')).startsWith('Nothing selected') && await page.isDisabled('[data-pick-continue]'), 'empty pick should block Continue');
+	expect(await page.locator('[data-platform="microsoft"] .pro-badge').isVisible(), 'Microsoft PRO badge missing');
+	for (const p of ['meta', 'google', 'microsoft']) await page.click(`[data-platform="${p}"]`);
+	expect((await page.textContent('[data-pick-count]')) === '3 selected.', 'count after re-pick');
+});
+
+await check('Onboarding: Connect shows one panel per pick, validates as you type, no Advanced settings', async () => {
+	await page.click('[data-onb-step="2"] [data-onb-next]');
+	const panels = await page.locator('[data-onb-panel]:visible').evaluateAll((p) => p.map((e) => e.dataset.onbPanel));
+	expect(panels.join(',') === 'meta,google,microsoft', 'panels: ' + panels.join(','));
+	expect(await page.getByText('Microsoft Advertising is part of Pro, so we\'ll leave it out of setup.').isVisible(), 'Free Microsoft note');
+	expect((await page.locator('[data-onb-step="3"] .advanced-settings').count()) === 0, 'Advanced settings shown in onboarding');
+	expect((await page.textContent('[data-onb-events="meta"]')).includes('Purchase'), 'recommended preset line missing');
+	expect(await page.isDisabled('[data-onb-connect-next]'), 'Continue should wait for a valid ID');
+	await page.fill('#onb-meta-id', 'EAA123');
+	expect(await visible(page, '#onb-meta-bad'), 'bad hint missing');
+	await page.fill('#onb-meta-id', '1234567890123456');
+	expect(await visible(page, '#onb-meta-good') && !(await page.isDisabled('[data-onb-connect-next]')), 'valid Pixel ID not accepted');
+	expect((await page.textContent('[data-onb-panel="meta"] [data-onb-status]')) === 'Looks right', 'Meta pill');
+	await page.fill('#onb-ga-id', 'G-7KQ2M9PX3L');
+	await page.fill('#onb-aw-label', 'AbC');
+	expect(await visible(page, '#onb-label-bad') && (await page.textContent('[data-onb-panel="google"] [data-onb-status]')) === 'Not connected', 'short label should fail');
+	await page.fill('#onb-aw-label', '');
+	expect((await page.textContent('[data-onb-panel="google"] [data-onb-status]')) === 'Looks right', 'Google should pass without the optional Ads fields');
+});
+
+await check('Onboarding: skip lands on the Dashboard checklist; Continue setup resumes', async () => {
+	await page.click('[data-onb-step="3"] [data-onb-next]');
+	expect((await shownStep(page)) === '4', 'not on step 4');
+	await page.click('[data-onb-step="4"] [data-onb-skip]');
+	await page.waitForURL(/index\.html/);
+	expect(await visible(page, '#welcome-title'), 'dashboard welcome missing after skip');
+	const items = await page.locator('[data-onb-checklist] li').evaluateAll((li) => li.map((l) => (l.querySelector('.is-done') ? 'done ' : 'open ') + l.textContent.replace(', done', '').trim()));
+	expect(items.join('; ') === 'done Plugin installed; done Pick where you run ads; done Connect your platforms, about 3 minutes; open Tell us if you sell to Europe; open See the first event arrive', items.join('; '));
+	await page.click('[data-onb-continue]');
+	await page.waitForURL(/onboarding\.html/);
+	expect((await shownStep(page)) === '4', 'Continue setup did not resume at step 4');
+});
+
+await check('Onboarding: Europe Yes turns on cookie choices with the consent note; No leaves it off', async () => {
+	expect(await page.isDisabled('[data-onb-eu-next]'), 'Continue should wait for an answer');
+	await page.click('label:has([data-onb-eu][value="yes"])');
+	expect(await visible(page, '[data-onb-eu-note="yes"]') && !(await visible(page, '[data-onb-eu-note="no"]')), 'Yes note');
+	expect((await page.textContent('[data-onb-eu-note="yes"]')).includes('Respect cookie choices is on') && (await page.textContent('[data-onb-eu-note="yes"]')).includes('consent plugin'), 'consent plugin note');
+	await page.click('label:has([data-onb-eu][value="no"])');
+	expect(await visible(page, '[data-onb-eu-note="no"]') && !(await visible(page, '[data-onb-eu-note="yes"]')), 'No note');
+	expect((await page.evaluate(() => window.WCCT_PROTO.state.eu)) === 'no', 'eu not saved as no');
+	await page.click('label:has([data-onb-eu][value="yes"])');
+	expect((await page.evaluate(() => window.WCCT_PROTO.state.eu)) === 'yes', 'eu not saved as yes');
+});
+
+await check('Onboarding: Verify waits, Simulate first event turns each platform green; Done; Go to dashboard', async () => {
+	await page.click('[data-onb-step="4"] [data-onb-next]');
+	expect((await page.locator('[data-onb-verify-row]').count()) === 2 && (await page.locator('.onb-verify-row.is-ok').count()) === 0, 'waiting rows');
+	expect(await page.isDisabled('[data-onb-verify-next]'), 'Continue before the first event');
+	expect(await page.$eval('[data-onb-simulate]', (b) => !!b.closest('.proto-action') && getComputedStyle(b.closest('.proto-action')).backgroundColor === 'rgb(29, 35, 39)'), 'Simulate is not styled as prototype UI');
+	await page.click('[data-onb-simulate]');
+	await page.waitForTimeout(1000);
+	expect((await page.locator('.onb-verify-row.is-ok').count()) === 2 && !(await page.isDisabled('[data-onb-verify-next]')), 'did not turn green');
+	await page.click('[data-onb-step="5"] [data-onb-next]');
+	const summary = await page.locator('[data-onb-summary] li').allTextContents();
+	expect(summary.join('; ') === 'Meta: sending 4 recommended events; Google: sending 4 recommended events; Respect cookie choices: on; Activity log: recording every order', summary.join('; '));
+	await page.click('[data-onb-finish]');
+	await page.waitForURL(/index\.html/);
+	expect(await visible(page, '.stat-grid') && (await page.evaluate(() => window.WCCT_PROTO.state.install)) === 'working', 'finish should land on the working dashboard');
 });
 
 await check('Platforms: Pause tracking confirm dialog, then Paused', async () => {
@@ -160,20 +259,30 @@ await check('Advanced settings: collapsed, Meta holds the old Advanced options, 
 	expect(await page.locator('[id^="script-"][role="switch"]').count() === 3, 'custom script should have 3 placements');
 });
 
-await check('Log: tabs filter, row click updates detail, Pro search', async () => {
+await check('Log 3.0: order-level, 24 hours, Sent column; tabs and detail; 3.1 adds search, export, retention', async () => {
 	await page.goto(url('log'));
+	expect((await page.textContent('[data-log-col-sent]')) === 'Sent', 'column should read Sent');
+	expect(await page.locator('[data-log-rows] tr').count() === 6 && (await page.locator('[data-log-rows]', { hasText: 'Add to cart' }).count()) === 0, '3.0 log should list orders only');
+	expect((await page.textContent('[data-log-count]')) === '6 orders in the last 24 hours', 'footer: ' + (await page.textContent('[data-log-count]')));
 	await page.click('[data-log-tab="missed"]');
 	expect(await page.locator('[data-log-rows] tr').count() === 1, 'missed tab');
 	await page.click('[data-log-rows] tr');
 	expect((await page.textContent('[data-log-detail]')).includes('Order #1311'), 'detail not updated');
 	await page.click('[data-log-tab="all"]');
 	await st(page, 'plan', 'pro');
-	await page.fill('#log-search', '1306');
-	expect(await page.locator('[data-log-rows] tr').count() === 1, 'search');
+	expect(await visible(page, '[data-log-24h]') && (await page.locator('#log-search, #log-keep').count()) === 0, 'Pro 3.0 should keep 24 hours, with no search or retention');
 	await st(page, 'log', 'empty');
 	expect(await page.getByText('No events yet. Place a test order and come back in a minute.').isVisible(), 'empty state');
 	await st(page, 'log', 'rows');
+	await setVersion(page, '3.1');
+	await page.fill('#log-search', '1306');
+	expect(await page.locator('[data-log-rows] tr').count() === 1 && await visible(page, '#log-keep'), '3.1 search or retention');
+	await st(page, 'server', 'connected');
+	await page.goto(url('log'));
+	expect((await page.textContent('[data-log-col-sent]')) === 'Delivered', '3.1 with the server connected should read Delivered');
+	await st(page, 'server', 'not');
 	await st(page, 'plan', 'free');
+	await setVersion(page, '3.0');
 });
 
 await check('Log at 1024 px: row opens detail dialog', async () => {
@@ -184,14 +293,22 @@ await check('Log at 1024 px: row opens detail dialog', async () => {
 	await context.close();
 });
 
-await check('Settings > Alerts (default panel): switches reflect plan; Send a test shows a toast', async () => {
+await check('Settings > Alerts: 3.0 has only the dashboard and Doctor rows; 3.1 adds emails and Send a test', async () => {
 	await page.goto(url('settings'));
 	expect(await visible(page, '#alerts') && !(await visible(page, '#access')) && !(await visible(page, '#plan')), 'Alerts should be the only panel shown by default');
 	expect((await page.getAttribute('[data-settings-link="alerts"]', 'aria-current')) === 'page', 'Alerts not marked current');
-	expect(await page.locator('.crown-link:visible').count() === 3, 'Free should show 3 locked rows');
-	await page.click('.crown-link:visible >> nth=0');
+	const rows = await page.locator('#alerts .option-title').allTextContents();
+	expect(rows.join(',') === 'Missed sales, on the dashboard,Doctor found something new', '3.0 rows: ' + rows.join(','));
+	await page.click('[data-settings-link="plan"]');
 	await page.waitForTimeout(100); // hashchange is async
-	expect(await visible(page, '#plan') && !(await visible(page, '#alerts')), 'Upgrade link should open the Plan panel');
+	const pro = await page.locator('#plan .tier:nth-child(2) .feature-list li').allTextContents();
+	expect(pro.join('; ') === 'Microsoft Advertising; More than one Meta pixel, each with its own events; Richer customer matching, Enhanced conversions; Extra events: View category, Add to wishlist, Registration; Custom parameters on any event; Meta catalog feed; Choose which roles can manage tracking', '3.0 Pro list: ' + pro.join('; '));
+	await page.goto(url('settings'));
+	await setVersion(page, '3.1');
+	expect(await page.locator('.crown-link:visible').count() === 3, '3.1 Free should show 3 locked email rows');
+	await page.click('.crown-link:visible >> nth=0');
+	await page.waitForTimeout(100);
+	expect(await visible(page, '#plan') && await page.getByText('Refunds sent to Analytics').isVisible(), 'Upgrade link should open Plan, with the 3.1 Pro list');
 	await page.click('[data-settings-link="alerts"]');
 	await page.waitForTimeout(100);
 	await st(page, 'plan', 'pro');
@@ -199,30 +316,146 @@ await check('Settings > Alerts (default panel): switches reflect plan; Send a te
 	await page.click('[data-send-test]');
 	await page.waitForSelector('.toast', { timeout: 2000 });
 	await st(page, 'plan', 'free');
+	await setVersion(page, '3.0');
 });
 
-await check('Doctor: 2 findings / all clear; Check again 2 s; Dismiss', async () => {
+await check('Settings > Integration access: new install is admin only; ticking asks first; Cancel leaves it unticked; Give access applies', async () => {
+	await page.goto(url('settings') + '#access');
+	await st(page, 'plan', 'pro');
+	expect((await page.locator('input[data-role]:checked').count()) === 0, 'only Administrator should be ticked on a new install');
+	await page.click('label:has(input[value="editor"])');
+	expect(await visible(page, '#role-dialog'), 'dialog did not open');
+	expect((await page.textContent('#role-dialog-title')).trim() === 'Give Editor access to Conversion Tracking?', 'title');
+	expect((await page.textContent('#role-dialog')).includes('custom scripts that run on every page of your store') && !(await visible(page, '[data-role-outside]')), 'body, or outside-line shown for Editor');
+	expect(!(await page.isChecked('input[value="editor"]')), 'box ticked before confirming');
+	await page.click('#role-dialog button[value="cancel"]');
+	await page.waitForTimeout(100);
+	expect(!(await visible(page, '#role-dialog')) && !(await page.isChecked('input[value="editor"]')) && (await page.isDisabled('[data-save]')), 'Cancel should leave Editor unticked and nothing to save');
+	await page.click('label:has(input[value="customer"])');
+	expect(await visible(page, '[data-role-outside]') && (await page.textContent('[data-role-outside]')) === 'This role usually belongs to people outside your business.', 'Customer outside line');
+	await page.keyboard.press('Escape');
+	await page.waitForTimeout(100);
+	expect(!(await page.isChecked('input[value="customer"]')), 'Escape should cancel');
+	await page.click('label:has(input[value="seller"])');
+	expect(await visible(page, '[data-role-outside]'), 'Vendor outside line');
+	await page.click('#role-dialog button[value="give"]');
+	await page.waitForTimeout(100);
+	expect(await page.isChecked('input[value="seller"]') && !(await page.isDisabled('[data-save]')), 'Give access should tick Vendor and enable Save');
+	await page.click('label:has(input[value="seller"])');
+	expect(!(await visible(page, '#role-dialog')) && !(await page.isChecked('input[value="seller"]')), 'unticking should not ask');
+	await page.goto(url('settings') + '#access');
+	await st(page, 'install', 'upgrade');
+	expect(await page.isChecked('input[value="shop_manager"]') && (await page.locator('input[data-role]:checked').count()) === 1, 'upgrade should keep the carried-over Shop manager');
+	await st(page, 'install', 'working');
+	await st(page, 'plan', 'free');
+});
+
+await check('Doctor 3.0: "We checked N things", findings with one action and Dismiss, Working collapsed', async () => {
 	await page.goto(url('doctor'));
-	await page.click('[data-finding-dismiss] >> nth=0');
-	expect((await page.textContent('[data-findings-title]')).includes('1 is worth a look'), 'dismiss count');
-	await page.click('[data-check-again]');
-	expect(await visible(page, '[data-doctor-running]'), 'running state missing');
+	const sub = () => page.textContent('[data-doctor-sub]');
+	expect((await page.textContent('#doctor-head')) === 'We checked 6 things.', 'Free header: ' + (await page.textContent('#doctor-head')));
+	expect((await sub()) === "3 are worth a look and 1 we can't be sure about. Nothing is broken.", 'sub: ' + (await sub()));
+	const titles = await page.locator('[data-finding]:visible .finding-title').allTextContents();
+	expect(titles.join(' | ') === 'Facebook for WooCommerce is also active | Your Google Ads conversion label looks incomplete | Cookie choices are on, but no consent plugin is connected | A Google Tag Manager plugin is active', titles.join(' | '));
+	for (const f of await page.locator('[data-finding]:visible').all()) {
+		expect((await f.locator('.finding-actions .btn').count()) === 1 && (await f.locator('[data-finding-dismiss]').count()) === 1 && (await f.locator('.finding-why').count()) === 1, 'each finding needs one action, Dismiss and one why line');
+	}
+	expect((await page.locator('[data-check="plugins"] .tag').allTextContents()).join(',') === "Meta,Sure it's active,Not sure it sends purchases", 'Sure / Not sure tags');
+	expect((await page.locator('[data-check="gtm"] a.btn').textContent()) === 'How to check', 'GTM how-to-check link');
+	expect(!(await page.$eval('[data-working]', (d) => d.open)) && (await page.textContent('[data-working-count]')) === '2', 'Working should start collapsed with 2 passed');
+	expect(!(await page.getByText(/turn its pixel off for you/).count()), 'no auto-fix offer');
+	await st(page, 'plan', 'pro');
+	expect((await page.textContent('#doctor-head')) === 'We checked 7 things.', 'Pro header');
+	await st(page, 'plan', 'free');
+});
+
+await check('Doctor 3.0: Dismiss with Undo; Check again on the duplicate; Check my store runs 2 s and brings items back', async () => {
+	const sub = () => page.textContent('[data-doctor-sub]');
+	await page.click('[data-check="consent"] [data-finding-dismiss]');
+	expect(!(await visible(page, '[data-check="consent"][data-finding]')) && (await sub()).startsWith('2 are worth a look'), 'dismiss count');
+	await page.click('.toast .link-btn');
+	expect(await visible(page, '[data-check="consent"][data-finding]') && (await sub()).startsWith('3 are'), 'Undo');
+	await page.click('[data-check="plugins"] [data-finding-recheck]');
+	await page.waitForTimeout(1200);
+	expect(!(await visible(page, '[data-check="plugins"][data-finding]')) && (await page.textContent('[data-working-count]')) === '3', 'Check again should move it to Working');
+	expect(await page.$eval('[data-pass][data-check="plugins"]', (p) => !p.hidden), 'pass row missing');
+	await page.click('[data-check="ids"] [data-finding-dismiss]');
+	await page.click('[data-check="consent"] [data-finding-dismiss]');
+	await page.click('[data-check="gtm"] [data-finding-dismiss]');
+	expect(await visible(page, '[data-clean-after-dismiss]') && (await sub()) === 'Everything is working.', 'all dismissed');
+	await page.click('[data-doctor-run]');
+	expect(await visible(page, '[data-doctor-running]') && (await page.textContent('[data-doctor-running]')).includes('Checking 6 things'), 'running state');
 	await page.waitForTimeout(1500);
 	expect(await visible(page, '[data-doctor-running]'), 'running ended before 2 s');
 	await page.waitForTimeout(800);
-	expect(!(await visible(page, '[data-doctor-running]')) && (await page.textContent('[data-findings-title]')).includes('2 are'), 'results not back');
+	expect(!(await visible(page, '[data-doctor-running]')) && (await sub()).startsWith('3 are'), 'results not back');
 	await st(page, 'doctorResult', 'clear');
-	expect(await page.getByText('Everything looks good').isVisible(), 'all clear');
+	expect((await sub()) === 'Everything is working.' && (await page.textContent('[data-working-count]')) === '6', 'all clear');
 	await st(page, 'doctorResult', 'findings');
 });
 
-await check("What's new: Free / Pro / old Pro detected", async () => {
+await check('Doctor 3.1: keeps the extended checks, with self-fix steps and Check again', async () => {
+	await page.goto(url('doctor'));
+	await setVersion(page, '3.1');
+	expect(await page.getByText('No second Meta pixel found in your theme or header').isVisible() && await page.getByText('Your cache plugin serves the cookie script uncached').isVisible(), 'loopback checks missing');
+	expect(await page.getByText('We sent each of your last 50 purchases once').isVisible(), 'honest duplicate wording');
+	expect((await page.locator('[data-finding] .finding-steps').count()) === 1 && (await page.locator('[data-finding-recheck]').count()) === 1, 'self-fix steps / Check again');
+	await page.click('[data-finding-dismiss] >> nth=0');
+	expect((await page.textContent('[data-findings-title]')).includes('1 is worth a look'), '3.1 dismiss count');
+	await setVersion(page, '3.0');
+});
+
+await check("What's new: Free / Pro / old Pro detected; previous settings download", async () => {
 	await page.goto(url('whats-new'));
 	await st(page, 'oldPro', 'yes');
 	expect(await page.getByText('Conversion Tracking Pro 1.1.4 is installed but paused.').isVisible(), 'old pro');
 	await st(page, 'oldPro', 'no');
 	await st(page, 'plan', 'pro');
-	expect(await page.getByText('Pro 3.0 is active.').isVisible(), 'pro');
+	expect(await page.getByText('Pro 3.0 is active.').isVisible() && !(await page.getByText('missed-sale emails').count()), 'pro, without 3.1 emails');
+	await st(page, 'plan', 'free');
+	expect(await page.getByRole('button', { name: 'Download your previous settings (JSON)' }).isVisible(), 'download missing');
+	expect(await page.getByText('Saved before the update. Your old settings are also kept, so you can go back to the previous version if you need to.').isVisible(), 'download line');
+});
+
+await check('Migration: state only when Upgraded; Done / In progress 45% / Needs attention', async () => {
+	await page.goto(url('whats-new'));
+	await page.click('#proto-state summary');
+	expect((await page.locator('[data-state-key="migration"]').count()) === 0, 'Migration state shown when not Upgraded');
+	await st(page, 'install', 'upgrade');
+	expect((await page.locator('[data-state-key="migration"]').count()) === 3, 'Migration state missing when Upgraded');
+	await page.click('#proto-state summary');
+	await st(page, 'migration', 'done');
+	expect(await page.getByText('Everything carried over').isVisible() && !(await visible(page, 'progress')), 'done');
+	await st(page, 'migration', 'progress');
+	expect(await page.getByText('Updating your order history in the background, 45%').isVisible() && await page.getByText('Tracking keeps running. No action needed.').isVisible(), 'progress text');
+	expect(await page.$eval('progress', (p) => p.value === 45 && p.max === 100) && !(await page.locator('[data-when*="migration=progress"] .btn').count()), 'progress bar, no action');
+	await st(page, 'migration', 'attention');
+	const items = await page.locator('[data-when*="migration=attention"] .step-row').evaluateAll((r) => r.map((e) => e.querySelector('b').textContent + ' -> ' + e.querySelector('a').getAttribute('href')));
+	expect(items.join('; ') === 'We split your Google Ads ID into a conversion ID and a label. -> platforms-google.html; X retired the old event codes. -> platforms-x.html', items.join('; '));
+	expect(!(await page.getByText('placeholder').count()), 'custom script placeholder item should be omitted');
+	await page.goto(url('index'));
+	expect(await page.locator('[data-platform-status="warn"]:visible', { hasText: 'X retired' }).count() === 1, 'dashboard X card with attention');
+	await st(page, 'migration', 'done');
+	expect(await page.locator('[data-platform-status]:visible', { hasText: 'X retired' }).count() === 0, 'dashboard X card should clear when done');
+	await st(page, 'migration', 'attention');
+	await st(page, 'install', 'working');
+});
+
+await check('After an upgrade: carried-over events show Custom; feed URL line; Google split notice', async () => {
+	await page.goto(url('platforms'));
+	await st(page, 'install', 'upgrade');
+	const t = '[data-events="meta"]';
+	expect((await page.getAttribute(`${t} [aria-pressed="true"]`, 'data-ev-preset')) === 'custom', 'Meta preset should be Custom');
+	expect(await page.isChecked(`${t} [data-ev-toggle="search"]`) && !(await page.isChecked(`${t} [data-ev-toggle="checkout"]`)), 'carried events not applied');
+	await page.goto(url('platforms-x'));
+	expect((await page.getAttribute('[data-events="x"] [aria-pressed="true"]', 'data-ev-preset')) === 'rec', 'X matches Recommended');
+	await page.goto(url('platforms-google'));
+	expect(await page.getByText('We split your Google Ads ID into a conversion ID and a label').isVisible(), 'Google split notice');
+	await page.goto(url('catalog'));
+	await st(page, 'plan', 'pro');
+	expect((await page.textContent('#feed-url')).endsWith('?action=wcct-product-export') && await page.getByText('Same URL as before, so Meta keeps fetching it.').isVisible(), 'feed URL line');
+	await st(page, 'install', 'working');
+	expect(!(await page.getByText('Same URL as before').isVisible()), 'feed line only after an upgrade');
 	await st(page, 'plan', 'free');
 });
 
@@ -279,12 +512,12 @@ await check('Catalog: Free lock; Pro feed, copy, category search, ID mismatch wa
 	await page.selectOption('[data-feed-id-type]', 'sku');
 	expect(await visible(page, 'p[data-id-match="no"]') && !(await visible(page, 'p[data-id-match="yes"]')), 'mismatch warning missing');
 	await page.goto(url('doctor'));
-	expect(await page.getByText('Your feed and your pixel use different product IDs').isVisible(), 'Doctor mismatch finding missing');
+	expect(await page.getByText('Your catalog feed and your Meta pixel use different product IDs').isVisible(), 'Doctor mismatch finding missing');
 	await page.goto(url('catalog'));
 	await page.selectOption('[data-feed-id-type]', 'id');
 	await page.goto(url('doctor'));
-	expect(await page.getByText('Catalog feed product IDs match the product IDs your Meta pixel sends').isVisible(), 'Doctor match check missing');
-	expect(await page.getByText('Catalog feed is reachable').isVisible(), 'Doctor reachable check missing');
+	expect(await page.$eval('[data-pass][data-check="ids-match"]', (p) => !p.hidden) && !(await visible(page, '[data-finding][data-check="ids-match"]')), 'Doctor match check missing');
+	expect(!(await page.getByText('Catalog feed is reachable').count()), '3.0 Doctor must not fetch the feed');
 	await page.goto(url('platforms') + '#product-id-sent');
 	expect(await visible(page, '#meta-product-id'), 'link did not open Advanced settings');
 	await st(page, 'plan', 'free');
@@ -306,15 +539,15 @@ await check('Version toggle: Server state only in 3.1; 3.0 shows no server UI', 
 	expect(await visible(page, '[data-state-key="version"][data-state-val="3.0"][aria-pressed="true"]'), 'Version should default to 3.0');
 	expect((await page.locator('[data-state-key="server"]').count()) === 0, 'Server state shown in 3.0');
 	expect((await page.locator('.server, .col-from, .events-note').count()) === 0, 'server UI in 3.0');
-	await page.click('[data-state-key="version"][data-state-val="3.1"]');
+	await Promise.all([page.waitForEvent('load'), page.click('[data-state-key="version"][data-state-val="3.1"]')]);
 	expect(await visible(page, '[data-state-key="server"]'), 'Server state missing in 3.1');
 	await page.click('#proto-state summary');
-	await st(page, 'version', '3.0');
+	await setVersion(page, '3.0');
 });
 
 await check('3.1 Meta: Sent from column, note, connect flow, Free locks, test mode, delivery settings; flag off elsewhere', async () => {
 	await page.goto(url('platforms'));
-	await st(page, 'version', '3.1');
+	await setVersion(page, '3.1');
 	const t = '[data-events="meta"]';
 	expect(await visible(page, `${t} th.col-from`), 'Sent from column missing');
 	expect((await page.textContent(`${t} .events-note`)).includes('Browser tracking always runs. Server sending only adds a second copy, and Meta keeps one.'), 'note line');
@@ -344,7 +577,7 @@ await check('3.1 Meta: Sent from column, note, connect flow, Free locks, test mo
 	}
 	await st(page, 'plan', 'free');
 	await st(page, 'server', 'not');
-	await st(page, 'version', '3.0');
+	await setVersion(page, '3.0');
 });
 
 await check('Layout: full width at 1920 px, Platforms columns 240 / fluid / 320 at 1440 px', async () => {

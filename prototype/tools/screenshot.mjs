@@ -14,7 +14,8 @@ mkdirSync(path.join(out, 'states'), { recursive: true });
 mkdirSync(path.join(out, '1920', 'states'), { recursive: true });
 
 const pages = readdirSync(root).filter((f) => f.endsWith('.html')).map((f) => f.replace('.html', ''));
-const base = { version: '3.0', server: 'not', install: 'working', doctor: 'ran', connection: 'connected', doctorResult: 'findings', log: 'rows', oldPro: 'no' };
+const base = { version: '3.0', server: 'not', install: 'working', doctor: 'ran', connection: 'connected', doctorResult: 'findings', log: 'rows', oldPro: 'no', onbAt: '1' };
+const wizard = { onbPicked: 'meta,google,x,microsoft', onbConnected: 'meta,google,x', eu: 'yes' };
 
 // Extra states worth a look, beyond Free / Pro.
 const extras = [
@@ -31,12 +32,34 @@ const extras = [
 	['settings#access', { plan: 'pro' }, 'settings-access-pro'],
 	['settings#plan', { plan: 'free' }, 'settings-plan-free'],
 	['doctor', { plan: 'pro', feed: 'fail', feedId: 'sku' }, 'doctor-pro-catalog-findings'],
+	// Trimmed 3.0 scope and Phase 2 (2026-10-30).
+	['index', { plan: 'free', install: 'new', onbAt: '4' }, 'index-new-install-checklist'],
+	['index', { plan: 'free', doctor: 'plugin' }, 'index-doctor-plugin-recheck'],
+	['doctor', { plan: 'free' }, 'doctor-30-free-working-open', { prep: (p) => p.click('[data-working] summary') }],
+	['doctor', { plan: 'pro', feedId: 'sku' }, 'doctor-30-pro-ids-differ'],
+	['doctor', { plan: 'pro', version: '3.1' }, 'doctor-31-pro'],
+	['settings#access', { plan: 'pro' }, 'settings-access-role-modal', { prep: (p) => p.click('label:has(input[value="customer"])'), full: false }],
+	['settings#access', { plan: 'pro', install: 'upgrade' }, 'settings-access-pro-upgraded'],
+	['onboarding', { plan: 'free' }, 'onboarding-1-welcome', { prep: (p) => p.click('[data-onb-shared]') }],
+	['onboarding?step=2', { plan: 'free', ...wizard }, 'onboarding-2-platforms'],
+	['onboarding?step=3', { plan: 'free', ...wizard }, 'onboarding-3-connect'],
+	['onboarding?step=4', { plan: 'free', ...wizard }, 'onboarding-4-europe-yes'],
+	['onboarding?step=4', { plan: 'free', ...wizard, eu: 'no' }, 'onboarding-4-europe-no'],
+	['onboarding?step=5', { plan: 'free', ...wizard }, 'onboarding-5-verify-waiting'],
+	['onboarding?step=5', { plan: 'free', ...wizard, verified: 'yes' }, 'onboarding-5-verify-sent'],
+	['onboarding?step=6', { plan: 'free', ...wizard, verified: 'yes' }, 'onboarding-6-done'],
+	['whats-new', { plan: 'free', install: 'upgrade', migration: 'done' }, 'whats-new-migration-done'],
+	['whats-new', { plan: 'free', install: 'upgrade', migration: 'progress' }, 'whats-new-migration-in-progress'],
+	['whats-new', { plan: 'free', install: 'upgrade', migration: 'attention' }, 'whats-new-migration-needs-attention'],
+	['whats-new', { plan: 'pro', install: 'upgrade', migration: 'attention', oldPro: 'yes' }, 'whats-new-migration-old-pro'],
+	['catalog', { plan: 'pro', install: 'upgrade' }, 'catalog-pro-upgraded'],
+	['platforms', { plan: 'free', install: 'upgrade' }, 'platforms-upgraded-custom-preset'],
 ];
 
 const browser = await chromium.launch();
 const problems = [];
 
-async function shoot(name, state, file, width, { full = true, save = true } = {}) {
+async function shoot(name, state, file, width, { full = true, save = true, prep } = {}) {
 	const context = await browser.newContext({ viewport: { width, height: 900 }, deviceScaleFactor: 1 });
 	await context.addInitScript((s) => {
 		window.localStorage.setItem('wcct-proto-v1', JSON.stringify(s));
@@ -44,9 +67,10 @@ async function shoot(name, state, file, width, { full = true, save = true } = {}
 	const page = await context.newPage();
 	page.on('pageerror', (e) => problems.push(`${name} @${width}: JS error ${e.message}`));
 	page.on('console', (m) => { if (m.type() === 'error') problems.push(`${name} @${width}: console ${m.text()}`); });
-	const [pageFile, hash] = name.split('#');
-	await page.goto(pathToFileURL(path.join(root, `${pageFile}.html`)).href + (hash ? `#${hash}` : ''));
+	const [pageFile, rest] = name.split(/(?=[?#])/);
+	await page.goto(pathToFileURL(path.join(root, `${pageFile}.html`)).href + (rest || ''));
 	await page.addStyleTag({ content: '.state-bar{display:none!important}' });
+	if (prep) await prep(page);
 	await page.waitForTimeout(150);
 	const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 	if (overflow > 0) problems.push(`${name} @${width} (${JSON.stringify(state)}): horizontal page scroll ${overflow}px`);
@@ -70,10 +94,10 @@ for (const name of pages) {
 		for (const w of [1024, 1280]) await shoot(name, { plan }, null, w, { save: false });
 	}
 }
-for (const [name, state, file] of extras) {
-	await shoot(name, state, path.join(out, 'states', `${file}.png`), 1440);
-	await shoot(name, state, path.join(out, '1920', 'states', `${file}-1920.png`), 1920);
-	await shoot(name, state, null, 1024, { save: false });
+for (const [name, state, file, opts = {}] of extras) {
+	await shoot(name, state, path.join(out, 'states', `${file}.png`), 1440, opts);
+	await shoot(name, state, path.join(out, '1920', 'states', `${file}-1920.png`), 1920, opts);
+	await shoot(name, state, null, 1024, { ...opts, save: false });
 }
 // 3.1: every page in both plans is checked for errors and scroll; pages with
 // server UI (Meta) are also saved.

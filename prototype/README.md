@@ -12,24 +12,25 @@ Bottom-right, dark, labelled **PROTOTYPE**. It starts collapsed so it never cove
 
 | Control | Options | What it changes |
 |---|---|---|
-| Plan | Free, Pro | Pro badges and locked rows, upgrade cards, Pro-only fields (second pixel, Enhanced conversions, log search and export, alert emails, UET tag), the "Pro 3.0.0" version pill |
-| Install | New, Upgraded, Working | New: dashboard welcome banner with nothing connected. Upgraded: "Updated to 3.0" banner, X re-setup notice on the X page. Working: the normal state |
-| Version | 3.0, 3.1 | 3.0 (default) has no server-side features anywhere. 3.1 adds server sending to platforms whose flag is on in `assets/config.js` (Meta today) |
+| Plan | Free, Pro | Pro badges and locked rows, upgrade cards, Pro-only fields (second pixel, Enhanced conversions, role access, UET tag; in 3.1 also log search and export and alert emails), the "Pro 3.0.0" version pill |
+| Install | New, Upgraded, Working | New: the dashboard opens the onboarding wizard once, then shows the unfinished setup steps with Continue setup. Upgraded: "Updated to 3.0" banner and the Migration state. Working: the normal state |
+| Migration | Done, In progress, Needs attention | Shown only when Install is Upgraded. What's new shows the matching card; Needs attention (default) also drives the X re-setup notice, the Google ID split notice and the dashboard's X card |
+| Version | 3.0, 3.1 | 3.0 (default) is the trimmed 3.0 scope: no server-side features, no emails, no log retention, search or export, no scheduled or storefront Doctor checks, no refunds. 3.1 adds those, plus server sending to platforms whose flag is on in `assets/config.js` (Meta today). 3.1-only markup lives in `<template data-v31>` (3.0-only in `<template data-v30>`), stamped at load, so the 3.0 DOM has no trace of it. Changing Version reloads the page |
 | Server | Not connected, Connected | Shown only in 3.1. Not connected: the token steps. Connected: what's sent, last 7 days, customer details, connection and Test mode |
 | Per screen | see below | Only the states that screen has |
 
-Per-screen states: Dashboard (Doctor ran, not run), Platforms Meta / X / Microsoft (connected, not connected), Activity log (with rows, empty), Doctor (2 findings, all clear; catalog feed healthy, unreachable), Catalog (feed healthy, unreachable), What's new (old Pro 1.1.4 not installed, detected). Meta's "Product ID sent" and Catalog's "ID used in the feed" share state, so changing either one updates the Catalog warning and the Doctor. A **Screen** menu jumps to any page, including the ones the nav doesn't reach (Pick platforms, What's new, Weekly email). **Reset all states** restores the defaults.
+Per-screen states: Dashboard (Doctor ran, not run, plugin added = the quiet re-check card), Platforms Meta / X / Microsoft (connected, not connected), Activity log (with rows, empty), Doctor (findings, all clear; in 3.1 also catalog feed healthy, unreachable), Catalog (3.1: feed healthy, unreachable), What's new (old Pro 1.1.4 not installed, detected). Onboarding opens at the furthest step reached; `onboarding.html?step=N` jumps to a step. Meta's "Product ID sent" and Catalog's "ID used in the feed" share state, so changing either one updates the Catalog warning and the Doctor. A **Screen** menu jumps to any page, including the ones the nav doesn't reach (Pick platforms, What's new, Weekly email). **Reset all states** restores the defaults.
 
 State lives in `localStorage` under `wcct-proto-v1`, so it survives navigation. If storage is blocked (private window), it works per page.
 
-Things that are interactive without the state bar: tile picking with a live count, Pause tracking (confirm dialog, then Paused and Resume), the Google radio and field checks, the events table (Recommended / All / Custom, Show more, Pro locks), Advanced settings, Custom script placements, the Catalog category search and Copy URL, the 3.1 Connect flow and Test mode, the Help drawer below 1280 px, log tabs, row detail (a dialog under 1100 px) and search (Pro), Doctor "Check again" (2 s) and Dismiss with Undo, Settings sections by URL hash, alert "Send a test", dashboard filter chips and chart period, the Help menu.
+Things that are interactive without the state bar: the onboarding wizard (Start, tile picking, IDs checked as you type, the Europe answer, the prototype-only Simulate first event, Skip for now and Continue setup), role access with its confirmation dialog (Pro), tile picking with a live count, Pause tracking (confirm dialog, then Paused and Resume), the Google radio and field checks, the events table (Recommended / All / Custom, Show more, Pro locks), Advanced settings, Custom script placements, the Catalog category search and Copy URL, the 3.1 Connect flow and Test mode, the Help drawer below 1280 px, log tabs, row detail (a dialog under 1100 px) and search (Pro, 3.1), Doctor "Check my store" (2 s), Check again on a finding, and Dismiss with Undo, Settings sections by URL hash, alert "Send a test", dashboard filter chips and chart period, the Help menu.
 
 ## File map
 
 | File | Screen | Reference artboard |
 |---|---|---|
 | `index.html` | Dashboard | `mockup-ref/Main.dc.html` |
-| `pick-platforms.html` | First run, pick platforms (wizard top bar) | `PickPlatforms.dc.html` |
+| `onboarding.html` | New-install wizard: Welcome, Platforms, Connect, Europe, Verify, Done. Replaces `pick-platforms.html` (its tiles are step 2) | `PickPlatforms.dc.html` for step 2 |
 | `platforms.html` | Platforms, Meta selected (master-detail) | `Platforms.dc.html` |
 | `platforms-google.html` | Google one flow | `GoogleFlow.dc.html` |
 | `platforms-x.html` | X, with the re-setup notice for upgraders | thin variant of `Platforms.dc.html` |
@@ -38,9 +39,9 @@ Things that are interactive without the state bar: tile picking with a live coun
 | `catalog.html` | Catalog (Meta tab): feed status, product IDs, exclusions, setup steps; Pro lock in Free | new, 2026-10-28 |
 | `settings.html` | Settings with a section list: Alerts (default, `#alerts`), Integration access by role (Pro, `#access`) and Plan with the Free / Pro comparison (`#plan`). Replaces the old Alerts page | `Alerts.dc.html` for the Alerts and Plan sections |
 | `log.html` | Activity log | `Log.dc.html` |
-| `doctor.html` | Tracking Doctor | `Doctor.dc.html` |
-| `whats-new.html` | Upgrader "what's new" | `WhatsNew.dc.html` |
-| `email-weekly.html` | Weekly health email, 640 px, no app chrome | `WeeklyEmail.dc.html` |
+| `doctor.html` | Tracking Doctor. 3.0: 7 checks on local data (6 on Free), collapsed Working list. 3.1: the extended checks | `Doctor.dc.html` |
+| `whats-new.html` | Upgrader "what's new", with the migration states and the previous-settings download | `WhatsNew.dc.html` |
+| `email-weekly.html` | Weekly health email, 640 px, no app chrome. 3.1 only | `WeeklyEmail.dc.html` |
 | `assets/tokens.css` | Design tokens (plugin-ui's, plus CT overrides and additions) | |
 | `assets/components.css` | One class per plugin-ui component, layout helpers, breakpoints | |
 | `assets/email.css` | Email preview only | |
@@ -87,20 +88,20 @@ Do not carry: `--wp-*` and the layout variables (prototype scaffolding).
 | `.tag` | `Badge variant="secondary"` |
 | `.version-badge`, `.version-crown` | `TopBar` `versions` (outline Badge; Pro adds the 26px round badge with `CrownIcon`) |
 | `.pro-badge`, `data-icon="pui-crown"` | `CrownIcon` + "PRO" on `--pro` (CT pattern; plugin-ui has no PRO pill) |
-| `.btn` + `.primary .secondary .outline .ghost .destructive .outline-destructive .link .pro`, sizes `.xs .sm .lg .icon-only` | `Button` (h-9, px-2.5, gap-1.5, rounded-md, text-sm font-medium, focus ring-3 ring-ring/50, disabled opacity-50). `.outline` is plugin-ui's border-primary text-primary; `.pro` = `TopBar.UpgradeBtn` |
+| `.btn` + `.primary .secondary .outline .ghost .destructive .outline-destructive .link .pro`, sizes `.xs .sm .lg .icon-only` | `Button` (h-9, px-2.5, gap-1.5, rounded-md, text-sm font-medium, focus: CT draws a 2px `--ring` outline 2px out instead of plugin-ui's ring-3 ring-ring/50, see `TOKENS-PROPOSAL.md`; disabled opacity-50). `.outline` is plugin-ui's border-primary text-primary; `.pro` = `TopBar.UpgradeBtn` |
 | `.link-danger` | `Button variant="link"` in the destructive colour (Texty's red Deactivate link, here "Pause tracking") |
 | `.switch` (checkbox with `role="switch"`) | `Switch` (30 × 18.4px track, 14px thumb, bg-input off / bg-primary on) |
 | `.field`, `.field-label`, `.input`, `.select`, `textarea`; `.field-hint / .field-good / .field-bad` | `Field`, `FieldLabel` (text-sm font-medium), `FieldDescription`, `Input` / `Select` / `Textarea` (h-9, rounded-md, border-input, shadow-xs). "Bad" is amber, never red |
 | `.radio-card` | `FieldLabel` wrapping a `Field` with `RadioGroupItem` (border, rounded-md, p-3; checked bg-primary/5 border-primary/30; radio size-4.5) |
 | `.option-row`, `.event-row` | Settings field row (p-4, title text-sm font-semibold, description text-xs muted); `.event-row` body follows its switch (Texty `collapsible_switch`) |
-| `.stat-card` | `MatricsCard` (p-5, rounded-[3px], ring-border, no shadow; 52px icon circle bg-primary/10; value font-bold text-lg; 12px description) |
+| `.stat-card` | `MatricsCard` (p-5, ring-border, but 14px corners like every card: CT overrides plugin-ui's rounded-[3px], 2026-11-02; no shadow; 52px icon circle bg-primary/10; value font-bold text-lg; 12px description) |
 | `.tabs`, `.chips` | `Tabs` default variant (bg-muted list h-9 p-[3px], trigger font-medium text-foreground/60, active bg-background shadow-sm) |
 | `.topbar-nav` | `Tabs variant="line"` (active border-b-2 border-b-primary text-primary) |
 | `.topbar` | `TopBar` (66px, logo, versions, `rightSideComponents` with the Help button) |
 | `.menu` | `DropdownMenu` (rounded-md p-1 shadow-md ring-1; items rounded-sm px-2 py-1.5, hover bg-accent) |
 | `.dialog` | `AlertDialog` (rounded-xl p-6 ring-1, overlay black/10 + blur-xs); `.is-wide` = `Dialog` (rounded-lg, overlay black/50 + blur-sm) |
 | `.toast` | sonner `Toaster` |
-| `.data-table`, `.table-toolbar`, `.table-foot`, `.empty`, `.card.is-dataviews` | `DataViews` with plugin-ui's `wordpress/style.css` (6px radius, 20px edge cells, bg-accent on hover and selected rows, 128px empty-state circle) |
+| `.data-table`, `.table-toolbar`, `.table-foot`, `.empty`, `.card.is-dataviews` | `DataViews` with plugin-ui's `wordpress/style.css` (14px corners like every card, where plugin-ui draws 6px, 2026-11-02; 20px edge cells, bg-accent on hover and selected rows, 128px empty-state circle) |
 | `.pick-tile` | Selection card (rounded-xl border, checked border-primary bg-primary/5) with a `Checkbox` tick |
 | `.platform-card`, `.platform-list-item`, `.master-detail`, `.detail-*`, `.help`, `.finding`, `.check-row`, `.summary-card`, `.timeline`, `.upgrade-card` | CT layouts built from `Card`, `Badge` and `Button` (Texty Gateway master-detail, Doctor, log detail, inline upgrade) |
 | `.wp-chrome` (`.wp-adminbar`, `.wp-adminmenu`, `.wp-content`) | Not built: WP core |
@@ -114,4 +115,4 @@ Layout: full width beside the WP menu with 32 px side padding, no max-width. Pla
 cd prototype/tools && npm install && npm run verify
 ```
 
-`verify` runs, in order: `html-validate` on the page files (`html-validate:recommended`), `check-links.mjs` (every local link and asset resolves from `file://`, every page is reachable), `contrast.mjs` (every visible text colour against the background it sits on, all pages and states, threshold 4.5:1; it also saves the rendered DOM to `tools/rendered/` and validates that too), `interactions.mjs` (26 checks, including layout, the help drawer, one setting per line, the events table, Catalog, Settings and 3.1 server sending), `grep-30.mjs` (no server-side terms anywhere in the 3.0 state, with an allow-list that says why each kept hit stays) and `screenshot.mjs` (Free and Pro at 1440 and 1920 px, extra states, 3.1 states, and a horizontal-scroll check at 1024 / 1280 / 1440 / 1920). Contrast covers every page in both plans and both versions.
+`verify` runs, in order: `html-validate` on the page files (`html-validate:recommended`), `check-links.mjs` (every local link and asset resolves from `file://`, every page is reachable), `contrast.mjs` (every visible text colour against the background it sits on, all pages and states, threshold 4.5:1; since 2026-11-02 it also focuses every enabled control and checks the focus ring against the surface it sits on, threshold 3:1; it also saves the rendered DOM to `tools/rendered/` and validates that too), `interactions.mjs` (37 checks, including layout, the help drawer, one setting per line, the events table, Catalog, Settings, role access, onboarding, migration, the Doctor and 3.1 server sending), `grep-30.mjs` (no 3.1 or server-side terms anywhere in the 3.0 state: 3.1, server, weekly, digest, export, retention, loopback, refund, Delivered, 401, daily, every day, reachable, email, alert and more, with an allow-list that says why each kept hit stays) and `screenshot.mjs` (Free and Pro at 1440 and 1920 px, extra states, 3.1 states, and a horizontal-scroll check at 1024 / 1280 / 1440 / 1920). Contrast covers every page in both plans and both versions.

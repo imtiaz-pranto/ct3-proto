@@ -23,14 +23,15 @@ for (const src of sources) {
 		if (url === '#') { placeholders++; continue; }
 		if (/^(https?:|mailto:)/.test(url)) { broken.push(`${src}: external URL ${url} (prototype must not load the network)`); continue; }
 		checked++;
-		const [file, frag] = url.split('#');
+		const [path0, frag] = url.split('#');
+		const file = path0.split('?')[0]; // ?tab=missed and ?step=3 are read by app.js
 		const target = file || (src.endsWith('.html') ? src : null);
 		if (file && !existsSync(path.join(root, file))) { broken.push(`${src}: ${url} -> missing file`); continue; }
 		if (frag && target && target.endsWith('.html') && !ids(target).has(frag)) broken.push(`${src}: ${url} -> no id="${frag}"`);
 		if (file.endsWith('.html')) pairs.add(`${src} -> ${file}`);
 	}
 }
-// Runtime-built targets in app.js (pick-platforms continue button, screen jump).
+// Runtime-built targets in app.js (screen jump, onboarding redirect).
 for (const m of readFileSync(path.join(root, 'assets/app.js'), 'utf8').matchAll(/'([a-z-]+\.html)(#[a-z-]+)?'/g)) {
 	checked++;
 	if (!existsSync(path.join(root, m[1]))) broken.push(`app.js: ${m[1]} -> missing file`);

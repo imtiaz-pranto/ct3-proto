@@ -24,7 +24,7 @@
 			<ul class="platform-list">
 				<li><a class="platform-list-item" href="platforms.html"><span class="logo sm"><img src="assets/logos/meta.svg" alt=""></span>Meta<span class="pill ok is-dot"><span class="sr-only">Working</span></span></a></li>
 				<li><a class="platform-list-item" href="platforms-google.html"><span class="logo sm"><img src="assets/logos/google-analytics.svg" alt=""></span>Google<span class="pill warn is-dot"><span class="sr-only">Needs attention</span></span></a></li>
-				<li><a class="platform-list-item" href="platforms-x.html" aria-current="page"><span class="logo sm"><img src="assets/logos/x.svg" alt=""></span>X<span class="pill ok is-dot" data-when="connection=connected;install!=upgrade"><span class="sr-only">Working</span></span><span class="pill warn is-dot" data-when="connection=connected;install=upgrade"><span class="sr-only">Needs attention</span></span><span class="pill off is-dot" data-when="connection=not"><span class="sr-only">Not set up</span></span></a></li>
+				<li><a class="platform-list-item" href="platforms-x.html" aria-current="page"><span class="logo sm"><img src="assets/logos/x.svg" alt=""></span>X<span class="pill ok is-dot" data-when="connection=connected;install!=upgrade||connection=connected;migration!=attention"><span class="sr-only">Working</span></span><span class="pill warn is-dot" data-when="connection=connected;install=upgrade;migration=attention"><span class="sr-only">Needs attention</span></span><span class="pill off is-dot" data-when="connection=not"><span class="sr-only">Not set up</span></span></a></li>
 				<li><a class="platform-list-item" href="platforms-microsoft.html"><span class="logo sm"><img src="assets/logos/microsoft.svg" alt=""></span>Microsoft<span class="pro-badge" data-when="plan=free"><span data-icon="pui-crown"></span>PRO</span><span class="pill off is-dot" data-when="plan=pro"><span class="sr-only">Not set up</span></span></a></li>
 				<li><a class="platform-list-item" href="platforms-custom.html"><span class="logo sm"><img src="assets/logos/custom.svg" alt=""></span>Custom script<span class="pill off is-dot"><span class="sr-only">Not set up</span></span></a></li>
 			</ul>
@@ -38,14 +38,14 @@
 					<h2 class="detail-title" id="detail-title">X <span class="muted small">(formerly Twitter)</span></h2>
 					<p class="detail-desc">Sends your store's events to the X Pixel for X ads. <a href="#">Learn more</a></p>
 				</div>
-				<span data-when="connection=connected;install!=upgrade"><span class="pill ok" data-when-paused="no">Working</span><span class="pill off" data-when-paused="yes">Paused</span></span>
-				<span class="pill warn" data-when="connection=connected;install=upgrade">Needs attention</span>
+				<span data-when="connection=connected;install!=upgrade||connection=connected;migration!=attention"><span class="pill ok" data-when-paused="no">Working</span><span class="pill off" data-when-paused="yes">Paused</span></span>
+				<span class="pill warn" data-when="connection=connected;install=upgrade;migration=attention">Needs attention</span>
 				<span class="pill off" data-when="connection=not">Not set up</span>
 			</div>
 
 			<div class="detail-body">
 				<div class="detail-form" data-platform-form>
-					<section class="notice warning stack-sm" data-when="connection=connected;install=upgrade" aria-labelledby="x-resetup-title">
+					<section class="notice warning stack-sm" data-when="connection=connected;install=upgrade;migration=attention" aria-labelledby="x-resetup-title">
 						<div class="row"><span class="pill warn">Needs a re-setup</span></div>
 						<h3 class="card-title" id="x-resetup-title">X retired the old single-event codes</h3>
 						<p class="small">Your base tag carried over and still tracks page views and add to cart. Purchases need a new event ID from X Ads Manager; until then X doesn't see your sales. It takes about 2 minutes.</p>

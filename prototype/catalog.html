@@ -48,7 +48,8 @@
 					<ul class="feature-list">
 						<li><span data-icon="check"></span>Microsoft Advertising</li>
 						<li><span data-icon="check"></span>More than one Meta pixel</li>
-						<li><span data-icon="check"></span>Missed-sale emails and a weekly health email</li>
+						<li><span data-icon="check"></span>Role access for your team</li>
+						<template data-v31><li><span data-icon="check"></span>Missed-sale emails and a weekly health email</li></template>
 					</ul>
 				</div>
 			</aside>
@@ -58,22 +59,37 @@
 		<div class="detail-body" data-when="plan=pro">
 			<div class="detail-form" data-platform-form>
 				<section class="feed-summary" aria-labelledby="feed-title">
-					<div class="feed-summary-head">
-						<span class="summary-icon ok" data-when="feed=ok"><span data-icon="circle-check"></span></span>
-						<span class="summary-icon warn" data-when="feed=fail"><span data-icon="triangle-alert"></span></span>
-						<div class="feed-summary-text">
-							<h2 class="summary-title" id="feed-title"><span data-when="feed=ok">Your feed is healthy</span><span data-when="feed=fail">Meta couldn't fetch your feed</span></h2>
-							<p class="summary-sub"><span data-when="feed=ok">248 products. Generated today at 06:00, every 24 hours. Meta fetched it at 06:02.</span><span data-when="feed=fail">248 products, generated today at 06:00. At 06:02 your site answered Meta with "401 Unauthorized".</span></p>
+					<template data-v30>
+						<div class="feed-summary-head">
+							<span class="summary-icon ok"><span data-icon="circle-check"></span></span>
+							<div class="feed-summary-text">
+								<h2 class="summary-title" id="feed-title">Your feed is ready</h2>
+								<p class="summary-sub">248 products. Generated today at 06:00, every 24 hours.</p>
+							</div>
+							<span class="pill ok">Ready</span>
 						</div>
-						<span class="pill ok" data-when="feed=ok">Healthy</span>
-						<span class="pill warn" data-when="feed=fail">Not fetched</span>
-					</div>
+					</template>
+					<template data-v31>
+						<div class="feed-summary-head">
+							<span class="summary-icon ok" data-when="feed=ok"><span data-icon="circle-check"></span></span>
+							<span class="summary-icon warn" data-when="feed=fail"><span data-icon="triangle-alert"></span></span>
+							<div class="feed-summary-text">
+								<h2 class="summary-title" id="feed-title"><span data-when="feed=ok">Your feed is healthy</span><span data-when="feed=fail">Meta couldn't fetch your feed</span></h2>
+								<p class="summary-sub"><span data-when="feed=ok">248 products. Generated today at 06:00, every 24 hours. Meta fetched it at 06:02.</span><span data-when="feed=fail">248 products, generated today at 06:00. At 06:02 your site answered Meta with "401 Unauthorized".</span></p>
+							</div>
+							<span class="pill ok" data-when="feed=ok">Healthy</span>
+							<span class="pill warn" data-when="feed=fail">Not fetched</span>
+						</div>
+					</template>
 					<div class="feed-url">
 						<span class="feed-url-label">Feed URL</span>
 						<code id="feed-url">https://store.example.com/?action=wcct-product-export</code>
 						<button type="button" class="btn secondary sm" data-copy="feed-url"><span data-icon="copy"></span>Copy URL</button>
 					</div>
-					<p class="notice warning small" data-when="feed=fail"><b>Usually a security plugin or a cache rule blocks Meta.</b> Allow the feed URL in that plugin, then wait for the next fetch. The <a href="doctor.html">Doctor</a> shows what answered instead.</p>
+					<p class="small muted" data-when="install=upgrade">Same URL as before, so Meta keeps fetching it.</p>
+					<template data-v31>
+						<p class="notice warning small" data-when="feed=fail"><b>Usually a security plugin or a cache rule blocks Meta.</b> Allow the feed URL in that plugin, then wait for the next fetch. The <a href="doctor.html">Doctor</a> shows what answered instead.</p>
+					</template>
 				</section>
 
 				<section class="set-section" id="id-matching" aria-labelledby="ids-title">
@@ -209,7 +225,8 @@
 				<div class="clip"><span data-icon="play"></span>Clip: connecting the feed in Commerce Manager, 45 s</div>
 				<div>
 					<h3>After the first upload</h3>
-					<p>Meta takes up to an hour to read 248 products. The <a href="doctor.html">Doctor</a> checks every day that the feed is reachable and that its IDs match your pixel.</p>
+					<template data-v30><p>Meta takes up to an hour to read 248 products. When you run the <a href="doctor.html">Doctor</a>, it checks that the feed's product IDs match your pixel.</p></template>
+					<template data-v31><p>Meta takes up to an hour to read 248 products. The <a href="doctor.html">Doctor</a> checks every day that the feed is reachable and that its IDs match your pixel.</p></template>
 				</div>
 			</aside>
 		</div>

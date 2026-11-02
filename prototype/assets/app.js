@@ -4,7 +4,11 @@
  * 1. Prototype state (Plan, Install, per-screen states) in localStorage.
  * 2. Elements with data-when="key=value" show only when the state matches.
  *    Several conditions join with ";", alternatives with "|", "!=" negates:
- *    data-when="plan=pro;install!=new"
+ *    data-when="plan=pro;install!=new", and "||" joins whole groups.
+ *    <template data-v31> holds markup that exists only in the 3.1 state. It
+ *    is stamped into the page at load when Version is 3.1, so the 3.0 DOM
+ *    carries no trace of it (hidden text included). <template data-v30> is
+ *    the 3.0-only counterpart. Changing Version reloads.
  * 3. Renders the simulated WP admin chrome, the plugin top bar and the
  *    prototype-only state bar, so each page file holds only its content.
  * 4. Shared behaviour (switches, dialogs, toasts, help menu) and one small
@@ -30,30 +34,40 @@
 		server: 'not',
 		pixelId: 'id',
 		feedId: 'id',
-		feed: 'ok'
+		feed: 'ok',
+		migration: 'attention',
+		// Onboarding progress (Install = New): the step reached, what was
+		// picked, the Europe answer and whether the first event arrived. The
+		// dashboard checklist reads these.
+		onbAt: '0',
+		onbPicked: 'meta,google',
+		onbConnected: '',
+		eu: 'unset',
+		verified: 'no'
 	};
 
 	var GLOBAL_STATES = [
 		{ key: 'version', label: 'Version', options: [['3.0', '3.0'], ['3.1', '3.1']] },
 		{ key: 'server', label: 'Server', when: 'version=3.1', options: [['not', 'Not connected'], ['connected', 'Connected']] },
 		{ key: 'plan', label: 'Plan', options: [['free', 'Free'], ['pro', 'Pro']] },
-		{ key: 'install', label: 'Install', options: [['new', 'New'], ['upgrade', 'Upgraded'], ['working', 'Working']] }
+		{ key: 'install', label: 'Install', options: [['new', 'New'], ['upgrade', 'Upgraded'], ['working', 'Working']] },
+		{ key: 'migration', label: 'Migration', when: 'install=upgrade', options: [['done', 'Done'], ['progress', 'In progress'], ['attention', 'Needs attention']] }
 	];
 
 	var PAGE_STATES = {
-		'index': [{ key: 'doctor', label: 'Doctor', options: [['ran', 'Ran'], ['not', 'Not run']] }],
+		'index': [{ key: 'doctor', label: 'Doctor', options: [['ran', 'Ran'], ['not', 'Not run'], ['plugin', 'Plugin added']] }],
 		'platforms': [{ key: 'connection', label: 'Meta', options: [['connected', 'Connected'], ['not', 'Not connected']] }],
 		'platforms-x': [{ key: 'connection', label: 'X', options: [['connected', 'Connected'], ['not', 'Not connected']] }],
 		'platforms-microsoft': [{ key: 'connection', label: 'Microsoft (Pro only)', options: [['connected', 'Connected'], ['not', 'Not connected']] }],
 		'log': [{ key: 'log', label: 'Rows', options: [['rows', 'With rows'], ['empty', 'Empty']] }],
-		'doctor': [{ key: 'doctorResult', label: 'Result', options: [['findings', '2 findings'], ['clear', 'All clear']] }, { key: 'feed', label: 'Catalog feed (Pro)', options: [['ok', 'Healthy'], ['fail', 'Unreachable']] }],
+		'doctor': [{ key: 'doctorResult', label: 'Result', options: [['findings', 'Findings'], ['clear', 'All clear']] }, { key: 'feed', label: 'Catalog feed (Pro)', when: 'version=3.1', options: [['ok', 'Healthy'], ['fail', 'Unreachable']] }],
 		'whats-new': [{ key: 'oldPro', label: 'Old Pro 1.1.4', options: [['no', 'Not installed'], ['yes', 'Detected']] }],
-		'catalog': [{ key: 'feed', label: 'Feed', options: [['ok', 'Healthy'], ['fail', 'Unreachable']] }]
+		'catalog': [{ key: 'feed', label: 'Feed', when: 'version=3.1', options: [['ok', 'Healthy'], ['fail', 'Unreachable']] }]
 	};
 
 	var SCREENS = [
 		['index.html', 'Dashboard'],
-		['pick-platforms.html', 'Pick platforms'],
+		['onboarding.html', 'Onboarding'],
 		['platforms.html', 'Platforms: Meta'],
 		['platforms-google.html', 'Platforms: Google'],
 		['platforms-x.html', 'Platforms: X'],
@@ -63,7 +77,7 @@
 		['log.html', 'Activity log'],
 		['doctor.html', 'Doctor'],
 		['whats-new.html', 'What\'s new'],
-		['email-weekly.html', 'Weekly email'],
+		['email-weekly.html', 'Weekly email', '3.1'],
 		['settings.html', 'Settings']
 	];
 
@@ -81,7 +95,7 @@
 		}
 		var merged = {};
 		Object.keys(DEFAULTS).forEach(function (k) {
-			merged[k] = saved[k] || DEFAULTS[k];
+			merged[k] = typeof saved[k] === 'string' ? saved[k] : DEFAULTS[k];
 		});
 		return merged;
 	}
@@ -95,18 +109,26 @@
 	function setState(key, value) {
 		state[key] = value;
 		save();
+		// 3.1-only markup is stamped at load, so a version change reloads.
+		if (key === 'version') {
+			window.location.reload();
+			return;
+		}
 		applyState();
 		renderStateBar();
 		document.dispatchEvent(new CustomEvent('wcct:state', { detail: { key: key } }));
 	}
 
+	// "||" joins whole condition groups: "install!=upgrade||migration=done".
 	function matches(expr) {
-		return expr.split(';').every(function (cond) {
-			var neg = cond.indexOf('!=') !== -1;
-			var parts = cond.split(neg ? '!=' : '=');
-			var vals = parts[1].split('|');
-			var has = vals.indexOf(state[parts[0].trim()]) !== -1;
-			return neg ? !has : has;
+		return expr.split('||').some(function (group) {
+			return group.split(';').every(function (cond) {
+				var neg = cond.indexOf('!=') !== -1;
+				var parts = cond.split(neg ? '!=' : '=');
+				var vals = parts[1].split('|');
+				var has = vals.indexOf(state[parts[0].trim()]) !== -1;
+				return neg ? !has : has;
+			});
 		});
 	}
 
@@ -115,6 +137,26 @@
 	function serverOn(key) {
 		var p = CONFIG.platforms[key];
 		return state.version === '3.1' && !!(p && p.serverSending);
+	}
+
+	// Stamps each <template data-v31> (or data-v30) in place when Version
+	// matches, and drops it otherwise. Runs once, before anything reads the page.
+	function stampVersion() {
+		document.querySelectorAll('template[data-v31], template[data-v30]').forEach(function (t) {
+			// Keep the saved DOM tidy: no indent-only line where it was.
+			var prev = t.previousSibling;
+			if (prev && prev.nodeType === 3) {
+				prev.textContent = prev.textContent.replace(/[ \t]+$/, '');
+			}
+			if (t.hasAttribute(state.version === '3.1' ? 'data-v31' : 'data-v30')) {
+				var frag = t.content.cloneNode(true);
+				if (frag.lastChild && frag.lastChild.nodeType === 3) {
+					frag.lastChild.textContent = frag.lastChild.textContent.replace(/[ \t]+$/, '');
+				}
+				t.parentNode.insertBefore(frag, t);
+			}
+			t.remove();
+		});
 	}
 
 	function applyState() {
@@ -210,12 +252,11 @@
 			'</div>';
 
 		if (shell === 'wizard') {
+			// The onboarding page marks the current and finished steps.
 			header.innerHTML = brand +
-				'<ol class="topbar-steps">' +
-				'<li class="step" aria-current="step"><b>1</b>Pick platforms</li>' +
-				'<li class="step"><b>2</b>Connect</li>' +
-				'<li class="step"><b>3</b>Done</li></ol>' +
-				'<div class="topbar-end"><a class="btn ghost" href="index.html">Skip for now</a></div>';
+				'<ol class="topbar-steps">' + ONB_STEPS.map(function (s, i) {
+					return '<li class="step" data-step-dot="' + (i + 1) + '"><b>' + (i + 1) + '</b><span class="step-name">' + s + '</span></li>';
+				}).join('') + '</ol>';
 		} else {
 			var current = document.body.getAttribute('data-nav') || '';
 			var tabs = [['dashboard', 'index.html', 'Dashboard'], ['platforms', 'platforms.html', 'Platforms'], ['catalog', 'catalog.html', 'Catalog'], ['log', 'log.html', 'Activity log'], ['doctor', 'doctor.html', 'Doctor'], ['settings', 'settings.html', 'Settings']];
@@ -316,7 +357,7 @@
 					}).join('') + '</div></fieldset>';
 			}).join('') +
 			'<label class="state-group"><span>Screen</span><select class="input" data-screen-jump aria-label="Jump to screen">' +
-			SCREENS.map(function (s) {
+			SCREENS.filter(function (s) { return !s[2] || s[2] === state.version; }).map(function (s) {
 				return '<option value="' + s[0] + '"' + (s[0].replace('.html', '') === page ? ' selected' : '') + '>' + s[1] + '</option>';
 			}).join('') + '</select></label>' +
 			'<button type="button" class="link-btn" data-state-reset>Reset all states</button>' +
@@ -492,12 +533,21 @@
 	 * Event / On / (3.1: Sent from) / Last seen and a Recommended | All |
 	 * Custom preset. Every event is listed; Recommended only sets which are on.
 	 */
+	// Events an upgraded store carried over from 2.x. Where they differ from
+	// the Recommended set, the preset starts on Custom.
+	var CARRIED = { meta: ['view', 'cart', 'purchase', 'search'] };
+
 	function eventsTable(el) {
 		var key = el.getAttribute('data-events');
 		var p = CONFIG.platforms[key];
 		var on = {};
 		var preset = 'rec';
-		p.events.forEach(function (e) { on[e.key] = !!e.rec; });
+		function startingSet() {
+			var carried = state.install === 'upgrade' && CARRIED[key];
+			p.events.forEach(function (e) { on[e.key] = carried ? carried.indexOf(e.key) !== -1 : !!e.rec; });
+			preset = carried && p.events.some(function (e) { return on[e.key] !== !!e.rec; }) ? 'custom' : 'rec';
+		}
+		startingSet();
 
 		function locked(e) {
 			return e.pro && state.plan !== 'pro';
@@ -586,7 +636,12 @@
 			render();
 			el.querySelector('[data-ev-toggle="' + t.getAttribute('data-ev-toggle') + '"]').focus();
 		});
-		document.addEventListener('wcct:state', render);
+		document.addEventListener('wcct:state', function (e) {
+			if (e.detail.key === 'install') {
+				startingSet();
+			}
+			render();
+		});
 		render();
 	}
 
@@ -711,7 +766,34 @@
 
 	var pages = {};
 
+	// Onboarding steps, shared by the wizard and the dashboard checklist.
+	var ONB_STEPS = ['Welcome', 'Platforms', 'Connect', 'Europe', 'Verify', 'Done'];
+
 	pages['index'] = function () {
+		// A new install opens the wizard once, the way activation would.
+		if (state.install === 'new' && state.onbAt === '0') {
+			window.location.replace('onboarding.html');
+			return;
+		}
+		var list = document.querySelector('[data-onb-checklist]');
+		function checklist() {
+			var at = Number(state.onbAt);
+			var items = [
+				['Plugin installed', true],
+				['Pick where you run ads', at > 2],
+				['Connect your platforms, about 3 minutes', at > 3],
+				['Tell us if you sell to Europe', at > 4],
+				['See the first event arrive', state.verified === 'yes']
+			];
+			list.innerHTML = items.map(function (i) {
+				return '<li><span class="check-dot' + (i[1] ? ' is-done' : '') + '">' + ic(i[1] ? 'check' : 'clock') + '</span>' +
+					(i[1] ? '<span>' + i[0] + '<span class="sr-only">, done</span></span>' : '<span>' + i[0] + '</span>') + '</li>';
+			}).join('');
+			hydrateIcons(list);
+		}
+		document.addEventListener('wcct:state', checklist);
+		checklist();
+
 		var chips = document.querySelectorAll('[data-filter]');
 		chips.forEach(function (chip) {
 			chip.addEventListener('click', function () {
@@ -756,35 +838,212 @@
 		}
 	};
 
-	pages['pick-platforms'] = function () {
+	pages['onboarding'] = function () {
+		var steps = document.querySelectorAll('[data-onb-step]');
+		var dots = document.querySelectorAll('[data-step-dot]');
+		var names = { meta: 'Meta', google: 'Google', x: 'X', microsoft: 'Microsoft Advertising', custom: 'Custom script' };
+		// Sample IDs fill the panels of platforms connected earlier, so a
+		// resumed setup shows what was entered.
+		var SAMPLE = { 'onb-meta-id': '1234567890123456', 'onb-ga-id': 'G-7KQ2M9PX3L', 'onb-x-id': 'o8x2k', 'onb-x-event': 'tw-o8x2k-o8x3a', 'onb-uet-id': '343012345' };
+		var param = Number(new URLSearchParams(window.location.search).get('step'));
+		var current = param >= 1 && param <= 6 ? param : Math.max(1, Number(state.onbAt));
+
+		function list(key) {
+			return state[key] ? state[key].split(',') : [];
+		}
+		function reach(n) {
+			if (n > Number(state.onbAt)) {
+				setState('onbAt', String(n));
+			}
+		}
+		var render = { 2: renderPick, 3: renderConnect, 4: renderEu, 5: renderVerify, 6: renderDone };
+		function go(n, focus) {
+			current = n;
+			reach(n);
+			steps.forEach(function (s) { s.hidden = Number(s.getAttribute('data-onb-step')) !== n; });
+			dots.forEach(function (d) {
+				var i = Number(d.getAttribute('data-step-dot'));
+				d.classList.toggle('is-done', i < n);
+				if (i === n) {
+					d.setAttribute('aria-current', 'step');
+				} else {
+					d.removeAttribute('aria-current');
+				}
+			});
+			if (render[n]) {
+				render[n]();
+			}
+			window.scrollTo(0, 0);
+			// Move focus to the new step's title so screen readers follow.
+			if (focus) {
+				var title = document.querySelector('[data-onb-step="' + n + '"] h1');
+				title.setAttribute('tabindex', '-1');
+				title.focus();
+			}
+		}
+		document.querySelectorAll('[data-onb-next]').forEach(function (b) {
+			b.addEventListener('click', function () { go(current + 1, true); });
+		});
+		document.querySelectorAll('[data-onb-back]').forEach(function (b) {
+			b.addEventListener('click', function () { go(current - 1, true); });
+		});
+
+		// Step 1: the usage opt-in starts off; "What's shared" opens the list.
+		var shared = document.querySelector('[data-onb-shared]');
+		shared.addEventListener('click', function () {
+			var list = document.getElementById('onb-shared');
+			list.hidden = !list.hidden;
+			shared.setAttribute('aria-expanded', String(!list.hidden));
+		});
+
+		// Step 2: multi-select tiles.
 		var tiles = document.querySelectorAll('.pick-tile[data-platform]');
 		var count = document.querySelector('[data-pick-count]');
-		var go = document.querySelector('[data-pick-continue]');
-		var names = { meta: 'Meta', google: 'Google', x: 'X', microsoft: 'Microsoft Advertising', custom: 'a custom script' };
-		var links = { meta: 'platforms.html', google: 'platforms-google.html', x: 'platforms-x.html', microsoft: 'platforms-microsoft.html', custom: 'platforms-custom.html' };
-		function update() {
-			var picked = Array.prototype.filter.call(tiles, function (t) { return t.getAttribute('aria-pressed') === 'true'; });
-			var n = picked.length;
-			if (!n) {
-				count.textContent = 'Nothing selected. Pick at least one, or skip for now.';
-				go.setAttribute('aria-disabled', 'true');
-				go.removeAttribute('href');
-				go.textContent = 'Pick a platform to continue';
-				return;
-			}
-			count.textContent = n + ' selected. About 3 minutes each.';
-			var first = picked[0].getAttribute('data-platform');
-			go.removeAttribute('aria-disabled');
-			go.setAttribute('href', links[first]);
-			go.textContent = 'Continue to connect ' + names[first];
+		var pickNext = document.querySelector('[data-pick-continue]');
+		function renderPick() {
+			var picked = list('onbPicked');
+			tiles.forEach(function (t) { t.setAttribute('aria-pressed', String(picked.indexOf(t.getAttribute('data-platform')) !== -1)); });
+			count.textContent = picked.length ? picked.length + ' selected.' : 'Nothing selected. Pick at least one, or skip for now.';
+			pickNext.disabled = !picked.length;
 		}
 		tiles.forEach(function (t) {
 			t.addEventListener('click', function () {
-				t.setAttribute('aria-pressed', String(t.getAttribute('aria-pressed') !== 'true'));
-				update();
+				var picked = Array.prototype.filter.call(tiles, function (o) {
+					return o === t ? o.getAttribute('aria-pressed') !== 'true' : o.getAttribute('aria-pressed') === 'true';
+				}).map(function (o) { return o.getAttribute('data-platform'); });
+				setState('onbPicked', picked.join(','));
+				renderPick();
 			});
 		});
-		update();
+
+		// Step 3: one panel per picked platform, IDs checked as they're typed.
+		var connectNext = document.querySelector('[data-onb-connect-next]');
+		var connectNote = document.querySelector('[data-onb-connect-note]');
+		document.querySelectorAll('[data-onb-events]').forEach(function (p) {
+			var rec = CONFIG.platforms[p.getAttribute('data-onb-events')].events.filter(function (e) { return e.rec; }).map(function (e) { return e.name; });
+			p.textContent = 'Recommended events on: ' + rec.join(', ') + '.';
+		});
+		function fieldOk(input) {
+			var v = input.value.trim();
+			var ok = new RegExp(input.getAttribute('data-pattern'), 'i').test(v);
+			var field = input.closest('.field');
+			field.querySelector('.field-good').hidden = !ok;
+			field.querySelector('.field-bad').hidden = ok || !v;
+			field.classList.toggle('is-bad', !ok && !!v);
+			return ok || (!v && input.hasAttribute('data-optional'));
+		}
+		function panelOk(key) {
+			var inputs = Array.prototype.filter.call(document.querySelectorAll('[data-onb-id="' + key + '"]'), function (i) { return i.getClientRects().length; });
+			var results = inputs.map(fieldOk);
+			var filled = inputs.some(function (i) { return i.value.trim() && !i.hasAttribute('data-optional'); });
+			return inputs.length > 0 && filled && results.every(Boolean);
+		}
+		function checkConnect() {
+			var picked = list('onbPicked');
+			var connected = picked.filter(panelOk);
+			document.querySelectorAll('[data-onb-panel]').forEach(function (p) {
+				var key = p.getAttribute('data-onb-panel');
+				var pill = p.querySelector('[data-onb-status]');
+				if (pill) {
+					pill.className = 'pill ' + (connected.indexOf(key) !== -1 ? 'ok' : 'off');
+					pill.textContent = connected.indexOf(key) !== -1 ? 'Looks right' : 'Not connected';
+				}
+			});
+			connectNext.disabled = !connected.length;
+			connectNote.textContent = connected.length
+				? connected.length + ' of ' + picked.filter(function (k) { return k !== 'custom' && (k !== 'microsoft' || state.plan === 'pro'); }).length + ' ready to connect.'
+				: 'Add a valid ID for at least one platform.';
+			setState('onbConnected', connected.join(','));
+		}
+		function renderConnect() {
+			var picked = list('onbPicked');
+			var connected = list('onbConnected');
+			document.querySelectorAll('[data-onb-panel]').forEach(function (p) {
+				var key = p.getAttribute('data-onb-panel');
+				p.hidden = picked.indexOf(key) === -1;
+				p.querySelectorAll('[data-onb-id]').forEach(function (i) {
+					if (connected.indexOf(key) !== -1 && !i.value && SAMPLE[i.id]) {
+						i.value = SAMPLE[i.id];
+					}
+				});
+			});
+			checkConnect();
+		}
+		document.querySelector('[data-onb-step="3"]').addEventListener('input', function (e) {
+			if (e.target.matches('[data-onb-id]')) {
+				checkConnect();
+			}
+		});
+
+		// Step 4: Europe. Yes turns on Respect cookie choices.
+		var euNext = document.querySelector('[data-onb-eu-next]');
+		function renderEu() {
+			document.querySelectorAll('[data-onb-eu]').forEach(function (r) { r.checked = r.value === state.eu; });
+			document.querySelectorAll('[data-onb-eu-note]').forEach(function (n) { n.hidden = n.getAttribute('data-onb-eu-note') !== state.eu; });
+			euNext.disabled = state.eu === 'unset';
+		}
+		document.querySelectorAll('[data-onb-eu]').forEach(function (r) {
+			r.addEventListener('change', function () {
+				setState('eu', r.value);
+				renderEu();
+			});
+		});
+
+		// Step 5: waiting per connected platform, green on the first event.
+		var verify = document.querySelector('[data-onb-verify]');
+		var verifyNext = document.querySelector('[data-onb-verify-next]');
+		var simulate = document.querySelector('[data-onb-simulate]');
+		function verifyRow(key, ok) {
+			return '<li class="onb-verify-row' + (ok ? ' is-ok' : '') + '" data-onb-verify-row="' + key + '">' +
+				'<span class="summary-icon ' + (ok ? 'ok' : 'busy') + '">' + ic(ok ? 'circle-check' : 'loader-circle') + '</span>' +
+				'<span class="onb-verify-text"><b>' + names[key] + '</b><span>' + (ok ? 'First event sent: Page view, just now.' : 'Waiting for the first event…') + '</span></span></li>';
+		}
+		function renderVerify() {
+			var connected = list('onbConnected');
+			var done = state.verified === 'yes';
+			verify.innerHTML = connected.map(function (k) { return verifyRow(k, done); }).join('');
+			hydrateIcons(verify);
+			document.querySelector('[data-onb-verify-empty]').hidden = connected.length > 0;
+			simulate.disabled = done || !connected.length;
+			verifyNext.disabled = !done;
+		}
+		simulate.addEventListener('click', function () {
+			simulate.disabled = true;
+			var rows = verify.querySelectorAll('[data-onb-verify-row]');
+			Array.prototype.forEach.call(rows, function (row, i) {
+				setTimeout(function () {
+					row.outerHTML = verifyRow(row.getAttribute('data-onb-verify-row'), true);
+					hydrateIcons(verify);
+					if (i === rows.length - 1) {
+						setState('verified', 'yes');
+						verifyNext.disabled = false;
+					}
+				}, 400 * (i + 1));
+			});
+		});
+
+		// Step 6: what's working, then the dashboard. Finishing ends the
+		// new-install state and clears progress for the next run.
+		function renderDone() {
+			var connected = list('onbConnected');
+			var rows = connected.map(function (k) {
+				var n = CONFIG.platforms[k].events.filter(function (e) { return e.rec; }).length;
+				return names[k] + ': sending ' + n + ' recommended events';
+			});
+			rows.push('Respect cookie choices: ' + (state.eu === 'yes' ? 'on' : 'off'));
+			rows.push('Activity log: recording every order');
+			var summary = document.querySelector('[data-onb-summary]');
+			summary.innerHTML = rows.map(function (t) { return '<li>' + ic('check') + '<span>' + esc(t) + '</span></li>'; }).join('');
+			hydrateIcons(summary);
+		}
+		document.querySelector('[data-onb-finish]').addEventListener('click', function () {
+			['onbAt', 'onbPicked', 'onbConnected', 'eu', 'verified'].forEach(function (k) { state[k] = DEFAULTS[k]; });
+			state.install = 'working';
+			save();
+			window.location.href = 'index.html';
+		});
+
+		go(current);
 	};
 
 	function platformPage(platformName) {
@@ -945,7 +1204,7 @@
 		// Upgraders carry only the retired single-event code, so the field starts empty.
 		var eventId = document.getElementById('x-event-id');
 		function sync() {
-			eventId.value = state.install === 'upgrade' ? '' : 'tw-o8x2k-o8x3a';
+			eventId.value = state.install === 'upgrade' && state.migration === 'attention' ? '' : 'tw-o8x2k-o8x3a';
 		}
 		document.querySelectorAll('[data-focus]').forEach(function (b) {
 			b.addEventListener('click', function () { document.getElementById(b.getAttribute('data-focus')).focus(); });
@@ -1030,6 +1289,63 @@
 		}
 		window.addEventListener('hashchange', show);
 		show();
+
+		// Role access: only Administrator on a new install. Ticking a role asks
+		// first; Cancel leaves it unticked. Upgrades keep the roles they had.
+		var roleDialog = document.getElementById('role-dialog');
+		var roleBoxes = document.querySelectorAll('input[data-role]');
+		var pendingRole = null;
+		function syncCarried() {
+			roleBoxes.forEach(function (box) {
+				box.checked = state.install === 'upgrade' && box.hasAttribute('data-carried');
+			});
+		}
+		function asking(box) {
+			return box.checked && !box.hasAttribute('data-confirmed');
+		}
+		roleBoxes.forEach(function (box) {
+			// The tick isn't a change yet, so Save stays as it was.
+			box.addEventListener('input', function (e) {
+				if (asking(box)) {
+					e.stopPropagation();
+				}
+			});
+			box.addEventListener('change', function (e) {
+				if (!asking(box)) {
+					box.removeAttribute('data-confirmed');
+					return;
+				}
+				e.stopPropagation();
+				box.checked = false;
+				pendingRole = box;
+				roleDialog.querySelector('[data-role-name]').textContent = box.getAttribute('data-role');
+				roleDialog.querySelector('[data-role-outside]').hidden = !box.hasAttribute('data-outside');
+				roleDialog.returnValue = '';
+				roleDialog.showModal();
+			});
+		});
+		if (roleDialog) {
+			roleDialog.addEventListener('close', function () {
+				var box = pendingRole;
+				pendingRole = null;
+				if (!box) {
+					return;
+				}
+				if (roleDialog.returnValue === 'give') {
+					box.checked = true;
+					box.setAttribute('data-confirmed', '');
+					box.dispatchEvent(new Event('change', { bubbles: true }));
+					toast(box.getAttribute('data-role') + ' can manage tracking once you save.', { icon: 'users' });
+				}
+				box.focus();
+			});
+		}
+		document.addEventListener('wcct:state', function (e) {
+			if (e.detail.key === 'install') {
+				syncCarried();
+			}
+		});
+		syncCarried();
 		var testBtn = document.querySelector('[data-send-test]');
 		var to = document.getElementById('alert-email');
 		if (testBtn) {
@@ -1042,13 +1358,13 @@
 	};
 
 	var LOG = [
-		{ id: 1312, time: 'Today 10:42', amount: '$200.00', event: 'Purchase', status: 'counted', reached: ['meta', 'google', 'x'] },
-		{ id: 1311, time: 'Today 10:31', amount: '$54.00', event: 'Purchase', status: 'missed', reached: ['google', 'x'], missed: 'meta' },
-		{ id: 1310, time: 'Today 09:58', amount: '$120.00', event: 'Purchase', status: 'counted', reached: ['meta', 'google', 'x'] },
+		{ id: 1312, order: true, time: 'Today 10:42', amount: '$200.00', event: 'Purchase', status: 'counted', reached: ['meta', 'google', 'x'] },
+		{ id: 1311, order: true, time: 'Today 10:31', amount: '$54.00', event: 'Purchase', status: 'missed', reached: ['google', 'x'], missed: 'meta' },
+		{ id: 1310, order: true, time: 'Today 09:58', amount: '$120.00', event: 'Purchase', status: 'counted', reached: ['meta', 'google', 'x'] },
 		{ id: 1309, time: 'Today 09:40', amount: '$30.00', event: 'Add to cart', status: 'tracked', reached: ['meta', 'google', 'x'] },
-		{ id: 1308, time: 'Today 09:12', amount: '$89.00', event: 'Purchase', status: 'pending', reached: [] },
-		{ id: 1307, time: 'Yesterday 18:07', amount: '$64.00', event: 'Failed order', status: 'skipped', reached: [] },
-		{ id: 1306, time: 'Yesterday 16:55', amount: '$210.00', event: 'Purchase', status: 'counted', reached: ['meta', 'google', 'x'] },
+		{ id: 1308, order: true, time: 'Today 09:12', amount: '$89.00', event: 'Purchase', status: 'pending', reached: [] },
+		{ id: 1307, order: true, time: 'Yesterday 18:07', amount: '$64.00', event: 'Failed order', status: 'skipped', reached: [] },
+		{ id: 1306, order: true, time: 'Yesterday 16:55', amount: '$210.00', event: 'Purchase', status: 'counted', reached: ['meta', 'google', 'x'] },
 		{ id: 1305, time: 'Yesterday 15:20', amount: '$45.00', event: 'Start checkout', status: 'tracked', reached: ['meta', 'google', 'x'] }
 	];
 	var PLATFORM = {
@@ -1129,16 +1445,29 @@
 		var table = document.querySelector('[data-log-table]');
 		var empty = document.querySelector('[data-log-empty]');
 		var noMatch = document.querySelector('[data-log-nomatch]');
-		var tab = 'all';
+		// The dashboard's missed-sale card links here with ?tab=missed.
+		var tab = new URLSearchParams(window.location.search).get('tab') || 'all';
 		var selected = 1312;
 		var narrow = window.matchMedia('(max-width: 1100px)');
+		var v31 = state.version === '3.1';
+		// 3.0 keeps one row per order for 24 hours; 3.1 adds every event.
+		var source = v31 ? LOG : LOG.filter(function (r) { return r.order; });
+
+		tabs.forEach(function (o) { o.setAttribute('aria-selected', String(o.getAttribute('data-log-tab') === tab)); });
+		if (tab !== 'all') {
+			selected = (source.filter(function (r) { return STATUS[r.status].tab === tab; })[0] || {}).id || selected;
+		}
+		// Only a server copy can confirm delivery, so "Delivered" needs 3.1
+		// with the server connected. Everything else is "Sent".
+		document.querySelector('[data-log-col-sent]').textContent = v31 && state.server === 'connected' ? 'Delivered' : 'Sent';
+		document.querySelector('[data-log-24h]').hidden = v31 && state.plan === 'pro';
 
 		function rows() {
 			if (state.log === 'empty') {
 				return [];
 			}
 			var q = search && state.plan === 'pro' ? search.value.replace(/[^0-9]/g, '') : '';
-			return LOG.filter(function (r) {
+			return source.filter(function (r) {
 				var okTab = tab === 'all' || STATUS[r.status].tab === tab;
 				var okQ = !q || String(r.id).indexOf(q) !== -1;
 				return okTab && okQ;
@@ -1160,7 +1489,7 @@
 					'<td><span class="pill ' + s.tone + '">' + s.text + '</span></td>' +
 					'<td><button type="button" class="btn ghost sm" data-view="' + r.id + '">View<span class="sr-only"> order #' + r.id + '</span></button></td></tr>';
 			}).join('');
-			foot.textContent = isEmpty ? '' : list.length + ' of 142 events';
+			foot.textContent = isEmpty ? '' : v31 ? list.length + ' of 142 events' : list.length + (list.length === 1 ? ' order' : ' orders') + ' in the last 24 hours';
 			showDetail();
 		}
 		function showDetail(open) {
@@ -1202,16 +1531,107 @@
 		render();
 	};
 
+	// Doctor. 3.0 runs 7 checks on local data only (active plugins, saved
+	// settings, the order log): no network, no schedule, no fixes. 3.1 keeps
+	// the extended checks. Both share Check my store, Check again and Dismiss.
 	pages['doctor'] = function () {
-		var btn = document.querySelector('[data-check-again]');
+		var runBtn = document.querySelector('[data-doctor-run]');
 		var running = document.querySelector('[data-doctor-running]');
 		var results = document.querySelector('[data-doctor-results]');
 		var last = document.querySelector('[data-last-check]');
+		var render = state.version === '3.1' ? doctor31() : doctor30();
+
+		document.querySelectorAll('[data-finding-dismiss]').forEach(function (b) {
+			b.addEventListener('click', function () {
+				var f = b.closest('[data-finding]');
+				render.dismiss(f, true);
+				toast('Dismissed. It won\'t show again unless something changes.', {
+					undo: function () { render.dismiss(f, false); }
+				});
+			});
+		});
+		// Check again on one finding re-reads that check. The prototype plays
+		// the fixed outcome: the merchant deactivated the other plugin.
+		document.querySelectorAll('[data-finding-recheck]').forEach(function (b) {
+			b.addEventListener('click', function () {
+				var f = b.closest('[data-finding]');
+				busy(b, 'Checking', 1000, function () {
+					render.resolve(f);
+					toast('Checked again. Facebook for WooCommerce is no longer active.');
+				});
+			});
+		});
+		runBtn.addEventListener('click', function () {
+			running.hidden = false;
+			results.hidden = true;
+			busy(runBtn, 'Checking', 2000, function () {
+				running.hidden = true;
+				results.hidden = false;
+				render.reset();
+				last.textContent = 'Last check: just now';
+				toast('Check finished. We checked ' + document.querySelector('[data-doctor-results] [data-check-total]').textContent + ' things.');
+			});
+		});
+		document.addEventListener('wcct:state', render.update);
+		render.update();
+	};
+
+	function doctor30() {
+		var findings = document.querySelectorAll('[data-finding]');
+		var passes = document.querySelectorAll('[data-pass]');
+		var dismissed = {};
+		var resolved = {};
+		// Which checks found something in the current prototype state. Checks
+		// without a finding card (Purchase on, orders sent) always pass here.
+		function found(key) {
+			if (!document.querySelector('[data-finding][data-check="' + key + '"]')) {
+				return false;
+			}
+			if (key === 'ids-match') {
+				return state.plan === 'pro' && state.pixelId !== state.feedId;
+			}
+			return state.doctorResult === 'findings' && !resolved[key];
+		}
+		function applies(key) {
+			return key !== 'ids-match' || state.plan === 'pro';
+		}
+		function update() {
+			findings.forEach(function (f) {
+				var key = f.getAttribute('data-check');
+				f.hidden = !found(key) || !!dismissed[key];
+			});
+			passes.forEach(function (p) {
+				var key = p.getAttribute('data-check');
+				p.hidden = !applies(key) || found(key);
+			});
+			var total = Array.prototype.filter.call(passes, function (p) { return applies(p.getAttribute('data-check')); }).length;
+			var open = Array.prototype.filter.call(findings, function (f) { return !f.hidden; });
+			var sure = open.filter(function (f) { return !f.classList.contains('is-unsure'); }).length;
+			var unsure = open.length - sure;
+			var working = Array.prototype.filter.call(passes, function (p) { return !p.hidden; }).length;
+			document.querySelectorAll('[data-check-total]').forEach(function (el) { el.textContent = total; });
+			document.querySelector('[data-working-count]').textContent = working;
+			document.querySelector('[data-doctor-sub]').textContent = sure
+				? (sure === 1 ? '1 is' : sure + ' are') + ' worth a look' + (unsure ? ' and 1 we can\'t be sure about' : '') + '. Nothing is broken.'
+				: unsure ? 'Nothing is broken. 1 thing we can\'t be sure about.' : 'Everything is working.';
+			document.querySelector('[data-doctor-icon="warn"]').hidden = !sure;
+			document.querySelector('[data-doctor-icon="ok"]').hidden = !!sure;
+			document.querySelector('[data-findings-label]').hidden = !open.length;
+			document.querySelector('[data-clean-after-dismiss]').hidden = open.length > 0 || !Object.keys(dismissed).some(function (k) { return dismissed[k] && found(k); });
+		}
+		return {
+			update: update,
+			dismiss: function (f, on) { dismissed[f.getAttribute('data-check')] = on; update(); },
+			resolve: function (f) { resolved[f.getAttribute('data-check')] = true; update(); },
+			reset: function () { dismissed = {}; resolved = {}; update(); }
+		};
+	}
+
+	function doctor31() {
 		var summaryTitle = document.querySelector('[data-findings-title]');
 		var findingsSection = document.querySelector('[data-findings]');
 		var cleanCard = document.querySelector('[data-clean-after-dismiss]');
-
-		function countOpen() {
+		function update() {
 			// "Not sure" items are listed but not counted as worth a look.
 			var sure = document.querySelectorAll('[data-finding]:not(.is-unsure):not([hidden])').length;
 			var any = document.querySelectorAll('[data-finding]:not([hidden])').length;
@@ -1225,38 +1645,21 @@
 			findingsSection.hidden = any === 0;
 			cleanCard.hidden = any !== 0;
 		}
-		document.querySelectorAll('[data-finding-dismiss]').forEach(function (b) {
-			b.addEventListener('click', function () {
-				var f = b.closest('[data-finding]');
-				f.hidden = true;
-				countOpen();
-				toast('Dismissed. It won\'t show again unless something changes.', {
-					undo: function () {
-						f.hidden = false;
-						countOpen();
-					}
-				});
-			});
-		});
-		btn.addEventListener('click', function () {
-			running.hidden = false;
-			results.hidden = true;
-			busy(btn, 'Checking', 2000, function () {
-				running.hidden = true;
-				results.hidden = false;
+		return {
+			update: update,
+			dismiss: function (f, on) { f.hidden = on; update(); },
+			resolve: function (f) { f.hidden = true; update(); },
+			reset: function () {
 				document.querySelectorAll('[data-finding]').forEach(function (f) { f.hidden = false; });
 				applyState(); // re-hide findings that don't apply to the current state
-				countOpen();
-				last.textContent = 'Last check: just now';
-				toast('Check finished. ' + document.querySelector('[data-check-total]').textContent + ' things checked.');
-			});
-		});
-		document.addEventListener('wcct:state', countOpen);
-		countOpen();
-	};
+				update();
+			}
+		};
+	}
 
 	/* ------------------------------------------------------------- boot */
 
+	stampVersion();
 	renderChrome();
 	renderStateBar();
 	applyState();

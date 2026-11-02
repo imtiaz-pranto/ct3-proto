@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Set up · Conversion Tracking 3.0 prototype</title>
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/components.css">
+</head>
+<body data-page="onboarding" data-shell="wizard">
+<div class="wp-content">
+<main class="page wcct-app" id="wcct-app">
+
+	<!-- Step 1: Welcome -->
+	<section class="card onb-step" data-onb-step="1" aria-labelledby="onb1-title">
+		<div class="onb-body">
+			<div class="stack-sm">
+				<h1 class="page-title is-hero" id="onb1-title">Show your ads which visits turn into sales</h1>
+				<p class="lead">Conversion Tracking sends your store's product views, carts and purchases to Meta, Google and X, so each platform knows which ads led to a sale. Setup takes about 3 minutes.</p>
+			</div>
+			<ul class="feature-list">
+				<li><span data-icon="check"></span>Each purchase counted once, failed orders skipped</li>
+				<li><span data-icon="check"></span>Respects your visitors' cookie choices</li>
+				<li><span data-icon="check"></span>An Activity log that shows what was sent for each order</li>
+			</ul>
+			<div><button type="button" class="btn primary lg" data-onb-next>Start</button></div>
+			<div class="onb-optin">
+				<label class="check"><input type="checkbox" id="onb-usage" data-onb-usage><span>Share anonymous usage data to help improve the plugin.</span></label>
+				<div><button type="button" class="link-btn" aria-expanded="false" aria-controls="onb-shared" data-onb-shared>What's shared</button></div>
+				<ul class="onb-shared" id="onb-shared" hidden>
+					<li>Your WordPress, WooCommerce and PHP versions</li>
+					<li>Which platforms you connect, never your IDs</li>
+					<li>Which settings are on or off</li>
+					<li>Never customer details, order data or your site address</li>
+				</ul>
+			</div>
+		</div>
+		<div class="onb-foot">
+			<a class="btn ghost" href="index.html" data-onb-skip>Skip for now</a>
+		</div>
+	</section>
+
+	<!-- Step 2: Pick platforms (the pick-platforms content) -->
+	<section class="card onb-step" data-onb-step="2" aria-labelledby="onb2-title" hidden>
+		<div class="onb-body">
+			<div class="stack-sm">
+				<h1 class="page-title is-hero" id="onb2-title">Where do you run ads?</h1>
+				<p class="lead">Pick the platforms you use today. You can add more later. Nothing is sent until you connect one.</p>
+			</div>
+			<div class="tile-grid">
+				<button type="button" class="pick-tile" data-platform="meta" aria-pressed="true">
+					<span class="pill ok no-dot popular">Popular</span>
+					<span class="tick"><span data-icon="check"></span></span>
+					<span class="logo lg"><img src="assets/logos/meta.svg" alt=""></span>
+					<span><span class="pick-tile-name">Meta</span><span class="pick-tile-desc">Facebook and Instagram ads</span></span>
+				</button>
+				<button type="button" class="pick-tile" data-platform="google" aria-pressed="true">
+					<span class="pill ok no-dot popular">Popular</span>
+					<span class="tick"><span data-icon="check"></span></span>
+					<span class="logo lg"><img src="assets/logos/google-analytics.svg" alt=""></span>
+					<span><span class="pick-tile-name">Google</span><span class="pick-tile-desc">Analytics, Ads, or both</span></span>
+				</button>
+				<button type="button" class="pick-tile" data-platform="x" aria-pressed="false">
+					<span class="tick"><span data-icon="check"></span></span>
+					<span class="logo lg"><img src="assets/logos/x.svg" alt=""></span>
+					<span><span class="pick-tile-name">X</span><span class="pick-tile-desc">formerly Twitter</span></span>
+				</button>
+				<button type="button" class="pick-tile" data-platform="microsoft" aria-pressed="false">
+					<span class="tick"><span data-icon="check"></span></span>
+					<span class="logo lg"><img src="assets/logos/microsoft.svg" alt=""></span>
+					<span><span class="pick-tile-name">Microsoft Advertising <span class="pro-badge" data-when="plan=free"><span data-icon="pui-crown"></span>PRO</span></span><span class="pick-tile-desc">Bing and Microsoft Start ads</span></span>
+				</button>
+				<button type="button" class="pick-tile" data-platform="custom" aria-pressed="false">
+					<span class="tick"><span data-icon="check"></span></span>
+					<span class="logo lg"><img src="assets/logos/custom.svg" alt=""></span>
+					<span><span class="pick-tile-name">Custom script</span><span class="pick-tile-desc">Paste any other tag</span></span>
+				</button>
+				<div class="pick-tile is-soon">TikTok and Pinterest arrive in a later update. <a href="#">Tell us if you need them sooner.</a></div>
+			</div>
+		</div>
+		<div class="onb-foot">
+			<button type="button" class="btn ghost" data-onb-back>Back</button>
+			<p class="pick-count" data-pick-count aria-live="polite">2 selected.</p>
+			<a class="btn ghost push" href="index.html" data-onb-skip>Skip for now</a>
+			<button type="button" class="btn primary" data-onb-next data-pick-continue>Continue</button>
+		</div>
+	</section>
+
+	<!-- Step 3: Connect, one panel per picked platform. Advanced settings stay on the Platforms page. -->
+	<section class="card onb-step" data-onb-step="3" aria-labelledby="onb3-title" hidden>
+		<div class="onb-body">
+			<div class="stack-sm">
+				<h1 class="page-title is-hero" id="onb3-title">Connect your platforms</h1>
+				<p class="lead">Paste each ID. We check the format as you type. The recommended events are on, so most stores need nothing else.</p>
+			</div>
+
+			<section class="onb-panel" data-onb-panel="meta" aria-labelledby="onb-meta-title">
+				<div class="onb-panel-head">
+					<span class="logo"><img src="assets/logos/meta.svg" alt=""></span>
+					<h2 class="card-title" id="onb-meta-title">Meta</h2>
+					<span class="pill off" data-onb-status>Not connected</span>
+				</div>
+				<div class="field">
+					<label for="onb-meta-id">Pixel ID</label>
+					<input type="text" id="onb-meta-id" placeholder="15 or 16 digits, numbers only" inputmode="numeric" autocomplete="off" data-onb-id="meta" data-pattern="^\d{15,16}$" aria-describedby="onb-meta-hint onb-meta-good onb-meta-bad">
+					<p class="field-hint" id="onb-meta-hint">In Meta Events Manager, open your data source, then Settings. The Pixel ID is the number at the top.</p>
+					<p class="field-good" id="onb-meta-good" hidden><span data-icon="circle-check"></span><span>Looks like a Pixel ID.</span></p>
+					<p class="field-bad" id="onb-meta-bad" hidden><span data-icon="triangle-alert"></span><span>Pixel IDs are 15 or 16 digits, numbers only.</span></p>
+				</div>
+				<p class="small muted" data-onb-events="meta"></p>
+			</section>
+
+			<section class="onb-panel" data-onb-panel="google" aria-labelledby="onb-google-title">
+				<div class="onb-panel-head">
+					<span class="logo"><img src="assets/logos/google-analytics.svg" alt=""></span>
+					<h2 class="card-title" id="onb-google-title">Google</h2>
+					<span class="pill off" data-onb-status>Not connected</span>
+				</div>
+				<div class="field">
+					<label for="onb-ga-id">Analytics Measurement ID</label>
+					<input type="text" id="onb-ga-id" placeholder="Starts with G-" autocomplete="off" data-onb-id="google" data-pattern="^G-[A-Z0-9]{6,}$" aria-describedby="onb-ga-good onb-ga-bad">
+					<p class="field-good" id="onb-ga-good" hidden><span data-icon="circle-check"></span><span>Looks right.</span></p>
+					<p class="field-bad" id="onb-ga-bad" hidden><span data-icon="triangle-alert"></span><span>Measurement IDs start with G- followed by letters and numbers. Find it under Admin, then Data streams.</span></p>
+				</div>
+				<div class="field">
+					<label for="onb-aw-id">Ads conversion ID (optional)</label>
+					<input type="text" id="onb-aw-id" placeholder="Starts with AW-" autocomplete="off" data-onb-id="google" data-optional data-pattern="^AW-\d{6,}$" aria-describedby="onb-aw-good onb-aw-bad">
+					<p class="field-good" id="onb-aw-good" hidden><span data-icon="circle-check"></span><span>Looks right.</span></p>
+					<p class="field-bad" id="onb-aw-bad" hidden><span data-icon="triangle-alert"></span><span>Starts with AW- followed by numbers.</span></p>
+				</div>
+				<div class="field">
+					<label for="onb-aw-label">Ads conversion label (optional)</label>
+					<input type="text" id="onb-aw-label" placeholder="Letters and numbers after the slash" autocomplete="off" data-onb-id="google" data-optional data-pattern="^[A-Za-z0-9_-]{10,}$" aria-describedby="onb-label-good onb-label-bad">
+					<p class="field-good" id="onb-label-good" hidden><span data-icon="circle-check"></span><span>Looks right.</span></p>
+					<p class="field-bad" id="onb-label-bad" hidden><span data-icon="triangle-alert"></span><span>Looks incomplete. Labels are usually 10 or more letters and numbers.</span></p>
+				</div>
+				<p class="small muted" data-onb-events="google"></p>
+			</section>
+
+			<section class="onb-panel" data-onb-panel="x" aria-labelledby="onb-x-title">
+				<div class="onb-panel-head">
+					<span class="logo"><img src="assets/logos/x.svg" alt=""></span>
+					<h2 class="card-title" id="onb-x-title">X</h2>
+					<span class="pill off" data-onb-status>Not connected</span>
+				</div>
+				<div class="field">
+					<label for="onb-x-id">Pixel ID</label>
+					<input type="text" id="onb-x-id" placeholder="5 letters and numbers, like o8x2k" autocomplete="off" data-onb-id="x" data-pattern="^[a-z0-9]{5}$" aria-describedby="onb-x-good onb-x-bad">
+					<p class="field-good" id="onb-x-good" hidden><span data-icon="circle-check"></span><span>Looks right.</span></p>
+					<p class="field-bad" id="onb-x-bad" hidden><span data-icon="triangle-alert"></span><span>X Pixel IDs are 5 letters and numbers.</span></p>
+				</div>
+				<div class="field">
+					<label for="onb-x-event">Purchase event ID</label>
+					<input type="text" id="onb-x-event" placeholder="Starts with tw-" autocomplete="off" data-onb-id="x" data-pattern="^tw-[a-z0-9]{5}-[a-z0-9]{5}$" aria-describedby="onb-xe-good onb-xe-bad">
+					<p class="field-good" id="onb-xe-good" hidden><span data-icon="circle-check"></span><span>Looks right.</span></p>
+					<p class="field-bad" id="onb-xe-bad" hidden><span data-icon="triangle-alert"></span><span>Starts with tw-, then your Pixel ID and the event code, like tw-o8x2k-o8x3a.</span></p>
+				</div>
+				<p class="small muted" data-onb-events="x"></p>
+			</section>
+
+			<section class="onb-panel" data-onb-panel="microsoft" aria-labelledby="onb-ms-title">
+				<div class="onb-panel-head">
+					<span class="logo"><img src="assets/logos/microsoft.svg" alt=""></span>
+					<h2 class="card-title" id="onb-ms-title">Microsoft Advertising</h2>
+					<span class="pill off" data-onb-status>Not connected</span>
+				</div>
+				<p class="small muted" data-when="plan=free">Microsoft Advertising is part of Pro, so we'll leave it out of setup. It stays in your Platforms list.</p>
+				<div class="field" data-when="plan=pro">
+					<label for="onb-uet-id">UET tag ID</label>
+					<input type="text" id="onb-uet-id" placeholder="7 to 9 digits, numbers only" inputmode="numeric" autocomplete="off" data-onb-id="microsoft" data-pattern="^\d{7,9}$" aria-describedby="onb-uet-good onb-uet-bad">
+					<p class="field-good" id="onb-uet-good" hidden><span data-icon="circle-check"></span><span>Looks like a UET tag ID.</span></p>
+					<p class="field-bad" id="onb-uet-bad" hidden><span data-icon="triangle-alert"></span><span>UET tag IDs are 7 to 9 digits.</span></p>
+				</div>
+				<p class="small muted" data-onb-events="microsoft" data-when="plan=pro"></p>
+			</section>
+
+			<section class="onb-panel" data-onb-panel="custom" aria-labelledby="onb-custom-title">
+				<div class="onb-panel-head">
+					<span class="logo"><img src="assets/logos/custom.svg" alt=""></span>
+					<h2 class="card-title" id="onb-custom-title">Custom script</h2>
+				</div>
+				<p class="small muted">Add your script on the Platforms page after setup. You'll pick where it runs there.</p>
+			</section>
+		</div>
+		<div class="onb-foot">
+			<button type="button" class="btn ghost" data-onb-back>Back</button>
+			<p class="pick-count" data-onb-connect-note aria-live="polite">Add a valid ID for at least one platform.</p>
+			<a class="btn ghost push" href="index.html" data-onb-skip>Skip for now</a>
+			<button type="button" class="btn primary" data-onb-next data-onb-connect-next>Continue</button>
+		</div>
+	</section>
+
+	<!-- Step 4: Europe -->
+	<section class="card onb-step" data-onb-step="4" aria-labelledby="onb4-title" hidden>
+		<div class="onb-body">
+			<div class="stack-sm">
+				<h1 class="page-title is-hero" id="onb4-title">Do you sell to customers in Europe?</h1>
+				<p class="lead">EU law asks you to track visitors only after they agree in a cookie banner.</p>
+			</div>
+			<fieldset class="radio-list onb-narrow">
+				<legend class="sr-only">Do you sell to customers in Europe?</legend>
+				<label class="radio-card"><input type="radio" name="onb-eu" value="yes" data-onb-eu><span><span class="radio-title">Yes</span><span class="radio-desc">Turn on Respect cookie choices for every platform.</span></span></label>
+				<label class="radio-card"><input type="radio" name="onb-eu" value="no" data-onb-eu><span><span class="radio-title">No</span><span class="radio-desc">Leave it off. You can turn it on later in each platform.</span></span></label>
+			</fieldset>
+			<section class="notice info stack-sm onb-narrow" data-onb-eu-note="yes" hidden aria-label="Consent plugin">
+				<p class="small"><b>Respect cookie choices is on.</b> It works with a consent plugin that supports the WordPress Consent API, such as Complianz, CookieYes or Cookiebot. Without one, your tags wait for a choice that never comes and EU sales go untracked.</p>
+			</section>
+			<p class="small muted onb-narrow" data-onb-eu-note="no" hidden>Respect cookie choices stays off.</p>
+		</div>
+		<div class="onb-foot">
+			<button type="button" class="btn ghost" data-onb-back>Back</button>
+			<a class="btn ghost push" href="index.html" data-onb-skip>Skip for now</a>
+			<button type="button" class="btn primary" data-onb-next data-onb-eu-next disabled>Continue</button>
+		</div>
+	</section>
+
+	<!-- Step 5: Verify -->
+	<section class="card onb-step" data-onb-step="5" aria-labelledby="onb5-title" hidden>
+		<div class="onb-body">
+			<div class="stack-sm">
+				<h1 class="page-title is-hero" id="onb5-title">Check it works</h1>
+				<p class="lead">Open your store in a new tab. This turns green when the first event is sent.</p>
+			</div>
+			<div><a class="btn outline" href="#" target="_blank" rel="noopener"><span data-icon="external-link"></span>Open your store</a></div>
+			<ul class="onb-verify" data-onb-verify aria-live="polite"></ul>
+			<p class="small muted" data-onb-verify-empty hidden>No platform is connected yet. Go back to connect one, or skip for now.</p>
+			<div class="proto-action">
+				<span class="proto-tag">PROTOTYPE</span>
+				<button type="button" data-onb-simulate>Simulate first event</button>
+				<span>Stands in for a real visit to your store.</span>
+			</div>
+		</div>
+		<div class="onb-foot">
+			<button type="button" class="btn ghost" data-onb-back>Back</button>
+			<a class="btn ghost push" href="index.html" data-onb-skip>Skip for now</a>
+			<button type="button" class="btn primary" data-onb-next data-onb-verify-next disabled>Continue</button>
+		</div>
+	</section>
+
+	<!-- Step 6: Done -->
+	<section class="card onb-step" data-onb-step="6" aria-labelledby="onb6-title" hidden>
+		<div class="onb-body">
+			<div class="stack-sm">
+				<span class="summary-icon ok"><span data-icon="circle-check"></span></span>
+				<h1 class="page-title is-hero" id="onb6-title">You're set up</h1>
+				<p class="lead">Here's what's working now. Every order shows in the Activity log as it's sent.</p>
+			</div>
+			<ul class="feature-list" data-onb-summary></ul>
+		</div>
+		<div class="onb-foot">
+			<button type="button" class="btn primary lg push" data-onb-finish>Go to dashboard</button>
+		</div>
+	</section>
+
+</main>
+</div>
+<script src="assets/icons.js"></script>
+<script src="assets/config.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
