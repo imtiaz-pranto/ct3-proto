@@ -14,7 +14,7 @@
 	<div class="page-head">
 		<div>
 			<h1 class="page-title">Settings</h1>
-			<p class="page-sub">Alerts, who can manage tracking, and your plan.</p>
+			<p class="page-sub">Alerts, who can manage tracking, setup and your plan.</p>
 		</div>
 	</div>
 
@@ -22,6 +22,7 @@
 		<nav class="settings-nav" aria-label="Settings sections">
 			<a href="#alerts" data-settings-link="alerts"><span data-icon="bell"></span>Alerts</a>
 			<a href="#access" data-settings-link="access"><span data-icon="users"></span>Integration access<span class="pro-badge" data-when="plan=free"><span data-icon="pui-crown"></span>PRO</span></a>
+			<a href="#setup" data-settings-link="setup"><span data-icon="refresh-cw"></span>Setup</a>
 			<a href="#plan" data-settings-link="plan"><span data-icon="crown"></span>Plan</a>
 		</nav>
 
@@ -164,6 +165,22 @@
 				</div>
 			</form>
 		</dialog>
+
+			<section class="card is-clip" id="setup" data-settings-panel aria-labelledby="setup-title">
+				<div class="detail-head">
+					<span class="logo"><span data-icon="refresh-cw"></span></span>
+					<div class="detail-head-text">
+						<h2 class="detail-title" id="setup-title">Setup</h2>
+						<p class="detail-desc">The guided setup you saw when you installed the plugin.</p>
+					</div>
+				</div>
+				<div>
+					<div class="card-row">
+						<div class="event-row-text"><div class="option-title">Setup wizard</div><div class="option-desc" data-setup-desc>Walk through platforms, Europe and the first event again. Your current settings are filled in, and nothing changes unless you finish.</div></div>
+						<a class="btn outline push" href="onboarding.html?rerun=1" data-setup-rerun>Run setup wizard again</a>
+					</div>
+				</div>
+			</section>
 
 			<section class="card is-clip" id="plan" data-settings-panel aria-labelledby="tiers-title">
 				<div class="detail-head">

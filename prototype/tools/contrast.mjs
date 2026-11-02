@@ -36,6 +36,8 @@ runs.push(['index', { plan: 'free', install: 'new' }], ['index', { plan: 'free',
 	['settings#access', { plan: 'pro' }, openRole], ['settings#access', { plan: 'pro', install: 'upgrade' }]);
 for (const step of [2, 3, 4, 5, 6]) for (const plan of ['free', 'pro']) runs.push([`onboarding?step=${step}`, { plan, ...wizard, verified: step === 6 ? 'yes' : 'no' }]);
 runs.push(['onboarding?step=5', { plan: 'free', ...wizard, verified: 'yes' }]);
+// Settings > Setup > Run setup wizard again (2026-11-02).
+runs.push(['onboarding?rerun=1', { plan: 'free', usage: 'yes' }], ['onboarding?rerun=1&step=2', { plan: 'pro' }], ['onboarding?rerun=1&step=6', { plan: 'pro' }]);
 for (const migration of ['done', 'progress', 'attention']) for (const plan of ['free', 'pro']) runs.push(['whats-new', { plan, install: 'upgrade', migration }]);
 
 const browser = await chromium.launch();

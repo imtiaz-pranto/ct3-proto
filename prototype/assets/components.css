@@ -262,6 +262,7 @@ p { margin: 0; }
 .card-title { font-size: 16px; font-weight: 500; }
 .card-row { display: flex; align-items: center; gap: 16px; padding: 16px 24px; border-top: 1px solid var(--border); }
 .card-row:first-child { border-top: 0; }
+.card-row > .push { margin-left: auto; flex: none; }
 .card-row.is-stacked { flex-direction: column; align-items: stretch; gap: 8px; }
 
 /* -------------------------------------------------------------- .notice
@@ -791,7 +792,7 @@ a.platform-card:hover { color: inherit; box-shadow: var(--shadow-md); }
 .server-step-title { font-weight: 600; }
 .server-block { display: flex; flex-direction: column; gap: 8px; }
 .server-block h4,
-.server-upgrade h4 { font-size: 13px; font-weight: 600; margin: 0; }
+.server-upgrade h4 { font-size: 13px; font-weight: 600; margin: 0; display: flex; align-items: center; gap: 8px; }
 .server-upgrade { display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: var(--radius-lg); background: var(--pro-soft); }
 .compare-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .compare-table th,

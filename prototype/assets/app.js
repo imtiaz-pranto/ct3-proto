@@ -43,7 +43,9 @@
 		onbPicked: 'meta,google',
 		onbConnected: '',
 		eu: 'unset',
-		verified: 'no'
+		verified: 'no',
+		// Usage-data opt-in, saved when the wizard is finished.
+		usage: 'no'
 	};
 
 	var GLOBAL_STATES = [
@@ -651,12 +653,15 @@
 	 * deduplicates by event ID. There is no server-only option anywhere.
 	 * Free/Pro split per decision C1, confirmed 2026-10-28: Free sends Purchase and
 	 * the shopping steps with basic matching; Pro sends every event with
-	 * full matching.
+	 * full matching. Shown as not final in the UI (2026-11-02): a "Not
+	 * final" tag and "Plan details may change." wherever the split shows.
 	 */
 	function serverSection(el) {
 		var key = el.getAttribute('data-server-section');
 		var p = CONFIG.platforms[key];
 		var testMode = false;
+		var notFinal = '<span class="tag">Not final</span>';
+		var mayChange = '<p class="small muted">Plan details may change.</p>';
 
 		function render() {
 			if (!serverOn(key)) {
@@ -687,7 +692,7 @@
 					'<input type="text" id="server-token-' + key + '" placeholder="Starts with EAA" autocomplete="off" spellcheck="false"></div></li></ol>' +
 					'<div><button type="button" class="btn primary" data-server-connect>Connect and send a test event</button></div>';
 			} else {
-				h += '<div class="server-block"><h4>What\'s being sent</h4><p class="small">' +
+				h += '<div class="server-block"><h4>What\'s being sent ' + notFinal + '</h4><p class="small">' +
 					(pro ? 'Every event that\'s on in the table above, built from your store\'s own records.'
 						: esc(freeEvents.join(', ').replace(/, ([^,]*)$/, ' and $1')) + ', built from your store\'s own records.') +
 					' Each copy carries the same event ID as the browser, so ' + esc(p.name) + ' counts it once.</p></div>' +
@@ -699,7 +704,7 @@
 					'<div class="server-block"><h4>Customer details shared</h4><p class="small">' +
 					(pro ? 'Email, phone, name, city, zip, customer ID, ad click ID, IP address and browser.'
 						: 'Email, phone, ad click ID, IP address and browser.') +
-					' They\'re scrambled before they leave your store, so ' + esc(p.name) + ' can match them to people but never sees them in plain text. Only sent when the shopper allows marketing cookies.</p></div>' +
+					' They\'re scrambled before they leave your store, so ' + esc(p.name) + ' can match them to people but never sees them in plain text. Only sent when the shopper allows marketing cookies.</p>' + mayChange + '</div>' +
 					'<div class="server-block"><h4>Connection</h4>' +
 					'<div class="field"><label for="server-token-' + key + '">Access token</label>' +
 					'<input type="text" id="server-token-' + key + '" value="••••••••a91F" autocomplete="off" spellcheck="false"></div>' +
@@ -710,12 +715,12 @@
 					'</div>';
 			}
 			if (!pro) {
-				h += '<div class="server-upgrade"><h4>Free and Pro</h4>' +
+				h += '<div class="server-upgrade"><h4>Free and Pro ' + notFinal + '</h4>' +
 					'<table class="compare-table"><thead><tr><th scope="col"><span class="sr-only">Feature</span></th><th scope="col">Free</th><th scope="col">Pro</th></tr></thead><tbody>' +
 					'<tr><th scope="row">Events from the server</th><td>Purchase and the shopping steps</td><td>Every event</td></tr>' +
 					'<tr><th scope="row">Customer matching</th><td>Email, phone, click ID, IP, browser</td><td>Adds name, city, zip and customer ID</td></tr>' +
 					'<tr><th scope="row">Other platforms</th><td>Browser tracking</td><td>Server sending as each platform supports it</td></tr>' +
-					'</tbody></table>' +
+					'</tbody></table>' + mayChange +
 					'<div><a class="btn pro" href="settings.html#plan">Upgrade to Pro' + ic('pui-crown') + '</a></div></div>';
 			}
 			el.innerHTML = h + '</div></div>';
@@ -845,15 +850,29 @@
 		// Sample IDs fill the panels of platforms connected earlier, so a
 		// resumed setup shows what was entered.
 		var SAMPLE = { 'onb-meta-id': '1234567890123456', 'onb-ga-id': 'G-7KQ2M9PX3L', 'onb-x-id': 'o8x2k', 'onb-x-event': 'tw-o8x2k-o8x3a', 'onb-uet-id': '343012345' };
-		var param = Number(new URLSearchParams(window.location.search).get('step'));
-		var current = param >= 1 && param <= 6 ? param : Math.max(1, Number(state.onbAt));
+		var params = new URLSearchParams(window.location.search);
+		var param = Number(params.get('step'));
+		// Settings > Setup > Run setup wizard again (?rerun=1): the wizard
+		// works on a draft filled from the current settings. Close and the
+		// skip links leave without saving; only finishing saves.
+		var rerun = params.get('rerun') === '1' && state.install !== 'new';
+		var live = state.connection === 'connected' ? ['meta', 'google', 'x'] : ['google'];
+		var wiz = rerun ? { onbAt: '1', onbPicked: live.join(','), onbConnected: live.join(','), eu: 'no', verified: 'yes', usage: state.usage } : state;
+		function put(key, value) {
+			if (rerun) {
+				wiz[key] = value;
+			} else {
+				setState(key, value);
+			}
+		}
+		var current = param >= 1 && param <= 6 ? param : (rerun ? 1 : Math.max(1, Number(state.onbAt)));
 
 		function list(key) {
-			return state[key] ? state[key].split(',') : [];
+			return wiz[key] ? wiz[key].split(',') : [];
 		}
 		function reach(n) {
-			if (n > Number(state.onbAt)) {
-				setState('onbAt', String(n));
+			if (n > Number(wiz.onbAt)) {
+				put('onbAt', String(n));
 			}
 		}
 		var render = { 2: renderPick, 3: renderConnect, 4: renderEu, 5: renderVerify, 6: renderDone };
@@ -888,7 +907,22 @@
 			b.addEventListener('click', function () { go(current - 1, true); });
 		});
 
-		// Step 1: the usage opt-in starts off; "What's shared" opens the list.
+		// Step 1: the usage opt-in shows the saved choice (off on a new
+		// install); "What's shared" opens the list.
+		var usage = document.querySelector('[data-onb-usage]');
+		usage.checked = wiz.usage === 'yes';
+		usage.addEventListener('change', function () {
+			if (rerun) {
+				wiz.usage = usage.checked ? 'yes' : 'no';
+			}
+		});
+		if (rerun) {
+			document.querySelectorAll('[data-onb-skip]').forEach(function (a) {
+				a.textContent = 'Close without saving';
+				a.setAttribute('href', 'settings.html#setup');
+			});
+			document.querySelector('[data-onb-finish]').textContent = 'Save and go to Settings';
+		}
 		var shared = document.querySelector('[data-onb-shared]');
 		shared.addEventListener('click', function () {
 			var list = document.getElementById('onb-shared');
@@ -911,7 +945,7 @@
 				var picked = Array.prototype.filter.call(tiles, function (o) {
 					return o === t ? o.getAttribute('aria-pressed') !== 'true' : o.getAttribute('aria-pressed') === 'true';
 				}).map(function (o) { return o.getAttribute('data-platform'); });
-				setState('onbPicked', picked.join(','));
+				put('onbPicked', picked.join(','));
 				renderPick();
 			});
 		});
@@ -953,7 +987,7 @@
 			connectNote.textContent = connected.length
 				? connected.length + ' of ' + picked.filter(function (k) { return k !== 'custom' && (k !== 'microsoft' || state.plan === 'pro'); }).length + ' ready to connect.'
 				: 'Add a valid ID for at least one platform.';
-			setState('onbConnected', connected.join(','));
+			put('onbConnected', connected.join(','));
 		}
 		function renderConnect() {
 			var picked = list('onbPicked');
@@ -978,13 +1012,13 @@
 		// Step 4: Europe. Yes turns on Respect cookie choices.
 		var euNext = document.querySelector('[data-onb-eu-next]');
 		function renderEu() {
-			document.querySelectorAll('[data-onb-eu]').forEach(function (r) { r.checked = r.value === state.eu; });
-			document.querySelectorAll('[data-onb-eu-note]').forEach(function (n) { n.hidden = n.getAttribute('data-onb-eu-note') !== state.eu; });
-			euNext.disabled = state.eu === 'unset';
+			document.querySelectorAll('[data-onb-eu]').forEach(function (r) { r.checked = r.value === wiz.eu; });
+			document.querySelectorAll('[data-onb-eu-note]').forEach(function (n) { n.hidden = n.getAttribute('data-onb-eu-note') !== wiz.eu; });
+			euNext.disabled = wiz.eu === 'unset';
 		}
 		document.querySelectorAll('[data-onb-eu]').forEach(function (r) {
 			r.addEventListener('change', function () {
-				setState('eu', r.value);
+				put('eu', r.value);
 				renderEu();
 			});
 		});
@@ -1000,7 +1034,7 @@
 		}
 		function renderVerify() {
 			var connected = list('onbConnected');
-			var done = state.verified === 'yes';
+			var done = wiz.verified === 'yes';
 			verify.innerHTML = connected.map(function (k) { return verifyRow(k, done); }).join('');
 			hydrateIcons(verify);
 			document.querySelector('[data-onb-verify-empty]').hidden = connected.length > 0;
@@ -1015,7 +1049,7 @@
 					row.outerHTML = verifyRow(row.getAttribute('data-onb-verify-row'), true);
 					hydrateIcons(verify);
 					if (i === rows.length - 1) {
-						setState('verified', 'yes');
+						put('verified', 'yes');
 						verifyNext.disabled = false;
 					}
 				}, 400 * (i + 1));
@@ -1030,13 +1064,19 @@
 				var n = CONFIG.platforms[k].events.filter(function (e) { return e.rec; }).length;
 				return names[k] + ': sending ' + n + ' recommended events';
 			});
-			rows.push('Respect cookie choices: ' + (state.eu === 'yes' ? 'on' : 'off'));
+			rows.push('Respect cookie choices: ' + (wiz.eu === 'yes' ? 'on' : 'off'));
 			rows.push('Activity log: recording every order');
 			var summary = document.querySelector('[data-onb-summary]');
 			summary.innerHTML = rows.map(function (t) { return '<li>' + ic('check') + '<span>' + esc(t) + '</span></li>'; }).join('');
 			hydrateIcons(summary);
 		}
 		document.querySelector('[data-onb-finish]').addEventListener('click', function () {
+			state.usage = usage.checked ? 'yes' : 'no';
+			if (rerun) {
+				save();
+				window.location.href = 'settings.html#setup';
+				return;
+			}
 			['onbAt', 'onbPicked', 'onbConnected', 'eu', 'verified'].forEach(function (k) { state[k] = DEFAULTS[k]; });
 			state.install = 'working';
 			save();
@@ -1289,6 +1329,14 @@
 		}
 		window.addEventListener('hashchange', show);
 		show();
+
+		// Setup: a store still in its first setup continues it instead.
+		var rerunLink = document.querySelector('[data-setup-rerun]');
+		if (rerunLink && state.install === 'new') {
+			rerunLink.textContent = 'Continue setup';
+			rerunLink.setAttribute('href', 'onboarding.html');
+			document.querySelector('[data-setup-desc]').textContent = 'Pick up the setup where you left it.';
+		}
 
 		// Role access: only Administrator on a new install. Ticking a role asks
 		// first; Cancel leaves it unticked. Upgrades keep the roles they had.

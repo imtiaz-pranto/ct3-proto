@@ -319,6 +319,99 @@ await check('Settings > Alerts: 3.0 has only the dashboard and Doctor rows; 3.1 
 	await setVersion(page, '3.0');
 });
 
+const savedState = (page) => page.evaluate(() => JSON.parse(window.localStorage.getItem('wcct-proto-v1') || '{}'));
+
+await check('Settings > Alerts 3.0: in-app rows only, no email wording', async () => {
+	await page.goto(url('settings'));
+	const text = await page.locator('#alerts').innerText();
+	expect(!/e-?mail/i.test(text), '3.0 Alerts mentions email: ' + text.replace(/\s+/g, ' ').slice(0, 200));
+	expect((await page.locator('#alerts input, #alerts textarea').count()) === 2, '3.0 Alerts should hold only the 2 switches');
+});
+
+await check('Settings > Setup: Run setup wizard again opens the wizard pre-filled from current settings (3.0 and 3.1)', async () => {
+	for (const v of ['3.0', '3.1']) {
+		await page.goto(url('settings') + '#setup');
+		if (v === '3.1') await setVersion(page, '3.1');
+		await st(page, 'usage', 'yes'); // a saved choice that differs from the default
+		await page.goto(url('settings') + '#setup');
+		expect(await visible(page, '#setup') && (await page.getAttribute('[data-settings-link="setup"]', 'aria-current')) === 'page', `${v}: Setup panel not shown`);
+		const link = page.locator('[data-setup-rerun]');
+		expect((await link.textContent()).trim() === 'Run setup wizard again', `${v}: entry label`);
+		await link.click();
+		await page.waitForURL(/onboarding\.html\?rerun=1/);
+		expect((await shownStep(page)) === '1', `${v}: should open on step 1`);
+		expect(await page.isChecked('#onb-usage'), `${v}: opt-in should show the saved choice (on), not the default`);
+		const skips = await page.locator('[data-onb-skip]').evaluateAll((a) => a.map((e) => e.textContent.trim() + ' ' + e.getAttribute('href')));
+		expect(skips.length === 5 && skips.every((t) => t === 'Close without saving settings.html#setup'), `${v}: close links ` + skips.join(' | '));
+		await page.click('[data-onb-step="1"] [data-onb-next]');
+		const picked = await page.$$eval('.pick-tile[aria-pressed="true"]', (t) => t.map((e) => e.getAttribute('data-platform')).join(','));
+		expect(picked === 'meta,google,x', `${v}: picked tiles should match connected platforms, got ${picked}`);
+		await page.click('[data-pick-continue]');
+		expect((await page.inputValue('#onb-meta-id')).length >= 15, `${v}: Meta Pixel ID not pre-filled`);
+		await page.click('[data-onb-connect-next]');
+		expect(await page.isChecked('[data-onb-eu][value="no"]'), `${v}: Europe should reflect cookie choices off`);
+	}
+	await setVersion(page, '3.0');
+	await st(page, 'usage', 'no');
+});
+
+await check('Setup wizard re-run: closing or skipping changes nothing; finishing saves only the opt-in', async () => {
+	await page.goto(url('settings') + '#setup');
+	await st(page, 'usage', 'yes');
+	const before = await savedState(page);
+	// Change things, then close from step 1 and from a later step.
+	for (const leaveAt of [1, 4]) {
+		await page.goto(url('onboarding') + '?rerun=1');
+		await page.uncheck('#onb-usage');
+		await page.click('[data-onb-step="1"] [data-onb-next]');
+		await page.click('.pick-tile[data-platform="custom"]');
+		if (leaveAt === 4) {
+			await page.click('[data-pick-continue]');
+			await page.click('[data-onb-connect-next]');
+			await page.check('[data-onb-eu][value="yes"]');
+		}
+		await page.click(`[data-onb-step="${leaveAt === 1 ? 2 : 4}"] [data-onb-skip]`);
+		await page.waitForURL(/settings\.html#setup/);
+		const after = await savedState(page);
+		expect(JSON.stringify(after) === JSON.stringify(before), `state changed after closing at step ${leaveAt}: ` + JSON.stringify(after));
+		expect(await visible(page, '#setup'), 'close should land on Settings > Setup');
+	}
+	// Browser back / closing the tab also saves nothing: the draft never touches storage.
+	await page.goto(url('onboarding') + '?rerun=1');
+	await page.uncheck('#onb-usage');
+	await page.goto(url('settings') + '#setup');
+	expect(JSON.stringify(await savedState(page)) === JSON.stringify(before), 'leaving the page changed state');
+	// Finishing saves the opt-in and nothing else.
+	await page.goto(url('onboarding') + '?rerun=1');
+	await page.uncheck('#onb-usage');
+	await page.evaluate(() => { document.querySelectorAll('[data-onb-step]').forEach((s) => { s.hidden = s.getAttribute('data-onb-step') !== '6'; }); });
+	expect((await page.textContent('[data-onb-finish]')).trim() === 'Save and go to Settings', 'finish label in re-run');
+	await page.click('[data-onb-finish]');
+	await page.waitForURL(/settings\.html#setup/);
+	const saved = await savedState(page);
+	expect(saved.usage === 'no' && JSON.stringify({ ...saved, usage: 'yes' }) === JSON.stringify(before), 'finish should change only usage: ' + JSON.stringify(saved));
+	// A store still in its first setup continues it instead.
+	await st(page, 'install', 'new');
+	await page.reload(); // same URL with a hash: goto would not reload
+	expect((await page.textContent('[data-setup-rerun]')).trim() === 'Continue setup' && (await page.getAttribute('[data-setup-rerun]', 'href')) === 'onboarding.html', 'new install should offer Continue setup');
+	await st(page, 'install', 'working');
+	await st(page, 'usage', 'no');
+});
+
+await check('3.1 server split reads as not final; 3.0 has no such tag', async () => {
+	await page.goto(url('platforms'));
+	expect(!(await page.getByText('Not final').count()) && !(await page.getByText('Plan details may change').count()), '3.0 shows the not-final tag');
+	await setVersion(page, '3.1');
+	await st(page, 'server', 'not');
+	expect((await page.textContent('.server-upgrade h4')).includes('Not final') && await page.getByText('Plan details may change.').isVisible(), '3.1 Free: table not marked not final');
+	await st(page, 'plan', 'pro');
+	await st(page, 'server', 'connected');
+	expect((await page.locator('.server-block h4').first().textContent()).includes('Not final') && await page.getByText('Plan details may change.').isVisible(), '3.1 Pro: split not marked not final');
+	await st(page, 'plan', 'free');
+	await st(page, 'server', 'not');
+	await setVersion(page, '3.0');
+});
+
 await check('Settings > Integration access: new install is admin only; ticking asks first; Cancel leaves it unticked; Give access applies', async () => {
 	await page.goto(url('settings') + '#access');
 	await st(page, 'plan', 'pro');
