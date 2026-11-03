@@ -25,6 +25,23 @@ State lives in `localStorage` under `wcct-proto-v1`, so it survives navigation. 
 
 Things that are interactive without the state bar: the onboarding wizard (Start, tile picking, IDs checked as you type, the Europe answer, the prototype-only Simulate first event, Skip for now and Continue setup), role access with its confirmation dialog (Pro), tile picking with a live count, Pause tracking (confirm dialog, then Paused and Resume), the Google radio and field checks, the events table (Recommended / All / Custom, Show more, Pro locks), Advanced settings, Custom script placements, the Catalog category search and Copy URL, the 3.1 Connect flow and Test mode, the Help drawer below 1280 px, log tabs, row detail (a dialog under 1100 px) and search (Pro, 3.1), Doctor "Check my store" (2 s), Check again on a finding, and Dismiss with Undo, Settings sections by URL hash, alert "Send a test", dashboard filter chips and chart period, the Help menu.
 
+## Feasibility decisions applied (2026-11-03)
+
+`CT/FEASIBILITY-3.0.md` §0 records them. In the prototype:
+
+- **X:** optional event-ID fields for Add to cart, Start checkout and Registration (Pro); each row stays off with "Needs its event ID" until its ID is filled in (`config.js` `needsId`).
+- **Page view:** locked on for X and Microsoft ("Always on", `always`).
+- **Google:** a Registration conversion label field (Pro).
+- **Meta:** no pixel name in the ID hint.
+- **Plan:** Pro links to WooCommerce.com instead of "Active until [DATE]".
+- **Dashboard:** reads the last 24 hours. Stats are 4 purchases tracked and 1 missed, matching the Activity log. The chart shows purchases per hour, sent or missed, with no period select. The missed card names the order and the cause, and declined cookies aren't counted.
+- **Last seen:** shows a time for Purchase only; other events show "On".
+- **Onboarding:** the usage-data opt-in is gone. The X panel notes the other IDs. Verify opens a test link.
+- **Order value:** upgraders keep "Items, tax and shipping" on Meta, X and Microsoft.
+- **Custom parameters (Meta, Pro):** up to 5, each with an event, a field name and one of 5 tokens.
+- **Catalog:** optional feed login (off) with username and password; variation copy.
+- **Custom script:** admin-only notice; the role dialog says granted roles can change pixel IDs but not scripts.
+
 ## File map
 
 | File | Screen | Reference artboard |
@@ -37,7 +54,7 @@ Things that are interactive without the state bar: the onboarding wizard (Start,
 | `platforms-microsoft.html` | Microsoft Advertising: Pro lock in Free, UET tag in Pro | thin variant of `Platforms.dc.html` |
 | `platforms-custom.html` | Custom script: three placements and the 11 placeholders | replaces the old Advanced page's script card |
 | `catalog.html` | Catalog (Meta tab): feed status, product IDs, exclusions, setup steps; Pro lock in Free | new, 2026-10-28 |
-| `settings.html` | Settings with a section list: Alerts (default, `#alerts`), Integration access by role (Pro, `#access`), Setup (`#setup`: Run setup wizard again, which opens `onboarding.html?rerun=1` on a draft filled from the current settings; Close without saving leaves state untouched, finishing saves only the usage opt-in) and Plan with the Free / Pro comparison (`#plan`). Replaces the old Alerts page | `Alerts.dc.html` for the Alerts and Plan sections |
+| `settings.html` | Settings with a section list: Alerts (default, `#alerts`), Integration access by role (Pro, `#access`), Setup (`#setup`: Run setup wizard again, which opens `onboarding.html?rerun=1` on a draft filled from the current settings; Close without saving leaves state untouched, finishing returns to Settings; the real build saves the draft) and Plan with the Free / Pro comparison (`#plan`). Replaces the old Alerts page | `Alerts.dc.html` for the Alerts and Plan sections |
 | `log.html` | Activity log | `Log.dc.html` |
 | `doctor.html` | Tracking Doctor. 3.0: 7 checks on local data (6 on Free), collapsed Working list. 3.1: the extended checks | `Doctor.dc.html` |
 | `whats-new.html` | Upgrader "what's new", with the migration states and the previous-settings download | `WhatsNew.dc.html` |
@@ -115,4 +132,4 @@ Layout: full width beside the WP menu with 32 px side padding, no max-width. Pla
 cd prototype/tools && npm install && npm run verify
 ```
 
-`verify` runs, in order: `html-validate` on the page files (`html-validate:recommended`), `check-links.mjs` (every local link and asset resolves from `file://`, every page is reachable), `contrast.mjs` (every visible text colour against the background it sits on, all pages and states, threshold 4.5:1; since 2026-11-02 it also focuses every enabled control and checks the focus ring against the surface it sits on, threshold 3:1; it also saves the rendered DOM to `tools/rendered/` and validates that too), `interactions.mjs` (41 checks, including layout, the help drawer, one setting per line, the events table, Catalog, Settings, role access, onboarding, migration, the Doctor and 3.1 server sending), `grep-30.mjs` (no 3.1 or server-side terms anywhere in the 3.0 state: 3.1, server, weekly, digest, export, retention, loopback, refund, Delivered, 401, daily, every day, reachable, email, alert and more, with an allow-list that says why each kept hit stays) and `screenshot.mjs` (Free and Pro at 1440 and 1920 px, extra states, 3.1 states, and a horizontal-scroll check at 1024 / 1280 / 1440 / 1920). Contrast covers every page in both plans and both versions.
+`verify` runs, in order: `html-validate` on the page files (`html-validate:recommended`), `check-links.mjs` (every local link and asset resolves from `file://`, every page is reachable), `contrast.mjs` (every visible text colour against the background it sits on, all pages and states, threshold 4.5:1; since 2026-11-02 it also focuses every enabled control and checks the focus ring against the surface it sits on, threshold 3:1; it also saves the rendered DOM to `tools/rendered/` and validates that too), `interactions.mjs` (43 checks, including layout, the help drawer, one setting per line, the events table, Catalog, Settings, role access, onboarding, migration, the Doctor and 3.1 server sending), `grep-30.mjs` (no 3.1 or server-side terms anywhere in the 3.0 state: 3.1, server, weekly, digest, export, retention, loopback, refund, Delivered, 401, daily, every day, reachable, email, alert and more, with an allow-list that says why each kept hit stays) and `screenshot.mjs` (Free and Pro at 1440 and 1920 px, extra states, 3.1 states, and a horizontal-scroll check at 1024 / 1280 / 1440 / 1920). Contrast covers every page in both plans and both versions.

@@ -40,7 +40,7 @@ const extras = [
 	['doctor', { plan: 'pro', version: '3.1' }, 'doctor-31-pro'],
 	['settings#access', { plan: 'pro' }, 'settings-access-role-modal', { prep: (p) => p.click('label:has(input[value="customer"])'), full: false }],
 	['settings#access', { plan: 'pro', install: 'upgrade' }, 'settings-access-pro-upgraded'],
-	['onboarding', { plan: 'free' }, 'onboarding-1-welcome', { prep: (p) => p.click('[data-onb-shared]') }],
+	['onboarding', { plan: 'free' }, 'onboarding-1-welcome'],
 	['onboarding?step=2', { plan: 'free', ...wizard }, 'onboarding-2-platforms'],
 	['onboarding?step=3', { plan: 'free', ...wizard }, 'onboarding-3-connect'],
 	['onboarding?step=4', { plan: 'free', ...wizard }, 'onboarding-4-europe-yes'],

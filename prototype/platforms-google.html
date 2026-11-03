@@ -76,6 +76,12 @@
 						<p class="field-bad" id="label-bad"><span data-icon="triangle-alert"></span><span>Looks incomplete. Labels are usually 10 or more letters and numbers. The Help panel shows where to copy it.</span></p>
 					</div>
 
+					<div class="field" data-google="ads" data-when="plan=pro">
+						<label for="aw-reg-label">Registration conversion label (optional)</label>
+						<input type="text" id="aw-reg-label" value="" placeholder="The label of your sign-up conversion action" autocomplete="off" aria-describedby="aw-reg-hint">
+						<p class="field-hint" id="aw-reg-hint">Each Ads conversion action has its own label. Without one, Registration goes to Analytics only.</p>
+					</div>
+
 					<section class="events" data-events="google" aria-label="Events"></section>
 
 					<section data-server-section="google"></section>
@@ -87,7 +93,7 @@
 
 					<div class="upgrade-card" data-when="plan=free"><span>Enhanced conversions (hashed customer details so Ads matches more sales) are <b>Pro</b>.</span><a class="link-strong" href="settings.html#plan">Compare plans</a></div>
 					<div class="option-row" data-when="plan=pro">
-						<div><div class="option-title">Enhanced conversions</div><div class="option-desc">Hashed customer details so Ads matches more sales. Needs cookie choices on.</div></div>
+						<div><div class="option-title">Enhanced conversions</div><div class="option-desc">Hashed customer details so Ads matches more sales. Needs cookie choices on. Turn on Enhanced conversions in Google Ads too.</div></div>
 						<label class="switch"><input type="checkbox" role="switch" checked><span class="switch-track"></span><span class="sr-only">Enhanced conversions</span></label>
 					</div>
 

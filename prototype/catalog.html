@@ -87,6 +87,20 @@
 						<button type="button" class="btn secondary sm" data-copy="feed-url"><span data-icon="copy"></span>Copy URL</button>
 					</div>
 					<p class="small muted" data-when="install=upgrade">Same URL as before, so Meta keeps fetching it.</p>
+					<div class="option-row" id="feed-login">
+						<div><div class="option-title">Ask for a login</div><div class="option-desc">Off, so Meta keeps fetching the URL as it is. If you turn it on, add the same username and password in Commerce Manager, or Meta stops updating your catalog.</div></div>
+						<label class="switch"><input type="checkbox" role="switch" data-feed-login><span class="switch-track"></span><span class="sr-only">Ask for a login</span></label>
+					</div>
+					<div class="stack-sm" data-feed-login-fields hidden>
+						<div class="field">
+							<label for="feed-user">Feed username</label>
+							<input type="text" id="feed-user" autocomplete="off">
+						</div>
+						<div class="field">
+							<label for="feed-pass">Feed password</label>
+							<input type="password" id="feed-pass" autocomplete="new-password">
+						</div>
+					</div>
 					<template data-v31>
 						<p class="notice warning small" data-when="feed=fail"><b>Usually a security plugin or a cache rule blocks Meta.</b> Allow the feed URL in that plugin, then wait for the next fetch. The <a href="doctor.html">Doctor</a> shows what answered instead.</p>
 					</template>
@@ -95,7 +109,7 @@
 				<section class="set-section" id="id-matching" aria-labelledby="ids-title">
 					<div class="set-head">
 						<h2 id="ids-title">Product IDs</h2>
-						<p>Meta matches pixel events to catalog items by ID, so the feed and the pixel must use the same one.</p>
+						<p>Meta matches pixel events to catalog items by ID, so the feed and the pixel must use the same one. Variable products are listed once per variation, grouped under their parent, and the pixel sends the variation the shopper picked.</p>
 					</div>
 					<div class="set-card">
 						<div class="set-row">

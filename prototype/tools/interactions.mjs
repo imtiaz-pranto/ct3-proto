@@ -87,7 +87,7 @@ await check('Dashboard: filter chips', async () => {
 	expect(await page.locator('[data-platform-status]:visible').count() === 3, 'all filter');
 });
 
-await check('Onboarding: Install New opens the wizard; 6-step indicator; opt-in off; What\'s shared', async () => {
+await check('Onboarding: Install New opens the wizard; 6-step indicator; no usage-data opt-in (D5)', async () => {
 	await page.goto(url('index'));
 	await st(page, 'install', 'new');
 	await page.goto(url('index'));
@@ -95,10 +95,7 @@ await check('Onboarding: Install New opens the wizard; 6-step indicator; opt-in 
 	expect((await page.locator('.topbar-steps .step').allTextContents()).join(',') === '1Welcome,2Platforms,3Connect,4Europe,5Verify,6Done', 'step indicator');
 	expect((await shownStep(page)) === '1' && (await page.getAttribute('[data-step-dot="1"]', 'aria-current')) === 'step', 'not on step 1');
 	expect(await page.getByText('about 3 minutes').isVisible(), 'about 3 minutes missing');
-	expect(!(await page.isChecked('#onb-usage')), 'usage opt-in should start off');
-	expect(!(await visible(page, '#onb-shared')), 'shared list should start closed');
-	await page.click('[data-onb-shared]');
-	expect(await visible(page, '#onb-shared') && (await page.locator('#onb-shared li').count()) === 4, 'shared list did not open');
+	expect((await page.locator('#onb-usage, [data-onb-shared]').count()) === 0, 'usage-data opt-in should be gone (decision D5)');
 	for (const n of [1, 2, 3, 4, 5]) expect(await page.locator(`[data-onb-step="${n}"] [data-onb-skip]`).count() === 1, `step ${n} has no Skip for now`);
 	expect((await page.locator('.wcct-app .upgrade-card, .wcct-app .crown-link, .wcct-app a[href*="#plan"]').count()) === 0, 'upsell inside onboarding');
 });
@@ -332,7 +329,6 @@ await check('Settings > Setup: Run setup wizard again opens the wizard pre-fille
 	for (const v of ['3.0', '3.1']) {
 		await page.goto(url('settings') + '#setup');
 		if (v === '3.1') await setVersion(page, '3.1');
-		await st(page, 'usage', 'yes'); // a saved choice that differs from the default
 		await page.goto(url('settings') + '#setup');
 		expect(await visible(page, '#setup') && (await page.getAttribute('[data-settings-link="setup"]', 'aria-current')) === 'page', `${v}: Setup panel not shown`);
 		const link = page.locator('[data-setup-rerun]');
@@ -340,7 +336,6 @@ await check('Settings > Setup: Run setup wizard again opens the wizard pre-fille
 		await link.click();
 		await page.waitForURL(/onboarding\.html\?rerun=1/);
 		expect((await shownStep(page)) === '1', `${v}: should open on step 1`);
-		expect(await page.isChecked('#onb-usage'), `${v}: opt-in should show the saved choice (on), not the default`);
 		const skips = await page.locator('[data-onb-skip]').evaluateAll((a) => a.map((e) => e.textContent.trim() + ' ' + e.getAttribute('href')));
 		expect(skips.length === 5 && skips.every((t) => t === 'Close without saving settings.html#setup'), `${v}: close links ` + skips.join(' | '));
 		await page.click('[data-onb-step="1"] [data-onb-next]');
@@ -352,17 +347,14 @@ await check('Settings > Setup: Run setup wizard again opens the wizard pre-fille
 		expect(await page.isChecked('[data-onb-eu][value="no"]'), `${v}: Europe should reflect cookie choices off`);
 	}
 	await setVersion(page, '3.0');
-	await st(page, 'usage', 'no');
 });
 
-await check('Setup wizard re-run: closing or skipping changes nothing; finishing saves only the opt-in', async () => {
+await check('Setup wizard re-run: closing or skipping changes nothing; finishing returns to Settings', async () => {
 	await page.goto(url('settings') + '#setup');
-	await st(page, 'usage', 'yes');
 	const before = await savedState(page);
 	// Change things, then close from step 1 and from a later step.
 	for (const leaveAt of [1, 4]) {
 		await page.goto(url('onboarding') + '?rerun=1');
-		await page.uncheck('#onb-usage');
 		await page.click('[data-onb-step="1"] [data-onb-next]');
 		await page.click('.pick-tile[data-platform="custom"]');
 		if (leaveAt === 4) {
@@ -378,24 +370,22 @@ await check('Setup wizard re-run: closing or skipping changes nothing; finishing
 	}
 	// Browser back / closing the tab also saves nothing: the draft never touches storage.
 	await page.goto(url('onboarding') + '?rerun=1');
-	await page.uncheck('#onb-usage');
+	await page.click('.pick-tile[data-platform="custom"]').catch(() => {});
 	await page.goto(url('settings') + '#setup');
 	expect(JSON.stringify(await savedState(page)) === JSON.stringify(before), 'leaving the page changed state');
-	// Finishing saves the opt-in and nothing else.
+	// Finishing returns to Settings. The prototype stores no platform IDs,
+	// so its saved state stays the same; the real build saves the draft.
 	await page.goto(url('onboarding') + '?rerun=1');
-	await page.uncheck('#onb-usage');
 	await page.evaluate(() => { document.querySelectorAll('[data-onb-step]').forEach((s) => { s.hidden = s.getAttribute('data-onb-step') !== '6'; }); });
 	expect((await page.textContent('[data-onb-finish]')).trim() === 'Save and go to Settings', 'finish label in re-run');
 	await page.click('[data-onb-finish]');
 	await page.waitForURL(/settings\.html#setup/);
-	const saved = await savedState(page);
-	expect(saved.usage === 'no' && JSON.stringify({ ...saved, usage: 'yes' }) === JSON.stringify(before), 'finish should change only usage: ' + JSON.stringify(saved));
+	expect(JSON.stringify(await savedState(page)) === JSON.stringify(before), 'finish changed install or progress state');
 	// A store still in its first setup continues it instead.
 	await st(page, 'install', 'new');
 	await page.reload(); // same URL with a hash: goto would not reload
 	expect((await page.textContent('[data-setup-rerun]')).trim() === 'Continue setup' && (await page.getAttribute('[data-setup-rerun]', 'href')) === 'onboarding.html', 'new install should offer Continue setup');
 	await st(page, 'install', 'working');
-	await st(page, 'usage', 'no');
 });
 
 await check('3.1 server split reads as not final; 3.0 has no such tag', async () => {
@@ -412,6 +402,62 @@ await check('3.1 server split reads as not final; 3.0 has no such tag', async ()
 	await setVersion(page, '3.0');
 });
 
+await check('Feasibility decisions (2026-11-03): X IDs, page view lock, Last seen, Google label, pixel name, custom parameters', async () => {
+	await page.goto(url('platforms-x'));
+	const xRow = (k) => page.textContent(`[data-events="x"] tr[data-ev="${k}"] .col-on`);
+	const xSeen = (k) => page.textContent(`[data-events="x"] tr[data-ev="${k}"] .col-seen`);
+	expect(await visible(page, '#x-cart-id') && await visible(page, '#x-checkout-id') && !(await visible(page, '#x-registration-id')), 'X optional ID fields (Registration is Pro only)');
+	expect((await xRow('page')).includes('Always on') && !(await page.locator('[data-events="x"] [data-ev-toggle="page"]').count()), 'X Page view should be locked on');
+	expect(await page.isChecked('[data-ev-toggle="cart"]') && await page.isDisabled('[data-ev-toggle="checkout"]') && (await xSeen('checkout')).includes('Needs its event ID'), 'X rows follow their IDs');
+	await page.fill('#x-checkout-id', 'tw-o8x2k-o8x3c');
+	expect(!(await page.isDisabled('[data-ev-toggle="checkout"]')) && await page.isChecked('[data-ev-toggle="checkout"]'), 'typing an X event ID should turn its row on');
+	expect((await xSeen('purchase')).includes('ago') && (await xSeen('cart')).trim() === 'On', 'Last seen only on Purchase');
+	await page.goto(url('platforms'));
+	expect(!(await page.getByText('Connected to "').count()), 'pixel name should be gone (B3)');
+	expect((await page.textContent('[data-events="meta"] tr[data-ev="view"] .col-seen')).trim() === 'On', 'Meta View product should show On, not a time');
+	await st(page, 'plan', 'pro');
+	await page.goto(url('platforms-google'));
+	expect(await visible(page, '#aw-reg-label'), 'Pro: Registration conversion label field');
+	await page.goto(url('platforms-microsoft'));
+	expect((await page.textContent('[data-events="microsoft"] tr[data-ev="page"] .col-on')).includes('Always on'), 'Microsoft Page view should be locked on');
+	await page.goto(url('platforms'));
+	await page.evaluate(() => { document.querySelector('details.advanced-settings').open = true; }); // not every details: the state bar is one
+	await page.$eval('#meta-params', (el) => { el.checked = true; el.dispatchEvent(new Event('change', { bubbles: true })); }); // a forced click can land on the state bar
+	expect((await page.locator('.param-box').count()) === 1, 'custom parameters start with one sample');
+	for (let i = 0; i < 4; i++) await page.click('[data-param-add]');
+	expect((await page.locator('.param-box').count()) === 5 && await page.isDisabled('[data-param-add]'), 'custom parameters stop at 5');
+	expect((await page.locator('#param-val-1 option').allTextContents()).join(',') === '{product_category},{product_sku},{product_brand},{order_coupon},{customer_type}', 'token list');
+	await page.click('[data-param-remove="4"]');
+	expect((await page.locator('.param-box').count()) === 4 && !(await page.isDisabled('[data-param-add]')), 'remove a parameter');
+	await page.goto(url('platforms-google'));
+	await st(page, 'plan', 'free');
+	expect(!(await visible(page, '#aw-reg-label')), 'Free: no Registration label field');
+});
+
+await check('Feasibility decisions: dashboard 24 h, purchases chart, evidence-based missed card; upgrade keeps full total; catalog login; script lock; Plan link', async () => {
+	await page.goto(url('index'));
+	expect((await page.textContent('.page-sub')).includes('Last 24 hours') && (await page.textContent('#chart-title')) === 'Purchases in the last 24 hours', 'dashboard should read the last 24 hours');
+	expect(!(await page.locator('[data-chart-period]').count()) && (await page.locator('[data-chart] rect.bar').count()) === 4, 'hourly purchase bars, no period select');
+	const card = await page.textContent('[aria-label="Missed sales"]');
+	expect(card.includes('Order #1311') && card.includes('by design') && !/this week/.test(card), 'missed card should name the order and the cause');
+	await page.goto(url('platforms'));
+	expect((await page.inputValue('#meta-value')) === 'items', 'new install: Items only');
+	await st(page, 'install', 'upgrade');
+	expect((await page.inputValue('#meta-value')) === 'all', 'upgrade: Items, tax and shipping (D8)');
+	await st(page, 'install', 'working');
+	await page.goto(url('platforms-custom'));
+	expect(await page.getByText('Only administrators can add or change custom scripts').isVisible(), 'custom script lock notice (D4)');
+	await page.goto(url('catalog'));
+	await st(page, 'plan', 'pro');
+	expect(!(await visible(page, '[data-feed-login-fields]')), 'feed login fields start hidden (D6)');
+	await page.click('#feed-login .switch');
+	expect(await visible(page, '#feed-user') && await visible(page, '#feed-pass'), 'feed login fields show when on');
+	await page.goto(url('settings') + '#plan');
+	await page.reload();
+	expect(await page.getByText('Manage your subscription on WooCommerce.com').isVisible() && !(await page.getByText('[DATE]').count()), 'Plan: WooCommerce.com link instead of [DATE] (B4)');
+	await st(page, 'plan', 'free');
+});
+
 await check('Settings > Integration access: new install is admin only; ticking asks first; Cancel leaves it unticked; Give access applies', async () => {
 	await page.goto(url('settings') + '#access');
 	await st(page, 'plan', 'pro');
@@ -419,7 +465,7 @@ await check('Settings > Integration access: new install is admin only; ticking a
 	await page.click('label:has(input[value="editor"])');
 	expect(await visible(page, '#role-dialog'), 'dialog did not open');
 	expect((await page.textContent('#role-dialog-title')).trim() === 'Give Editor access to Conversion Tracking?', 'title');
-	expect((await page.textContent('#role-dialog')).includes('custom scripts that run on every page of your store') && !(await visible(page, '[data-role-outside]')), 'body, or outside-line shown for Editor');
+	expect((await page.textContent('#role-dialog')).includes('Custom scripts stay with administrators') && !(await visible(page, '[data-role-outside]')), 'body, or outside-line shown for Editor');
 	expect(!(await page.isChecked('input[value="editor"]')), 'box ticked before confirming');
 	await page.click('#role-dialog button[value="cancel"]');
 	await page.waitForTimeout(100);

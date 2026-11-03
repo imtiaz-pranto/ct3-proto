@@ -24,16 +24,6 @@
 				<li><span data-icon="check"></span>An Activity log that shows what was sent for each order</li>
 			</ul>
 			<div><button type="button" class="btn primary lg" data-onb-next>Start</button></div>
-			<div class="onb-optin">
-				<label class="check"><input type="checkbox" id="onb-usage" data-onb-usage><span>Share anonymous usage data to help improve the plugin.</span></label>
-				<div><button type="button" class="link-btn" aria-expanded="false" aria-controls="onb-shared" data-onb-shared>What's shared</button></div>
-				<ul class="onb-shared" id="onb-shared" hidden>
-					<li>Your WordPress, WooCommerce and PHP versions</li>
-					<li>Which platforms you connect, never your IDs</li>
-					<li>Which settings are on or off</li>
-					<li>Never customer details, order data or your site address</li>
-				</ul>
-			</div>
 		</div>
 		<div class="onb-foot">
 			<a class="btn ghost" href="index.html" data-onb-skip>Skip for now</a>
@@ -155,6 +145,7 @@
 					<p class="field-good" id="onb-xe-good" hidden><span data-icon="circle-check"></span><span>Looks right.</span></p>
 					<p class="field-bad" id="onb-xe-bad" hidden><span data-icon="triangle-alert"></span><span>Starts with tw-, then your Pixel ID and the event code, like tw-o8x2k-o8x3a.</span></p>
 				</div>
+				<p class="small muted">Add to cart and Start checkout each need their own event ID too. Add them later in Platforms, X.</p>
 				<p class="small muted" data-onb-events="x"></p>
 			</section>
 
@@ -219,7 +210,7 @@
 		<div class="onb-body">
 			<div class="stack-sm">
 				<h1 class="page-title is-hero" id="onb5-title">Check it works</h1>
-				<p class="lead">Open your store in a new tab. This turns green when the first event is sent.</p>
+				<p class="lead">Open your store with the button below. It opens a test link, so this turns green as soon as that page view is sent.</p>
 			</div>
 			<div><a class="btn outline" href="#" target="_blank" rel="noopener"><span data-icon="external-link"></span>Open your store</a></div>
 			<ul class="onb-verify" data-onb-verify aria-live="polite"></ul>

@@ -43,9 +43,7 @@
 		onbPicked: 'meta,google',
 		onbConnected: '',
 		eu: 'unset',
-		verified: 'no',
-		// Usage-data opt-in, saved when the wizard is finished.
-		usage: 'no'
+		verified: 'no'
 	};
 
 	var GLOBAL_STATES = [
@@ -530,6 +528,57 @@
 		}
 	}
 
+	/* --------------------------------------------------- custom parameters
+	 * Meta, Pro (decision D10, 2026-11-03): up to 5 parameters, each with the
+	 * event it goes with, a field name and one of 5 value tokens.
+	 */
+	var PARAM_TOKENS = ['{product_category}', '{product_sku}', '{product_brand}', '{order_coupon}', '{customer_type}'];
+	var PARAM_MAX = 5;
+	function paramsEditor(el) {
+		var list = el.querySelector('[data-param-list]');
+		var add = el.querySelector('[data-param-add]');
+		var events = [['all', 'Every event']].concat(CONFIG.platforms.meta.events.map(function (e) { return [e.key, e.name]; }));
+		var params = [{ event: 'view', key: 'content_category', value: '{product_category}' }];
+		function options(items, current) {
+			return items.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (o[0] === current ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('');
+		}
+		function render() {
+			list.innerHTML = params.map(function (prm, i) {
+				var n = i + 1;
+				return '<fieldset class="param-box" data-param="' + i + '"><legend>Parameter ' + n + '</legend>' +
+					'<div class="field"><label for="param-event-' + n + '">Send with</label><select id="param-event-' + n + '" data-param-field="event">' + options(events, prm.event) + '</select></div>' +
+					'<div class="field"><label for="param-key-' + n + '">Field name</label><input type="text" id="param-key-' + n + '" data-param-field="key" value="' + esc(prm.key) + '" placeholder="Like content_category" autocomplete="off"></div>' +
+					'<div class="field"><label for="param-val-' + n + '">Value</label><select id="param-val-' + n + '" data-param-field="value">' + options(PARAM_TOKENS.map(function (t) { return [t, t]; }), prm.value) + '</select></div>' +
+					'<div><button type="button" class="btn ghost sm" data-param-remove="' + i + '">' + ic('x') + 'Remove parameter ' + n + '</button></div></fieldset>';
+			}).join('');
+			add.disabled = params.length >= PARAM_MAX;
+			add.lastChild.textContent = params.length >= PARAM_MAX ? 'Up to 5 parameters' : 'Add a parameter';
+			hydrateIcons(list);
+		}
+		list.addEventListener('change', function (e) {
+			var box = e.target.closest('[data-param]');
+			if (box) {
+				params[Number(box.getAttribute('data-param'))][e.target.getAttribute('data-param-field')] = e.target.value;
+			}
+		});
+		list.addEventListener('click', function (e) {
+			var b = e.target.closest('[data-param-remove]');
+			if (b) {
+				params.splice(Number(b.getAttribute('data-param-remove')), 1);
+				render();
+				add.focus();
+			}
+		});
+		add.addEventListener('click', function () {
+			if (params.length < PARAM_MAX) {
+				params.push({ event: 'purchase', key: '', value: PARAM_TOKENS[0] });
+				render();
+				document.getElementById('param-key-' + params.length).focus();
+			}
+		});
+		render();
+	}
+
 	/* ------------------------------------------------------- events table
 	 * <div data-events="meta"> renders the platform's events from config.js:
 	 * Event / On / (3.1: Sent from) / Last seen and a Recommended | All |
@@ -554,8 +603,13 @@
 		function locked(e) {
 			return e.pro && state.plan !== 'pro';
 		}
+		// X: an event with its own event ID stays off until that ID is filled in.
+		function missingId(e) {
+			var input = e.needsId && document.getElementById(e.needsId);
+			return !!e.needsId && (!input || !input.value.trim());
+		}
 		function isOn(e) {
-			return on[e.key] && !locked(e);
+			return e.always ? !locked(e) : on[e.key] && !locked(e) && !missingId(e);
 		}
 		function applyPreset(name) {
 			preset = name;
@@ -575,14 +629,31 @@
 			}
 			return '<span class="ev-from">' + ic('monitor') + 'Browser + server</span>';
 		}
+		// 3.0 hears back about purchases only (D2), so only Purchase shows a time.
 		function seen(e) {
+			if (!locked(e) && missingId(e)) {
+				return '<span class="ev-off">Needs its event ID</span>';
+			}
 			if (!isOn(e)) {
 				return '<span class="ev-off">Off</span>';
+			}
+			if (e.key !== 'purchase') {
+				return '<span class="ev-off">On</span>';
 			}
 			if (state.connection === 'not' && key !== 'google') {
 				return '<span class="ev-off">Not yet</span>';
 			}
 			return '<span class="ev-seen">' + e.seen + '</span>';
+		}
+		function onCell(e) {
+			if (locked(e)) {
+				return '<span class="lock-icon">' + ic('lock') + '<span class="sr-only">' + esc(e.name) + ' is a Pro event</span></span>';
+			}
+			if (e.always) {
+				return '<span class="ev-always">Always on<span class="sr-only">: ' + esc(e.name) + ' is sent by the base tag</span></span>';
+			}
+			var noId = missingId(e);
+			return '<label class="switch"><input type="checkbox" role="switch" data-ev-toggle="' + e.key + '"' + (on[e.key] && !noId ? ' checked' : '') + (noId ? ' disabled' : '') + '><span class="switch-track"></span><span class="sr-only">Send ' + esc(e.name) + (noId ? ' (add its event ID first)' : '') + '</span></label>';
 		}
 		function render() {
 			var server = serverOn(key);
@@ -593,10 +664,7 @@
 					'<th scope="row"><span class="ev-name">' + esc(e.name) +
 					(lockedNow ? '<span class="pro-badge">' + ic('pui-crown') + 'PRO</span>' : '') + '</span>' +
 					'<span class="ev-desc">' + esc(e.desc) + '</span></th>' +
-					'<td class="col-on">' + (lockedNow
-						? '<span class="lock-icon">' + ic('lock') + '<span class="sr-only">' + esc(e.name) + ' is a Pro event</span></span>'
-						: '<label class="switch"><input type="checkbox" role="switch" data-ev-toggle="' + e.key + '"' + (on[e.key] ? ' checked' : '') + '><span class="switch-track"></span><span class="sr-only">Send ' + esc(e.name) + '</span></label>') +
-					'</td>' +
+					'<td class="col-on">' + onCell(e) + '</td>' +
 					(server ? '<td class="col-from">' + sentFrom(e) + '</td>' : '') +
 					'<td class="col-seen">' + seen(e) + '</td></tr>';
 			}).join('');
@@ -643,6 +711,12 @@
 				startingSet();
 			}
 			render();
+		});
+		// Typing an X event ID turns its row on or off.
+		document.addEventListener('input', function (e) {
+			if (p.events.some(function (ev) { return ev.needsId === e.target.id; })) {
+				render();
+			}
 		});
 		render();
 	}
@@ -812,34 +886,49 @@
 			});
 		});
 
-		var series = {
-			'7': { labels: ['Thu', 'Fri', 'Sat', 'Sun', 'Mon', 'Tue', 'Wed'], values: [14, 22, 19, 31, 26, 37, 34] },
-			'30': { labels: ['Sep 24', 'Oct 1', 'Oct 8', 'Oct 15', 'Oct 22'], values: [18, 22, 17, 25, 21, 28, 24, 30, 26, 31, 22, 27, 35, 29, 24, 33, 28, 36, 31, 25, 30, 38, 33, 29, 34, 40, 31, 37, 35, 34] },
-			'month': { labels: ['Oct 1', 'Oct 8', 'Oct 15', 'Oct 22'], values: [22, 27, 35, 29, 24, 33, 28, 36, 31, 25, 30, 38, 33, 29, 34, 40, 31, 37, 35, 30, 34, 36, 34] }
-		};
+		// Purchases per hour over the last 24 hours (decision D1/D2, 2026-11-03:
+		// 3.0 keeps 24 hours of order-level data and hears back about purchases
+		// only). Same orders as the Activity log: #1306 at 16:55 yesterday,
+		// #1310 at 09:58, #1311 (missed on Meta) and #1312 in the 10:00 hour.
+		var hours = [];
+		for (var hr = 0; hr < 24; hr++) {
+			hours.push({ label: String((11 + hr) % 24).padStart(2, '0') + ':00', sent: 0, missed: 0 });
+		}
+		hours[5].sent = 1;
+		hours[22].sent = 1;
+		hours[23].sent = 1;
+		hours[23].missed = 1;
 		var chart = document.querySelector('[data-chart]');
-		var select = document.querySelector('[data-chart-period]');
-		function draw(key) {
-			var d = series[key];
+		function draw() {
 			var w = 720;
 			var h = 180;
-			var max = Math.max.apply(null, d.values) * 1.15;
-			var step = w / (d.values.length - 1);
-			var pts = d.values.map(function (v, i) { return [Math.round(i * step), Math.round(h - (v / max) * (h - 10))]; });
-			var line = pts.map(function (p, i) { return (i ? 'L' : 'M') + p[0] + ' ' + p[1]; }).join(' ');
-			var area = line + ' L' + w + ' ' + h + ' L0 ' + h + 'Z';
-			var grid = [40, 90, 140].map(function (y) { return '<line class="grid-line" x1="0" x2="' + w + '" y1="' + y + '" y2="' + y + '"/>'; }).join('');
-			var labels = d.labels.map(function (l, i) {
-				var x = Math.round(i * (w - 30) / (d.labels.length - 1));
-				return '<text class="axis" x="' + x + '" y="198">' + l + '</text>';
+			var max = 3;
+			var slot = w / hours.length;
+			var bw = Math.round(slot * 0.6);
+			var y = function (v) { return Math.round((v / max) * (h - 10)); };
+			var grid = [60, 120].map(function (gy) { return '<line class="grid-line" x1="0" x2="' + w + '" y1="' + gy + '" y2="' + gy + '"/>'; }).join('');
+			var bars = hours.map(function (d, i) {
+				var x = Math.round(i * slot + (slot - bw) / 2);
+				var out = '';
+				if (d.sent) {
+					out += '<rect class="bar" x="' + x + '" y="' + (h - y(d.sent)) + '" width="' + bw + '" height="' + y(d.sent) + '"/>';
+				}
+				if (d.missed) {
+					out += '<rect class="bar is-missed" x="' + x + '" y="' + (h - y(d.sent + d.missed)) + '" width="' + bw + '" height="' + y(d.missed) + '"/>';
+				}
+				return out;
 			}).join('');
-			var total = d.values.reduce(function (a, b) { return a + b; }, 0);
-			chart.innerHTML = '<svg viewBox="0 0 720 200" preserveAspectRatio="none" role="img" aria-label="Area chart: ' + total + ' tracked events, ' + select.options[select.selectedIndex].text.toLowerCase() + '">' +
-				grid + '<path class="area" d="' + area + '"/><path class="line" d="' + line + '"/>' + labels + '</svg>';
+			var labels = hours.map(function (d, i) {
+				if (i % 4 !== 0 && i !== 23) {
+					return '';
+				}
+				return '<text class="axis" x="' + Math.round(i * slot) + '" y="198">' + (i === 23 ? 'Now' : d.label) + '</text>';
+			}).join('');
+			chart.innerHTML = '<svg viewBox="0 0 720 200" preserveAspectRatio="none" role="img" aria-label="Bar chart: 4 purchases in the last 24 hours; 3 sent to every connected platform, 1 missed on Meta">' +
+				grid + '<line class="grid-line" x1="0" x2="' + w + '" y1="' + h + '" y2="' + h + '"/>' + bars + labels + '</svg>';
 		}
-		if (chart && select) {
-			draw(select.value);
-			select.addEventListener('change', function () { draw(select.value); });
+		if (chart) {
+			draw();
 		}
 	};
 
@@ -857,7 +946,7 @@
 		// skip links leave without saving; only finishing saves.
 		var rerun = params.get('rerun') === '1' && state.install !== 'new';
 		var live = state.connection === 'connected' ? ['meta', 'google', 'x'] : ['google'];
-		var wiz = rerun ? { onbAt: '1', onbPicked: live.join(','), onbConnected: live.join(','), eu: 'no', verified: 'yes', usage: state.usage } : state;
+		var wiz = rerun ? { onbAt: '1', onbPicked: live.join(','), onbConnected: live.join(','), eu: 'no', verified: 'yes' } : state;
 		function put(key, value) {
 			if (rerun) {
 				wiz[key] = value;
@@ -907,15 +996,8 @@
 			b.addEventListener('click', function () { go(current - 1, true); });
 		});
 
-		// Step 1: the usage opt-in shows the saved choice (off on a new
-		// install); "What's shared" opens the list.
-		var usage = document.querySelector('[data-onb-usage]');
-		usage.checked = wiz.usage === 'yes';
-		usage.addEventListener('change', function () {
-			if (rerun) {
-				wiz.usage = usage.checked ? 'yes' : 'no';
-			}
-		});
+		// No usage-data opt-in in 3.0 (decision D5, 2026-11-03): Appsero keeps
+		// its own notice.
 		if (rerun) {
 			document.querySelectorAll('[data-onb-skip]').forEach(function (a) {
 				a.textContent = 'Close without saving';
@@ -923,12 +1005,6 @@
 			});
 			document.querySelector('[data-onb-finish]').textContent = 'Save and go to Settings';
 		}
-		var shared = document.querySelector('[data-onb-shared]');
-		shared.addEventListener('click', function () {
-			var list = document.getElementById('onb-shared');
-			list.hidden = !list.hidden;
-			shared.setAttribute('aria-expanded', String(!list.hidden));
-		});
 
 		// Step 2: multi-select tiles.
 		var tiles = document.querySelectorAll('.pick-tile[data-platform]');
@@ -954,7 +1030,8 @@
 		var connectNext = document.querySelector('[data-onb-connect-next]');
 		var connectNote = document.querySelector('[data-onb-connect-note]');
 		document.querySelectorAll('[data-onb-events]').forEach(function (p) {
-			var rec = CONFIG.platforms[p.getAttribute('data-onb-events')].events.filter(function (e) { return e.rec; }).map(function (e) { return e.name; });
+			// Events that need their own ID (X) stay off until it's added on the platform page.
+			var rec = CONFIG.platforms[p.getAttribute('data-onb-events')].events.filter(function (e) { return e.rec && !e.needsId; }).map(function (e) { return e.name; });
 			p.textContent = 'Recommended events on: ' + rec.join(', ') + '.';
 		});
 		function fieldOk(input) {
@@ -1071,7 +1148,6 @@
 			hydrateIcons(summary);
 		}
 		document.querySelector('[data-onb-finish]').addEventListener('click', function () {
-			state.usage = usage.checked ? 'yes' : 'no';
 			if (rerun) {
 				save();
 				window.location.href = 'settings.html#setup';
@@ -1467,8 +1543,8 @@
 			var p = PLATFORM[k];
 			h += '<div class="timeline-group"><div class="timeline-name">' + logo(k, 'xs') + (p.label || p.name) + '</div><ul class="timeline">';
 			if (row.missed === k) {
-				h += '<li class="is-warn">The pixel didn\'t fire for this visitor</li></ul>' +
-					'<p class="small muted">Most often an ad blocker or a declined cookie banner. A few a week is normal. If it keeps happening, <a href="doctor.html">ask the Doctor</a>.</p></div>';
+				h += '<li class="is-warn">Blocked in the shopper\'s browser</li></ul>' +
+					'<p class="small muted">The thank-you page checked in, but ' + p.name + '\'s script didn\'t load, most likely because of an ad blocker. Nothing to fix on your side. If it happens often, <a href="doctor.html">ask the Doctor</a>.</p></div>';
 				return;
 			}
 			h += '<li>' + p.hop + ', ' + sec(3 + i) + '</li><li>Reported to the log, ' + sec(4 + i) + '</li>';
@@ -1714,6 +1790,29 @@
 	hydrateIcons(document);
 	bindGlobal();
 	document.querySelectorAll('[data-events]').forEach(eventsTable);
+	document.querySelectorAll('[data-params]').forEach(paramsEditor);
+	// Upgraders keep the full order total they sent in 2.x (decision D8).
+	function keepUpgradeValue() {
+		['meta-value', 'x-value', 'microsoft-value'].forEach(function (id) {
+			var sel = document.getElementById(id);
+			if (sel) {
+				sel.value = state.install === 'upgrade' ? 'all' : 'items';
+			}
+		});
+	}
+	keepUpgradeValue();
+	document.addEventListener('wcct:state', function (e) {
+		if (e.detail.key === 'install') {
+			keepUpgradeValue();
+		}
+	});
+	// Catalog: the optional feed login shows its two fields only when on (D6).
+	var feedLogin = document.querySelector('[data-feed-login]');
+	if (feedLogin) {
+		feedLogin.addEventListener('change', function () {
+			document.querySelector('[data-feed-login-fields]').hidden = !feedLogin.checked;
+		});
+	}
 	document.querySelectorAll('[data-server-section]').forEach(serverSection);
 	document.querySelectorAll('[data-server-settings]').forEach(serverSettings);
 	if (pages[page]) {

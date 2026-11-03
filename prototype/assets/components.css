@@ -739,6 +739,11 @@ a.platform-card:hover { color: inherit; box-shadow: var(--shadow-md); }
 .event-row-head { display: flex; align-items: center; gap: 12px; padding: 14px 16px; }
 .event-row-text { flex: 1; min-width: 0; }
 .event-row-body { border-top: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; gap: 16px; font-size: 13px; }
+/* Meta custom parameters (Pro, decision D10): up to 5, one box each, fields stacked. */
+.param-list { display: flex; flex-direction: column; gap: 12px; }
+.param-box { margin: 0; padding: 12px 16px 16px; border: 1px solid var(--border); border-radius: var(--radius-md); display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.param-box legend { padding: 0 4px; font-size: 13px; font-weight: 600; }
+.param-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .event-row.is-locked { background: var(--muted-50); }
 .crown-link { display: inline-flex; align-items: center; gap: 4px; color: var(--tone-warn-fg); font-size: 13px; font-weight: 500; text-decoration: none; }
 .crown-link:hover { color: var(--tone-warn-fg); text-decoration: underline; }
@@ -769,6 +774,7 @@ a.platform-card:hover { color: inherit; box-shadow: var(--shadow-md); }
 .ev-seen { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; }
 .ev-seen::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--tone-ok-dot); flex: none; }
 .ev-off { font-size: 13px; color: var(--muted-foreground); }
+.ev-always { font-size: 13px; font-weight: 500; color: var(--tone-off-fg); white-space: nowrap; }
 .ev-from { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; }
 .ev-from .icon { width: 14px; height: 14px; color: var(--muted-foreground); }
 .events-note { font-size: 13px; color: var(--muted-foreground); }
@@ -1056,8 +1062,6 @@ a.platform-card:hover { color: inherit; box-shadow: var(--shadow-md); }
 .onb-body { padding: 40px; display: flex; flex-direction: column; gap: 24px; }
 .onb-foot { display: flex; align-items: center; gap: 12px; padding: 16px 40px; border-top: 1px solid var(--border); }
 .onb-foot .push { margin-left: auto; }
-.onb-optin { display: flex; flex-direction: column; gap: 8px; max-width: 560px; padding-top: 20px; border-top: 1px solid var(--border); }
-.onb-shared { margin: 0; padding-left: 20px; font-size: 13px; color: var(--muted-foreground); display: flex; flex-direction: column; gap: 4px; }
 .onb-panel { border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; display: flex; flex-direction: column; gap: 16px; }
 .onb-panel-head { display: flex; align-items: center; gap: 12px; }
 .onb-panel-head .pill { margin-left: auto; }
@@ -1153,9 +1157,12 @@ a.platform-card:hover { color: inherit; box-shadow: var(--shadow-md); }
 .chart .grid-line { stroke: var(--border); stroke-dasharray: 3 3; }
 .chart .area { fill: var(--primary); fill-opacity: 0.12; }
 .chart .line { fill: none; stroke: var(--primary); stroke-width: 2; }
+.chart .bar { fill: var(--primary); }
+.chart .bar.is-missed { fill: var(--tone-warn-fg); }
 .chart .axis { fill: var(--muted-foreground); font-size: 12px; font-family: var(--font-sans); }
 .chart-legend { font-size: 12px; color: var(--muted-foreground); display: flex; gap: 6px; align-items: center; }
 .chart-legend::before { content: ""; width: 10px; height: 10px; border-radius: 2px; background: var(--primary); }
+.chart-legend.is-missed::before { background: var(--tone-warn-fg); }
 
 /* --------------------------------------------------------------- dialog
  * plugin-ui <AlertDialog> (confirm) and <Dialog> (log detail) on native

@@ -48,7 +48,7 @@
 						<label for="pixel-id">Pixel ID</label>
 						<input type="text" id="pixel-id" value="1234567890123456" placeholder="15 or 16 digits, numbers only" inputmode="numeric" autocomplete="off" aria-describedby="pixel-hint pixel-good pixel-bad">
 						<p class="field-hint" id="pixel-hint" data-pixel-hint>Numbers only, 15 or 16 digits. If it starts with "EAA", that's an access token, not a Pixel ID.</p>
-						<p class="field-good" id="pixel-good" data-pixel-good><span data-icon="circle-check"></span><span><span data-when="connection=connected">Looks like a Pixel ID. Connected to "Demo Store Pixel".</span><span data-when="connection=not">Looks like a Pixel ID. Click Connect to start sending.</span></span></p>
+						<p class="field-good" id="pixel-good" data-pixel-good><span data-icon="circle-check"></span><span><span data-when="connection=connected">Looks like a Pixel ID.</span><span data-when="connection=not">Looks like a Pixel ID. Click Connect to start sending.</span></span></p>
 						<p class="field-bad" id="pixel-bad" data-pixel-bad hidden><span data-icon="triangle-alert"></span><span>Pixel IDs are 15 or 16 digits.</span></p>
 					</div>
 
@@ -72,6 +72,7 @@
 									<option value="all">Items, tax and shipping</option>
 								</select>
 								<p class="field-hint">Sent with Purchase. Items only keeps ad results in line with product revenue.</p>
+								<p class="field-hint" data-when="install=upgrade" data-value-kept>Set to Items, tax and shipping because that is what you sent before the update, so your reported values don't change.</p>
 							</div>
 
 							<div class="field" id="product-id-sent">
@@ -80,7 +81,7 @@
 									<option value="id" selected>Product ID (recommended)</option>
 									<option value="sku">SKU</option>
 								</select>
-								<p class="field-hint">Must match the IDs in your <a href="catalog.html#id-matching">catalog feed</a>, or dynamic ads can't find the product.</p>
+								<p class="field-hint">Must match the IDs in your <a href="catalog.html#id-matching">catalog feed</a>, or dynamic ads can't find the product. Variations send their own ID; a product without a SKU sends its Product ID.</p>
 							</div>
 
 							<div class="field">
@@ -97,14 +98,14 @@
 								<div class="event-row is-locked">
 									<div class="event-row-head">
 										<span class="lock-icon"><span data-icon="lock"></span></span>
-										<div class="event-row-text"><div class="option-title">Custom parameters <span class="pro-badge"><span data-icon="pui-crown"></span>PRO</span></div><div class="option-desc">Add your own fields to any event.</div></div>
+										<div class="event-row-text"><div class="option-title">Custom parameters <span class="pro-badge"><span data-icon="pui-crown"></span>PRO</span></div><div class="option-desc">Up to 5 extra fields, each sent with the event you pick.</div></div>
 										<a class="crown-link" href="settings.html#plan"><span data-icon="pui-crown"></span>Upgrade</a>
 									</div>
 								</div>
 								<div class="event-row is-locked">
 									<div class="event-row-head">
 										<span class="lock-icon"><span data-icon="lock"></span></span>
-										<div class="event-row-text"><div class="option-title">Richer customer matching <span class="pro-badge"><span data-icon="pui-crown"></span>PRO</span></div><div class="option-desc">Hashed address and customer ID for logged-in shoppers, so Meta matches more sales. Never printed in the page.</div></div>
+										<div class="event-row-text"><div class="option-title">Richer customer matching <span class="pro-badge"><span data-icon="pui-crown"></span>PRO</span></div><div class="option-desc">Hashed address and customer ID for logged-in shoppers, so Meta matches more sales. Never in plain text.</div></div>
 										<a class="crown-link" href="settings.html#plan"><span data-icon="pui-crown"></span>Upgrade</a>
 									</div>
 								</div>
@@ -121,12 +122,13 @@
 								<div class="event-row">
 									<div class="event-row-head">
 										<label class="switch"><input type="checkbox" role="switch" id="meta-params"><span class="switch-track"></span><span class="sr-only">Custom parameters</span></label>
-										<div class="event-row-text"><div class="option-title">Custom parameters</div><div class="option-desc">Add your own fields to any event.</div></div>
+										<div class="event-row-text"><div class="option-title">Custom parameters</div><div class="option-desc">Up to 5 extra fields, each sent with the event you pick.</div></div>
 										<span class="pill off">Off</span>
 									</div>
-									<div class="event-row-body">
-										<div class="field"><label for="param-key">Field name</label><input type="text" id="param-key" placeholder="content_category"></div>
-										<div class="field"><label for="param-val">Value</label><input type="text" id="param-val" placeholder="{product_category}"></div>
+									<div class="event-row-body" data-params>
+										<div class="param-list" data-param-list></div>
+										<div><button type="button" class="btn outline sm" data-param-add><span data-icon="plus"></span>Add a parameter</button></div>
+										<p class="xsmall muted">Values come from the product, the order or the shopper: <code>{product_category}</code> <code>{product_sku}</code> <code>{product_brand}</code> <code>{order_coupon}</code> <code>{customer_type}</code> (new or returning).</p>
 									</div>
 								</div>
 								<div class="event-row">

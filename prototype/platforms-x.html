@@ -48,7 +48,7 @@
 					<section class="notice warning stack-sm" data-when="connection=connected;install=upgrade;migration=attention" aria-labelledby="x-resetup-title">
 						<div class="row"><span class="pill warn">Needs a re-setup</span></div>
 						<h3 class="card-title" id="x-resetup-title">X retired the old single-event codes</h3>
-						<p class="small">Your base tag carried over and still tracks page views and add to cart. Purchases need a new event ID from X Ads Manager; until then X doesn't see your sales. It takes about 2 minutes.</p>
+						<p class="small">Your base tag carried over and still sends page views. Every other event, purchases included, now needs its own event ID from X Ads Manager. Until you add them, X doesn't see your sales or carts. It takes about 2 minutes.</p>
 						<div><button type="button" class="btn primary" data-focus="x-event-id">Set up the purchase event</button></div>
 					</section>
 
@@ -61,7 +61,25 @@
 					<div class="field">
 						<label for="x-event-id">Purchase event ID</label>
 						<input type="text" id="x-event-id" value="tw-o8x2k-o8x3a" placeholder="Starts with tw-" autocomplete="off" aria-describedby="x-event-hint">
-						<p class="field-hint" id="x-event-hint">Starts with tw-, then your Pixel ID and the event code. One ID for Purchase is enough; the others are optional.</p>
+						<p class="field-hint" id="x-event-hint">Starts with tw-, then your Pixel ID and the event code. Each event has its own ID in X Ads Manager.</p>
+					</div>
+
+					<div class="field">
+						<label for="x-cart-id">Add to cart event ID (optional)</label>
+						<input type="text" id="x-cart-id" value="tw-o8x2k-o8x3b" placeholder="Starts with tw-" autocomplete="off" aria-describedby="x-cart-hint" data-x-event-id>
+						<p class="field-hint" id="x-cart-hint">Optional. The event stays off until it has an ID.</p>
+					</div>
+
+					<div class="field">
+						<label for="x-checkout-id">Start checkout event ID (optional)</label>
+						<input type="text" id="x-checkout-id" value="" placeholder="Starts with tw-" autocomplete="off" aria-describedby="x-checkout-hint" data-x-event-id>
+						<p class="field-hint" id="x-checkout-hint">Optional. The event stays off until it has an ID.</p>
+					</div>
+
+					<div class="field" data-when="plan=pro">
+						<label for="x-registration-id">Registration event ID (optional)</label>
+						<input type="text" id="x-registration-id" value="" placeholder="Starts with tw-" autocomplete="off" aria-describedby="x-registration-hint" data-x-event-id>
+						<p class="field-hint" id="x-registration-hint">Optional. The event stays off until it has an ID.</p>
 					</div>
 
 					<section class="events" data-events="x" aria-label="Events"></section>
@@ -84,6 +102,7 @@
 									<option value="all">Items, tax and shipping</option>
 								</select>
 								<p class="field-hint">Sent with Purchase. Items only keeps ad results in line with product revenue.</p>
+								<p class="field-hint" data-when="install=upgrade" data-value-kept>Set to Items, tax and shipping because that is what you sent before the update, so your reported values don't change.</p>
 							</div>
 
 							<div class="field">
@@ -118,7 +137,7 @@
 						<ol>
 							<li>In <a href="#">X Ads Manager</a>, open <b>Tools</b>, then <b>Events Manager</b>.</li>
 							<li>Choose <b>Add event</b>, pick <b>Purchase</b> and the <b>Pixel</b> install method.</li>
-							<li>Copy the ID that starts with <code>tw-</code> and paste it into the Purchase event ID field.</li>
+							<li>Copy the ID that starts with <code>tw-</code> and paste it into the Purchase event ID field. Repeat for Add to cart, Start checkout or Registration if you want those too.</li>
 						</ol>
 					</div>
 					<div class="clip"><span data-icon="play"></span>Clip: creating the X purchase event, 30 s</div>
