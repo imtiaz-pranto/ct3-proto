@@ -72,11 +72,11 @@ await check('Dashboard: Doctor ran / not run / quiet re-check after a plugin is 
 	expect(await page.getByText('3 things worth a look').isVisible(), 'ran state missing');
 });
 
-await check('Dashboard 3.0: missed-sale card offers only 3.0 actions', async () => {
-	const links = await page.locator('[aria-label="Missed sales"] a:visible').evaluateAll((a) => a.map((l) => `${l.textContent.trim()} -> ${l.getAttribute('href')}`));
-	expect(links.join('; ') === 'Open the orders in the Activity log -> log.html?tab=missed; Check cookie choices -> platforms.html#cookie-choices; Run the Doctor -> doctor.html', links.join('; '));
+await check('Dashboard 3.0: not-confirmed card offers only 3.0 actions', async () => {
+	const links = await page.locator('[aria-label="Not confirmed purchases"] a:visible').evaluateAll((a) => a.map((l) => `${l.textContent.trim()} -> ${l.getAttribute('href')}`));
+	expect(links.join('; ') === 'Open the orders in the Activity log -> log.html?tab=not-confirmed; Check cookie choices -> platforms.html#cookie-choices; Run the Doctor -> doctor.html', links.join('; '));
 	await page.click('text=Open the orders in the Activity log');
-	expect((await page.getAttribute('[data-log-tab="missed"]', 'aria-selected')) === 'true' && (await page.textContent('[data-log-detail]')).includes('Order #1311'), 'missed tab or order not opened');
+	expect((await page.getAttribute('[data-log-tab="not-confirmed"]', 'aria-selected')) === 'true' && (await page.textContent('[data-log-detail]')).includes('Order #1311'), 'not-confirmed tab or order not opened');
 });
 
 await check('Dashboard: filter chips', async () => {
@@ -259,10 +259,10 @@ await check('Advanced settings: collapsed, Meta holds the old Advanced options, 
 await check('Log 3.0: order-level, 24 hours, Sent column; tabs and detail; 3.1 adds search, export, retention', async () => {
 	await page.goto(url('log'));
 	expect((await page.textContent('[data-log-col-sent]')) === 'Sent', 'column should read Sent');
-	expect(await page.locator('[data-log-rows] tr').count() === 6 && (await page.locator('[data-log-rows]', { hasText: 'Add to cart' }).count()) === 0, '3.0 log should list orders only');
-	expect((await page.textContent('[data-log-count]')) === '6 orders in the last 24 hours', 'footer: ' + (await page.textContent('[data-log-count]')));
-	await page.click('[data-log-tab="missed"]');
-	expect(await page.locator('[data-log-rows] tr').count() === 1, 'missed tab');
+	expect(await page.locator('[data-log-rows] tr').count() === 7 && (await page.locator('[data-log-rows]', { hasText: 'Add to cart' }).count()) === 0, '3.0 log should list orders only');
+	expect((await page.textContent('[data-log-count]')) === '7 orders in the last 24 hours', 'footer: ' + (await page.textContent('[data-log-count]')));
+	await page.click('[data-log-tab="not-confirmed"]');
+	expect(await page.locator('[data-log-rows] tr').count() === 1, 'not-confirmed tab');
 	await page.click('[data-log-rows] tr');
 	expect((await page.textContent('[data-log-detail]')).includes('Order #1311'), 'detail not updated');
 	await page.click('[data-log-tab="all"]');
@@ -295,7 +295,7 @@ await check('Settings > Alerts: 3.0 has only the dashboard and Doctor rows; 3.1 
 	expect(await visible(page, '#alerts') && !(await visible(page, '#access')) && !(await visible(page, '#plan')), 'Alerts should be the only panel shown by default');
 	expect((await page.getAttribute('[data-settings-link="alerts"]', 'aria-current')) === 'page', 'Alerts not marked current');
 	const rows = await page.locator('#alerts .option-title').allTextContents();
-	expect(rows.join(',') === 'Missed sales, on the dashboard,Doctor found something new', '3.0 rows: ' + rows.join(','));
+	expect(rows.join(',') === 'Not confirmed purchases, on the dashboard,Doctor found something new', '3.0 rows: ' + rows.join(','));
 	await page.click('[data-settings-link="plan"]');
 	await page.waitForTimeout(100); // hashchange is async
 	const pro = await page.locator('#plan .tier:nth-child(2) .feature-list li').allTextContents();
@@ -438,7 +438,7 @@ await check('Feasibility decisions: dashboard 24 h, purchases chart, evidence-ba
 	await page.goto(url('index'));
 	expect((await page.textContent('.page-sub')).includes('Last 24 hours') && (await page.textContent('#chart-title')) === 'Purchases in the last 24 hours', 'dashboard should read the last 24 hours');
 	expect(!(await page.locator('[data-chart-period]').count()) && (await page.locator('[data-chart] rect.bar').count()) === 4, 'hourly purchase bars, no period select');
-	const card = await page.textContent('[aria-label="Missed sales"]');
+	const card = await page.textContent('[aria-label="Not confirmed purchases"]');
 	expect(card.includes('Order #1311') && card.includes('by design') && !/this week/.test(card), 'missed card should name the order and the cause');
 	await page.goto(url('platforms'));
 	expect((await page.inputValue('#meta-value')) === 'items', 'new install: Items only');
@@ -455,6 +455,81 @@ await check('Feasibility decisions: dashboard 24 h, purchases chart, evidence-ba
 	await page.goto(url('settings') + '#plan');
 	await page.reload();
 	expect(await page.getByText('Manage your subscription on WooCommerce.com').isVisible() && !(await page.getByText('[DATE]').count()), 'Plan: WooCommerce.com link instead of [DATE] (B4)');
+	await st(page, 'plan', 'free');
+});
+
+await check('Scope freeze (2026-11-03): Not confirmed vs No check-in, customer details default, hashed copy, no coming-later lines', async () => {
+	// "Not confirmed" and "No check-in" read differently side by side.
+	await page.goto(url('log'));
+	const pill = (id) => page.$eval(`[data-log-rows] tr[data-id="${id}"] .pill`, (p) => ({ text: p.textContent.trim(), cls: p.className }));
+	const nc = await pill(1311);
+	const none = await pill(1304);
+	expect(nc.text === 'Not confirmed on Meta' && /\bwarn\b/.test(nc.cls), 'Not confirmed should be amber: ' + JSON.stringify(nc));
+	expect(none.text === 'No check-in' && /\boff\b/.test(none.cls), 'No check-in should be grey: ' + JSON.stringify(none));
+	expect((await page.textContent('[data-log-rows] tr[data-id="1304"]')).includes('Not checked: no thank-you page visit'), 'No check-in Sent cell');
+	await page.click('[data-log-tab="not-confirmed"]');
+	expect(!(await page.locator('[data-log-rows] tr[data-id="1304"]').count()), 'No check-in must not appear under Not confirmed');
+	await page.click('[data-log-tab="all"]');
+	await page.click('[data-log-rows] tr[data-id="1304"]');
+	expect((await page.textContent('[data-log-detail]')).includes("isn't counted as not confirmed"), 'No check-in detail');
+	// No visible "Missed" anywhere in 3.0 or 3.1.
+	for (const v of ['3.0', '3.1']) {
+		if (v === '3.1') await setVersion(page, '3.1');
+		for (const pg of ['index', 'log', 'settings', 'platforms-microsoft', 'catalog', 'whats-new', 'email-weekly']) {
+			await page.goto(url(pg));
+			await page.evaluate(() => { document.getElementById('proto-state')?.remove(); document.querySelectorAll('[data-settings-panel]').forEach((p) => { p.hidden = false; }); });
+			const text = await page.evaluate(() => document.body.innerText);
+			expect(!/\bmissed\b/i.test(text), `${v} ${pg} still says "missed"`);
+		}
+	}
+	await setVersion(page, '3.0');
+	await page.goto(url('index'));
+	expect(await page.getByText("1 order couldn't be checked").isVisible(), 'dashboard No check-in line');
+	// Include customer details: new install off; upgrader with customer placeholders on; without, off.
+	await page.goto(url('platforms-custom'));
+	expect(!(await page.isChecked('#custom-customer')), 'new install: customer details off');
+	expect((await page.textContent('#customer-details .option-desc')).includes('Only administrators can edit scripts'), 'help line');
+	await st(page, 'install', 'upgrade');
+	await st(page, 'savedScript', 'customer');
+	expect(await page.isChecked('#custom-customer'), 'upgrader using customer placeholders: on');
+	await st(page, 'savedScript', 'order');
+	expect(!(await page.isChecked('#custom-customer')), 'upgrader without customer placeholders: off');
+	await st(page, 'savedScript', 'customer');
+	await page.goto(url('whats-new'));
+	const attention = await page.evaluate(() => [...document.querySelectorAll('section')].filter((x) => x.getClientRects().length && /needs your attention|Needs attention/i.test(x.innerText)).map((x) => x.innerText).join(' '));
+	expect(!/customer|custom script/i.test(attention), 'customer details must not add a Needs attention item: ' + attention.slice(0, 160));
+	await st(page, 'install', 'working');
+	// Hashed copy and no "coming later" lines in 3.0.
+	await page.goto(url('platforms'));
+	expect(await page.getByText("Hashed before it's sent to the platform.").count() === 1 && !(await page.getByText(/in plain text/i).count()), 'hashed matching copy');
+	for (const pg of ['platforms', 'onboarding?step=2']) {
+		await page.goto(url(pg.split('?')[0]) + (pg.includes('?') ? '?' + pg.split('?')[1] : ''));
+		expect(!(await page.getByText(/Pinterest|later update|coming soon/i).count()), `${pg}: coming-later line in 3.0`);
+	}
+});
+
+await check('Five accepted (2026-11-03): pending copy, Waiting for first event, platform keys, variations note', async () => {
+	await page.goto(url('log'));
+	await page.click('[data-log-rows] tr[data-id="1308"]');
+	const pending = await page.textContent('[data-log-detail]');
+	expect(pending.includes('Sent to your platforms on the thank-you page') && !pending.includes('once the order is paid'), 'pending order copy (default 4)');
+	await page.goto(url('index'));
+	expect(!(await page.locator('[data-platform-status="waiting"]:visible').count()), 'waiting card hidden by default');
+	await st(page, 'firstEvent', 'waiting');
+	expect(await page.locator('[data-platform-status="waiting"]:visible', { hasText: 'Waiting for first event' }).count() === 1 && !(await page.locator('[data-platform-status="ok"]:visible', { hasText: 'formerly Twitter' }).count()), 'X card shows Waiting for first event');
+	await st(page, 'firstEvent', 'received');
+	await page.goto(url('platforms-microsoft'));
+	await st(page, 'plan', 'pro');
+	await page.evaluate(() => { document.querySelector('details.advanced-settings').open = true; });
+	expect((await page.textContent('.dev-list')).includes('bing_ads'), 'Microsoft developer key');
+	await st(page, 'plan', 'free');
+	await page.goto(url('platforms-google'));
+	await page.evaluate(() => { document.querySelector('details.advanced-settings').open = true; });
+	const g = await page.textContent('.dev-list');
+	expect(g.includes('adwords') && g.includes('ga4'), 'Google developer keys');
+	await page.goto(url('whats-new'));
+	await st(page, 'plan', 'pro');
+	expect(await page.getByText('lists each variation of a variable product').isVisible(), 'variations note on What\'s new (Pro)');
 	await st(page, 'plan', 'free');
 });
 
@@ -550,7 +625,7 @@ await check("What's new: Free / Pro / old Pro detected; previous settings downlo
 	expect(await page.getByText('Conversion Tracking Pro 1.1.4 is installed but paused.').isVisible(), 'old pro');
 	await st(page, 'oldPro', 'no');
 	await st(page, 'plan', 'pro');
-	expect(await page.getByText('Pro 3.0 is active.').isVisible() && !(await page.getByText('missed-sale emails').count()), 'pro, without 3.1 emails');
+	expect(await page.getByText('Pro 3.0 is active.').isVisible() && !(await page.getByText('emails about not confirmed purchases').count()), 'pro, without 3.1 emails');
 	await st(page, 'plan', 'free');
 	expect(await page.getByRole('button', { name: 'Download your previous settings (JSON)' }).isVisible(), 'download missing');
 	expect(await page.getByText('Saved before the update. Your old settings are also kept, so you can go back to the previous version if you need to.').isVisible(), 'download line');

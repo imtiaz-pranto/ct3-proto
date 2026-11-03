@@ -10,7 +10,8 @@
     "interactions": "node interactions.mjs",
     "screenshots": "node screenshot.mjs",
     "grep30": "node grep-30.mjs",
-    "verify": "npm run validate && npm run links && npm run contrast && npm run interactions && npm run grep30 && npm run screenshots"
+    "verify": "npm run validate && npm run links && npm run contrast && npm run interactions && npm run grep30 && npm run screenshots",
+    "scrub": "node scrub.mjs"
   },
   "devDependencies": {
     "html-validate": "^9.0.0",

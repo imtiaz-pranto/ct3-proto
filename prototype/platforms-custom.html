@@ -28,7 +28,7 @@
 				<li><a class="platform-list-item" href="platforms-microsoft.html"><span class="logo sm"><img src="assets/logos/microsoft.svg" alt=""></span>Microsoft<span class="pro-badge" data-when="plan=free"><span data-icon="pui-crown"></span>PRO</span><span class="pill off is-dot" data-when="plan=pro"><span class="sr-only">Not set up</span></span></a></li>
 				<li><a class="platform-list-item" href="platforms-custom.html" aria-current="page"><span class="logo sm"><img src="assets/logos/custom.svg" alt=""></span>Custom script<span class="pill off is-dot"><span class="sr-only">Not set up</span></span></a></li>
 			</ul>
-			<p class="master-foot">TikTok and Pinterest come in a later update.</p>
+			<template data-v31><p class="master-foot">Pinterest comes in a later update.</p></template>
 		</nav>
 
 		<section class="detail" aria-labelledby="detail-title">
@@ -94,7 +94,11 @@
 						<ul class="placeholder-list"><li><code>{order_number}</code></li><li><code>{order_total}</code></li><li><code>{order_subtotal}</code></li><li><code>{order_discount}</code></li><li><code>{order_shipping}</code></li><li><code>{currency}</code></li><li><code>{payment_method}</code></li></ul>
 						<div class="field-label">Customer <span class="tag">Personal data</span></div>
 						<ul class="placeholder-list"><li><code>{customer_id}</code></li><li><code>{customer_email}</code></li><li><code>{customer_first_name}</code></li><li><code>{customer_last_name}</code></li></ul>
-						<p class="notice info small">Customer placeholders fill in only for a verified order on the thank-you page, and only after the shopper allows marketing cookies. Everywhere else they stay empty, so personal data never lands in a page by accident.</p>
+						<div class="option-row" id="customer-details">
+							<div><div class="option-title">Include customer details in scripts</div><div class="option-desc">Shares the shopper's ID, email and name with your scripts on a verified order, and they wait for consent when Respect cookie choices is on. Only administrators can edit scripts.</div></div>
+							<label class="switch"><input type="checkbox" role="switch" id="custom-customer" data-customer-details><span class="switch-track"></span><span class="sr-only">Include customer details in scripts</span></label>
+						</div>
+						<p class="notice info small">Customer placeholders fill in only while this is on, only for a verified order on the thank-you page, and, with Respect cookie choices on, only after the shopper allows marketing cookies. Everywhere else they stay empty, so personal data never lands in a page by accident.</p>
 					</section>
 				</div>
 

@@ -54,7 +54,7 @@ All six clips already used one class. `[PRICE]` uses `.ph` (the only text value 
 | L15 | `assets/app.js:272` | Top bar Help (?) menu | Support | 3.0 and 3.1 |
 | L16 | `assets/app.js:273` | Top bar Help (?) menu | Feature request | 3.0 and 3.1 |
 | L17 | `assets/app.js:297-299` | Help drawer footer below 1280 px (Docs, Support, Feature request: same targets as L14 to L16) | Docs / Support / Feature request | 3.0 and 3.1 |
-| L18 | `onboarding.html:68` | Onboarding step 2, "TikTok and Pinterest arrive in a later update" tile | Tell us if you need them sooner. | 3.0 and 3.1 |
+| L18 | `onboarding.html:68` | Onboarding step 2, "Pinterest arrives in a later update" tile | Tell us if you need it sooner. | 3.1 only |
 | L19 | `assets/app.js:764` | Meta, Server sending, step 1 (create an access token) | How to create one | 3.1 only |
 
 ### Platform dashboards (outside sites)
@@ -71,14 +71,14 @@ All six clips already used one class. `[PRICE]` uses `.ph` (the only text value 
 
 | # | Page | Location | Link text | Version |
 |---|---|---|---|---|
-| L25 | `settings.html:226` | Settings > Plan, Pro column (Free plan) | Upgrade to Pro | 3.0 and 3.1 |
+| L25 | `settings.html:226` | Settings > Plan, Pro column (Free plan). Target in 3.0: the WooCommerce.com product page (Pro sold only there, decided 2026-11-03) | Upgrade to Pro | 3.0 and 3.1 |
 | L26 | `whats-new.html:25` | What's new, old Pro 1.1.4 detected banner | Update Pro | 3.0 and 3.1 |
 | L27 | `onboarding.html:215` | Onboarding step 5 (Verify), opens the storefront through a test link | Open your store | 3.0 and 3.1 |
-| L28 | `settings.html:229` | Settings > Plan, Pro column (Pro plan), replaces "Active until [DATE]" | Manage your subscription on WooCommerce.com | 3.0 and 3.1 |
+| L28 | `settings.html:229` | Settings > Plan, Pro column (Pro plan), replaces "Active until [DATE]". Target in 3.0: the buyer's WooCommerce.com subscriptions page | Manage your subscription on WooCommerce.com | 3.0 and 3.1 |
 
 ### Count
 
-28 link placeholders in all (L17 counts once, as it repeats L14 to L16 in the drawer). In the 3.0 view: 25 (L12, L13 and L19 are 3.1 only).
+28 link placeholders in all (L17 counts once, as it repeats L14 to L16 in the drawer). In the 3.0 view: 24 (L12, L13, L18 and L19 are 3.1 only).
 
 ## Not listed here
 

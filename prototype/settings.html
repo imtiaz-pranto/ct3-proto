@@ -32,30 +32,30 @@
 					<span class="logo"><span data-icon="bell"></span></span>
 					<div class="detail-head-text">
 						<h2 class="detail-title" id="notify-title">Alerts</h2>
-						<p class="detail-desc">We tell you when a sale wasn't sent to a platform. Every alert ends in something you can do.</p>
+						<p class="detail-desc">We tell you when we couldn't confirm a sale was sent to a platform. Every alert ends in something you can do.</p>
 					</div>
 				</div>
 				<div>
 					<div class="card-row">
-						<div class="event-row-text"><div class="option-title">Missed sales, on the dashboard</div><div class="option-desc">A badge and a card when a paid order wasn't sent to a connected platform within 10 minutes.</div></div>
-						<label class="switch"><input type="checkbox" role="switch" checked><span class="switch-track"></span><span class="sr-only">Missed sales on the dashboard</span></label>
+						<div class="event-row-text"><div class="option-title">Not confirmed purchases, on the dashboard</div><div class="option-desc">A badge and a card when we couldn't confirm a paid order was sent to a connected platform within 10 minutes.</div></div>
+						<label class="switch"><input type="checkbox" role="switch" checked><span class="switch-track"></span><span class="sr-only">Not confirmed purchases on the dashboard</span></label>
 					</div>
 
 					<template data-v31>
 						<div class="card-row">
-							<div class="event-row-text"><div class="option-title">Missed sales, by email <span class="pro-badge" data-when="plan=free"><span data-icon="pui-crown"></span>PRO</span></div><div class="option-desc">One email per platform per day at most. Order numbers only.</div></div>
-							<label class="switch" data-when="plan=pro"><input type="checkbox" role="switch" checked><span class="switch-track"></span><span class="sr-only">Missed sales by email</span></label>
+							<div class="event-row-text"><div class="option-title">Not confirmed purchases, by email <span class="pro-badge" data-when="plan=free"><span data-icon="pui-crown"></span>PRO</span></div><div class="option-desc">One email per platform per day at most. Order numbers only.</div></div>
+							<label class="switch" data-when="plan=pro"><input type="checkbox" role="switch" checked><span class="switch-track"></span><span class="sr-only">Not confirmed purchases by email</span></label>
 							<a class="crown-link" href="#plan" data-when="plan=free"><span data-icon="pui-crown"></span>Upgrade</a>
 						</div>
 
 						<div class="card-row">
-							<div class="event-row-text"><div class="option-title">Daily digest instead of one email per incident <span class="pro-badge" data-when="plan=free"><span data-icon="pui-crown"></span>PRO</span></div><div class="option-desc">One email at 09:00 with everything missed yesterday.</div></div>
+							<div class="event-row-text"><div class="option-title">Daily digest instead of one email per incident <span class="pro-badge" data-when="plan=free"><span data-icon="pui-crown"></span>PRO</span></div><div class="option-desc">One email at 09:00 with every purchase not confirmed yesterday.</div></div>
 							<label class="switch" data-when="plan=pro"><input type="checkbox" role="switch"><span class="switch-track"></span><span class="sr-only">Daily digest</span></label>
 							<a class="crown-link" href="#plan" data-when="plan=free"><span data-icon="pui-crown"></span>Upgrade</a>
 						</div>
 
 						<div class="card-row">
-							<div class="event-row-text"><div class="option-title">Weekly health email <span class="pro-badge" data-when="plan=free"><span data-icon="pui-crown"></span>PRO</span></div><div class="option-desc">Monday morning: purchases tracked per platform, missed count, Doctor summary. <a href="email-weekly.html">Preview</a></div></div>
+							<div class="event-row-text"><div class="option-title">Weekly health email <span class="pro-badge" data-when="plan=free"><span data-icon="pui-crown"></span>PRO</span></div><div class="option-desc">Monday morning: purchases tracked per platform, not confirmed count, Doctor summary. <a href="email-weekly.html">Preview</a></div></div>
 							<label class="switch" data-when="plan=pro"><input type="checkbox" role="switch" checked><span class="switch-track"></span><span class="sr-only">Weekly health email</span></label>
 							<a class="crown-link" href="#plan" data-when="plan=free"><span data-icon="pui-crown"></span>Upgrade</a>
 						</div>
@@ -113,7 +113,7 @@
 							<li><span data-icon="check"></span>Microsoft Advertising</li>
 							<li><span data-icon="check"></span><a href="catalog.html">Meta catalog feed</a></li>
 							<li><span data-icon="check"></span>More than one Meta pixel</li>
-							<template data-v31><li><span data-icon="check"></span>Missed-sale emails and a weekly health email</li></template>
+							<template data-v31><li><span data-icon="check"></span>Emails about not confirmed purchases and a weekly health email</li></template>
 						</ul>
 					</div>
 				</aside>
@@ -201,7 +201,7 @@
 							<li><span data-icon="check"></span>Respect cookie choices</li>
 							<li><span data-icon="check"></span>Tracking Doctor</li>
 							<li><span data-icon="check"></span>Activity log, 24 hours</li>
-							<li><span data-icon="check"></span>Missed-sale badge on the dashboard</li>
+							<li><span data-icon="check"></span>A badge for not confirmed purchases on the dashboard</li>
 						</ul>
 						<span class="pill ok" data-when="plan=free">Your plan</span>
 					</div>
@@ -218,7 +218,7 @@
 							<li><span data-icon="check"></span><a href="#access">Choose which roles can manage tracking</a></li>
 							<template data-v31>
 								<li><span data-icon="check"></span>Activity log kept 30 days (up to 90), search, export</li>
-								<li><span data-icon="check"></span>Missed-sale emails, weekly health email</li>
+								<li><span data-icon="check"></span>Emails about not confirmed purchases, weekly health email</li>
 								<li><span data-icon="check"></span>Refunds sent to Analytics</li>
 							</template>
 						</ul>

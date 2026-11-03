@@ -14,13 +14,18 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const pages = readdirSync(root).filter((f) => f.endsWith('.html')).map((f) => f.replace('.html', ''));
 const terms = ['3.1', 'backup sending', 'server', 'Conversions API', 'CAPI', 'Measurement Protocol', 'refund', 'weekly', 'digest', 'export', 'retention', 'loopback', 'Delivered', '401',
 	// Widened 2026-11-02 after catalog.html promised daily feed checks in 3.0.
-	'daily', 'every day', 'reachable', 'email', 'alert'];
+	'daily', 'every day', 'reachable', 'email', 'alert',
+	// TikTok is 3.1 scope (2026-11-03): no mention in the 3.0 view.
+	'TikTok',
+	// No "more platforms coming" lines in 3.0 (2026-11-03 scope freeze).
+	'Pinterest', 'coming soon', 'later update'];
 // Hits that stay, with the reason. Matched against the snippet.
 const keep = [
 	['?action=wcct-product-export', 'The catalog feed URL. It must stay exactly as it was so Meta keeps fetching it after the update.'],
 	['refreshes every day', 'Catalog Free preview: Meta fetches the feed on its own schedule. A Meta behaviour, not a CT check.'],
 	['daily schedule', 'Catalog setup step in Meta Commerce Manager. The merchant sets the schedule in Meta.'],
 	['customer_email', 'Custom script placeholder {customer_email}, one of the 11 kept in 3.0.'],
+	["shopper's ID, email and name", 'Custom script "Include customer details in scripts" help text (3.0, decided 2026-11-03): says what the setting shares.'],
 	['Alerts, who can manage', 'Settings > Alerts exists in 3.0 with the dashboard and Doctor rows only; emails are 3.1.'],
 	['Alerts Integration access', 'Settings section list: the Alerts section name (3.0, dashboard and Doctor rows).'],
 	['Plan Alerts We tell', 'Settings > Alerts panel title (3.0, dashboard and Doctor rows).'],

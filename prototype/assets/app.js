@@ -36,6 +36,8 @@
 		feedId: 'id',
 		feed: 'ok',
 		migration: 'attention',
+		savedScript: 'customer',
+		firstEvent: 'received',
 		// Onboarding progress (Install = New): the step reached, what was
 		// picked, the Europe answer and whether the first event arrived. The
 		// dashboard checklist reads these.
@@ -55,13 +57,17 @@
 	];
 
 	var PAGE_STATES = {
-		'index': [{ key: 'doctor', label: 'Doctor', options: [['ran', 'Ran'], ['not', 'Not run'], ['plugin', 'Plugin added']] }],
+		'index': [{ key: 'doctor', label: 'Doctor', options: [['ran', 'Ran'], ['not', 'Not run'], ['plugin', 'Plugin added']] },
+			// X connected, no purchase checked in yet (accepted 2026-11-03).
+			{ key: 'firstEvent', label: 'X first purchase', options: [['received', 'Received'], ['waiting', 'Waiting']] }],
 		'platforms': [{ key: 'connection', label: 'Meta', options: [['connected', 'Connected'], ['not', 'Not connected']] }],
 		'platforms-x': [{ key: 'connection', label: 'X', options: [['connected', 'Connected'], ['not', 'Not connected']] }],
 		'platforms-microsoft': [{ key: 'connection', label: 'Microsoft (Pro only)', options: [['connected', 'Connected'], ['not', 'Not connected']] }],
 		'log': [{ key: 'log', label: 'Rows', options: [['rows', 'With rows'], ['empty', 'Empty']] }],
 		'doctor': [{ key: 'doctorResult', label: 'Result', options: [['findings', 'Findings'], ['clear', 'All clear']] }, { key: 'feed', label: 'Catalog feed (Pro)', when: 'version=3.1', options: [['ok', 'Healthy'], ['fail', 'Unreachable']] }],
 		'whats-new': [{ key: 'oldPro', label: 'Old Pro 1.1.4', options: [['no', 'Not installed'], ['yes', 'Detected']] }],
+		// Upgraders only: what their saved 2.x script used, which sets the customer-details default.
+		'platforms-custom': [{ key: 'savedScript', label: 'Saved script', when: 'install=upgrade', options: [['customer', 'Customer placeholders'], ['order', 'Order only']] }],
 		'catalog': [{ key: 'feed', label: 'Feed', when: 'version=3.1', options: [['ok', 'Healthy'], ['fail', 'Unreachable']] }]
 	};
 
@@ -889,7 +895,8 @@
 		// Purchases per hour over the last 24 hours (decision D1/D2, 2026-11-03:
 		// 3.0 keeps 24 hours of order-level data and hears back about purchases
 		// only). Same orders as the Activity log: #1306 at 16:55 yesterday,
-		// #1310 at 09:58, #1311 (missed on Meta) and #1312 in the 10:00 hour.
+		// #1310 at 09:58, #1311 (not confirmed on Meta) and #1312 in the 10:00 hour.
+		// #1304 (no check-in) isn't drawn: it is neither sent nor not confirmed.
 		var hours = [];
 		for (var hr = 0; hr < 24; hr++) {
 			hours.push({ label: String((11 + hr) % 24).padStart(2, '0') + ':00', sent: 0, missed: 0 });
@@ -924,7 +931,7 @@
 				}
 				return '<text class="axis" x="' + Math.round(i * slot) + '" y="198">' + (i === 23 ? 'Now' : d.label) + '</text>';
 			}).join('');
-			chart.innerHTML = '<svg viewBox="0 0 720 200" preserveAspectRatio="none" role="img" aria-label="Bar chart: 4 purchases in the last 24 hours; 3 sent to every connected platform, 1 missed on Meta">' +
+			chart.innerHTML = '<svg viewBox="0 0 720 200" preserveAspectRatio="none" role="img" aria-label="Bar chart: 4 purchases in the last 24 hours; 3 sent to every connected platform, 1 not confirmed on Meta">' +
 				grid + '<line class="grid-line" x1="0" x2="' + w + '" y1="' + h + '" y2="' + h + '"/>' + bars + labels + '</svg>';
 		}
 		if (chart) {
@@ -1383,7 +1390,22 @@
 		check();
 	};
 
-	pages['platforms-custom'] = function () { platformPage('Custom script'); };
+	pages['platforms-custom'] = function () {
+		platformPage('Custom script');
+		// Include customer details (decided 2026-11-03): off on a new install;
+		// upgraders whose saved script already uses a customer placeholder start
+		// with it on, so nothing changes for them; everyone else starts off.
+		var customer = document.querySelector('[data-customer-details]');
+		function startCustomer() {
+			customer.checked = state.install === 'upgrade' && state.savedScript === 'customer';
+		}
+		startCustomer();
+		document.addEventListener('wcct:state', function (e) {
+			if (e.detail.key === 'install' || e.detail.key === 'savedScript') {
+				startCustomer();
+			}
+		});
+	};
 	// Settings: Alerts, Integration access and Plan, one panel at a time,
 	// picked by the URL hash so other pages can link to a section.
 	pages['settings'] = function () {
@@ -1489,7 +1511,9 @@
 		{ id: 1308, order: true, time: 'Today 09:12', amount: '$89.00', event: 'Purchase', status: 'pending', reached: [] },
 		{ id: 1307, order: true, time: 'Yesterday 18:07', amount: '$64.00', event: 'Failed order', status: 'skipped', reached: [] },
 		{ id: 1306, order: true, time: 'Yesterday 16:55', amount: '$210.00', event: 'Purchase', status: 'counted', reached: ['meta', 'google', 'x'] },
-		{ id: 1305, time: 'Yesterday 15:20', amount: '$45.00', event: 'Start checkout', status: 'tracked', reached: ['meta', 'google', 'x'] }
+		{ id: 1305, time: 'Yesterday 15:20', amount: '$45.00', event: 'Start checkout', status: 'tracked', reached: ['meta', 'google', 'x'] },
+		// Paid, but the shopper never reached the thank-you page (off-site gateway, upsell funnel): no check-in, never counted as not confirmed.
+		{ id: 1304, order: true, time: 'Yesterday 14:40', amount: '$75.00', event: 'Purchase', status: 'nocheckin', reached: [] }
 	];
 	var PLATFORM = {
 		meta: { name: 'Meta', logo: 'meta.svg', hop: 'Browser pixel fired' },
@@ -1499,7 +1523,9 @@
 	var STATUS = {
 		counted: { tone: 'ok', text: 'Counted once', tab: 'tracked' },
 		tracked: { tone: 'ok', text: 'Tracked', tab: 'tracked' },
-		missed: { tone: 'warn', text: 'Missed on Meta', tab: 'missed' },
+		// Not confirmed (amber): the thank-you page checked in, a platform didn't confirm. No check-in (grey, All tab only): we never heard back, so we don't judge it.
+		missed: { tone: 'warn', text: 'Not confirmed on Meta', tab: 'not-confirmed' },
+		nocheckin: { tone: 'off', text: 'No check-in', tab: 'none' },
 		pending: { tone: 'off', text: 'Pending payment', tab: 'pending' },
 		skipped: { tone: 'off', text: 'Skipped', tab: 'skipped' }
 	};
@@ -1520,6 +1546,9 @@
 		if (row.status === 'skipped') {
 			return '<span class="reached">Nothing sent, by design</span>';
 		}
+		if (row.status === 'nocheckin') {
+			return '<span class="reached">Not checked: no thank-you page visit</span>';
+		}
 		var names = row.reached.map(function (k) { return PLATFORM[k].name; }).join(', ');
 		return '<span class="reached" title="' + names + '"><span class="logo-stack">' + row.reached.map(function (k) { return logo(k, 'xs'); }).join('') + '</span></span>';
 	}
@@ -1531,20 +1560,25 @@
 			'<div class="detail-desc">' + esc(row.event) + ', ' + row.amount + ', ' + row.time.toLowerCase() + '</div></div>' +
 			'<span class="pill ' + s.tone + '">' + s.text + '</span></div>';
 		if (row.status === 'pending') {
-			h += '<ul class="timeline"><li class="is-off">Order created, waiting for payment</li><li class="is-off">Sent to your platforms once the order is paid</li></ul>' +
-				'<p class="small muted">Nothing to do. Bank transfers and cash on delivery stay here until you mark them paid.</p>';
+			h += '<ul class="timeline"><li>Sent to your platforms on the thank-you page</li><li class="is-off">Payment still pending</li></ul>' +
+				'<p class="small muted">Bank transfers and cash on delivery are sent when the shopper reaches the thank-you page, like every other order. The order stays here until you mark it paid.</p>';
 			return h;
 		}
 		if (row.status === 'skipped') {
 			h += '<ul class="timeline"><li class="is-off">Payment failed</li><li class="is-off">Nothing sent to any platform, so it never counts as a sale</li></ul>';
 			return h;
 		}
+		if (row.status === 'nocheckin') {
+			h += '<ul class="timeline"><li class="is-off">Order paid</li><li class="is-off">The shopper didn\'t reach the thank-you page, so it never checked in</li></ul>' +
+				'<p class="small muted">Common with payments that don\'t return to your store, one-click upsell pages and some custom checkouts. We can\'t tell whether it was sent, so it isn\'t counted as not confirmed.</p>';
+			return h;
+		}
 		['meta', 'google', 'x'].forEach(function (k, i) {
 			var p = PLATFORM[k];
 			h += '<div class="timeline-group"><div class="timeline-name">' + logo(k, 'xs') + (p.label || p.name) + '</div><ul class="timeline">';
 			if (row.missed === k) {
-				h += '<li class="is-warn">Blocked in the shopper\'s browser</li></ul>' +
-					'<p class="small muted">The thank-you page checked in, but ' + p.name + '\'s script didn\'t load, most likely because of an ad blocker. Nothing to fix on your side. If it happens often, <a href="doctor.html">ask the Doctor</a>.</p></div>';
+				h += '<li class="is-warn">We couldn\'t confirm this purchase was sent</li></ul>' +
+					'<p class="small muted">The thank-you page checked in, but ' + p.name + '\'s script didn\'t confirm it ran. An ad blocker or a browser privacy setting often causes this, but we can\'t tell for sure. If it happens often, <a href="doctor.html">ask the Doctor</a>.</p></div>';
 				return;
 			}
 			h += '<li>' + p.hop + ', ' + sec(3 + i) + '</li><li>Reported to the log, ' + sec(4 + i) + '</li>';
@@ -1569,7 +1603,7 @@
 		var table = document.querySelector('[data-log-table]');
 		var empty = document.querySelector('[data-log-empty]');
 		var noMatch = document.querySelector('[data-log-nomatch]');
-		// The dashboard's missed-sale card links here with ?tab=missed.
+		// The dashboard's not-confirmed card links here with ?tab=not-confirmed.
 		var tab = new URLSearchParams(window.location.search).get('tab') || 'all';
 		var selected = 1312;
 		var narrow = window.matchMedia('(max-width: 1100px)');

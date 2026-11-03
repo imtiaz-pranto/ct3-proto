@@ -75,7 +75,7 @@
 			</div>
 			<div class="card stat-card">
 				<span class="stat-icon is-warn"><span data-icon="triangle-alert"></span></span>
-				<div><span class="stat-value">1</span><span class="stat-label">Missed on Meta</span></div>
+				<div><span class="stat-value">1</span><span class="stat-label">Not confirmed on Meta</span></div>
 			</div>
 			<div class="card stat-card">
 				<span class="stat-icon is-ok"><span data-icon="check"></span></span>
@@ -89,15 +89,16 @@
 				<div data-when="doctor=not"><span class="stat-value">Not yet</span><span class="stat-label">Last Doctor run</span></div>
 			</div>
 		</section>
+		<p class="page-sub" data-nocheckin-note>1 order couldn't be checked: the shopper didn't reach the thank-you page, so it isn't counted as not confirmed. <a href="log.html">See it in the Activity log</a></p>
 
-		<section class="notice warning banner" aria-label="Missed sales">
+		<section class="notice warning banner" aria-label="Not confirmed purchases">
 			<div class="stack-sm banner-text">
 				<div class="row">
 					<span class="pill warn">Worth a look</span>
-					<p><b>1 purchase wasn't sent to Meta in the last 24 hours.</b> Order #1311: Meta's pixel was blocked in the shopper's browser, most likely by an ad blocker. Shoppers who decline cookies aren't counted here, because respecting that choice is by design.</p>
+					<p><b>We couldn't confirm that 1 purchase was sent to Meta in the last 24 hours.</b> Order #1311: the thank-you page checked in, but Meta's script didn't confirm it ran. An ad blocker or a browser privacy setting often causes this, but we can't tell for sure. Shoppers who decline cookies aren't counted here, because respecting that choice is by design.</p>
 				</div>
 				<div class="row wrap">
-					<a class="btn outline sm" href="log.html?tab=missed">Open the orders in the Activity log</a>
+					<a class="btn outline sm" href="log.html?tab=not-confirmed">Open the orders in the Activity log</a>
 					<a class="btn outline sm" href="platforms.html#cookie-choices">Check cookie choices</a>
 					<a class="btn outline sm" href="doctor.html">Run the Doctor</a>
 				</div>
@@ -114,7 +115,7 @@
 					<h2 class="card-title" id="chart-title">Purchases in the last 24 hours</h2>
 				</div>
 				<div data-chart></div>
-				<div class="row wrap"><span class="chart-legend">Sent to every connected platform</span><span class="chart-legend is-missed">Missed on a platform</span></div>
+				<div class="row wrap"><span class="chart-legend">Sent to every connected platform</span><span class="chart-legend is-missed">Not confirmed on a platform</span></div>
 			</section>
 
 			<section class="card card-body" aria-labelledby="doctor-title">
@@ -177,7 +178,14 @@
 					</span>
 					<span class="platform-note">X retired the old event codes, so purchases need a new event ID. <span class="fix">Fix it</span></span>
 				</a>
-				<a class="card platform-card" href="platforms-x.html" data-platform-status="ok" data-when="install!=upgrade||migration!=attention">
+				<a class="card platform-card" href="platforms-x.html" data-platform-status="waiting" data-when="firstEvent=waiting;install!=upgrade||firstEvent=waiting;migration!=attention">
+					<span class="platform-card-head">
+						<span class="platform-id"><span class="logo"><img src="assets/logos/x.svg" alt=""></span><span><span class="platform-name">X</span><span class="platform-meta">formerly Twitter</span></span></span>
+						<span class="pill off">Waiting for first event</span>
+					</span>
+					<span class="platform-note">Connected 5 minutes ago. This updates when the first purchase checks in. Place a test order to see it now.</span>
+				</a>
+				<a class="card platform-card" href="platforms-x.html" data-platform-status="ok" data-when="firstEvent!=waiting;install!=upgrade||firstEvent!=waiting;migration!=attention">
 					<span class="platform-card-head">
 						<span class="platform-id"><span class="logo"><img src="assets/logos/x.svg" alt=""></span><span><span class="platform-name">X</span><span class="platform-meta">formerly Twitter</span></span></span>
 						<span class="pill ok">Working</span>

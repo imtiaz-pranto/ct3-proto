@@ -126,10 +126,33 @@ Do not carry: `--wp-*` and the layout variables (prototype scaffolding).
 
 Layout: full width beside the WP menu with 32 px side padding, no max-width. Platforms: list 240 px, main column fluid, help 320 px. Text inputs stop at 560 px; one setting per line. Breakpoints: below 1280 px the help column becomes a drawer opened by the ? button; at 1180 px the top bar drops the version pills; at 1100 px the dashboard grids go to 2 columns and the log detail moves into a dialog; at 900 px the platform list stacks above the panel. 1024 px with the WP menu open (864 px content) is the narrowest layout tested.
 
+## Scope freeze pass (2026-11-03)
+
+- **"Not confirmed" replaces every "Missed"** label (stat, card, log status and tab `?tab=not-confirmed`, chart legend, Settings > Alerts, Plan, the 3.1 email copy). A new log row, #1304, shows the separate grey **"No check-in"** status ("Not checked: no thank-you page visit"). It's listed under All only, isn't drawn in the chart, and gets one quiet line on the dashboard.
+- **Custom script** has an "Include customer details in scripts" switch. It's off on a new install. Upgraders get it on when their saved script used a customer placeholder; the state bar's **Saved script** control (Upgraded only) sets that.
+- **Copy and the 3.0 view:** hashed matching reads "Hashed before it's sent to the platform". The 3.0 view has no "coming in a later update" lines; the Pinterest note exists only in 3.1. What's new says settings changed in 3.0 are lost when going back to 2.1.x.
+- **Checks:** 44 interaction checks. grep-30 also fails on Pinterest, "coming soon" and "later update" in 3.0.
+
+## Dependency check, five accepted (2026-11-03)
+
+- Log detail for a pending order: "Sent to your platforms on the thank-you page / Payment still pending" (pending and on-hold orders fire Purchase as today).
+- Dashboard: state-bar control **X first purchase** (Received, Waiting). Waiting shows the X card as "Waiting for first event", the fourth card state.
+- Developer blocks show the real integration ids: Microsoft `bing_ads`; Google is `google` in the settings API over `adwords` and `ga4`.
+- What's new (Pro) notes that the feed now lists variations under their parent.
+- 45 interaction checks.
+
+## Exporting to ct3-proto (required before every push)
+
+The public review copy (imtiaz-pranto/ct3-proto, deployed to ct3-proto.vercel.app) must never carry the real test-site values: the domain, the Meta Pixel ID and its short form, the store name, the admin's name in the WP bar, the sample email or the token. `tools/scrub.mjs` does the export:
+
+1. `cd prototype/tools && npm run scrub`. This copies `CT/prototype` to `ct3-proto/prototype` (the repo folder next to `CT`), replaces every real value with its stand-in, mirrors deletions, then scans the export and **fails (exit 1) if any real value is left**. It never copies `node_modules`, `tools/rendered`, `tools/contrast-report.txt`, `.DS_Store`, images or itself (it holds the real values). To scan without copying: `node scrub.mjs --check <folder>`.
+2. In `ct3-proto/prototype/tools`: `npm run verify`. This checks the scrubbed copy and regenerates `screenshots/` from the scrubbed pages. Screenshots are never copied from `CT`, because a PNG can't be scrubbed as text. Dated review sets under `screenshots/<name>-<date>/` come from one-off scripts; regenerate them against the export or leave them out.
+3. Commit and push from `ct3-proto` only after both steps pass.
+
 ## Tools
 
 ```bash
 cd prototype/tools && npm install && npm run verify
 ```
 
-`verify` runs, in order: `html-validate` on the page files (`html-validate:recommended`), `check-links.mjs` (every local link and asset resolves from `file://`, every page is reachable), `contrast.mjs` (every visible text colour against the background it sits on, all pages and states, threshold 4.5:1; since 2026-11-02 it also focuses every enabled control and checks the focus ring against the surface it sits on, threshold 3:1; it also saves the rendered DOM to `tools/rendered/` and validates that too), `interactions.mjs` (43 checks, including layout, the help drawer, one setting per line, the events table, Catalog, Settings, role access, onboarding, migration, the Doctor and 3.1 server sending), `grep-30.mjs` (no 3.1 or server-side terms anywhere in the 3.0 state: 3.1, server, weekly, digest, export, retention, loopback, refund, Delivered, 401, daily, every day, reachable, email, alert and more, with an allow-list that says why each kept hit stays) and `screenshot.mjs` (Free and Pro at 1440 and 1920 px, extra states, 3.1 states, and a horizontal-scroll check at 1024 / 1280 / 1440 / 1920). Contrast covers every page in both plans and both versions.
+`verify` runs, in order: `html-validate` on the page files (`html-validate:recommended`), `check-links.mjs` (every local link and asset resolves from `file://`, every page is reachable), `contrast.mjs` (every visible text colour against the background it sits on, all pages and states, threshold 4.5:1; since 2026-11-02 it also focuses every enabled control and checks the focus ring against the surface it sits on, threshold 3:1; it also saves the rendered DOM to `tools/rendered/` and validates that too), `interactions.mjs` (45 checks, including layout, the help drawer, one setting per line, the events table, Catalog, Settings, role access, onboarding, migration, the Doctor and 3.1 server sending), `grep-30.mjs` (no 3.1 or server-side terms anywhere in the 3.0 state: 3.1, server, weekly, digest, export, retention, loopback, refund, Delivered, 401, daily, every day, reachable, email, alert and more, with an allow-list that says why each kept hit stays) and `screenshot.mjs` (Free and Pro at 1440 and 1920 px, extra states, 3.1 states, and a horizontal-scroll check at 1024 / 1280 / 1440 / 1920). Contrast covers every page in both plans and both versions.

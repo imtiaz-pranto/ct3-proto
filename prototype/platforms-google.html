@@ -28,7 +28,7 @@
 				<li><a class="platform-list-item" href="platforms-microsoft.html"><span class="logo sm"><img src="assets/logos/microsoft.svg" alt=""></span>Microsoft<span class="pro-badge" data-when="plan=free"><span data-icon="pui-crown"></span>PRO</span><span class="pill off is-dot" data-when="plan=pro"><span class="sr-only">Not set up</span></span></a></li>
 				<li><a class="platform-list-item" href="platforms-custom.html"><span class="logo sm"><img src="assets/logos/custom.svg" alt=""></span>Custom script<span class="pill off is-dot"><span class="sr-only">Not set up</span></span></a></li>
 			</ul>
-			<p class="master-foot">TikTok and Pinterest come in a later update.</p>
+			<template data-v31><p class="master-foot">Pinterest comes in a later update.</p></template>
 		</nav>
 
 		<section class="detail" aria-labelledby="detail-title">
@@ -131,7 +131,7 @@
 							<section class="dev-block" aria-labelledby="dev-title">
 								<h3 id="dev-title"><span data-icon="terminal"></span>For developers</h3>
 								<dl class="dev-list">
-									<dt>Integration key</dt><dd><code>google</code></dd>
+									<dt>Integration key</dt><dd><code>google</code> in the settings API; two integrations underneath, <code>adwords</code> and <code>ga4</code></dd>
 									<dt>Event IDs</dt><dd><code>wcct_{order_id}_purchase</code></dd>
 									<dt>Filters</dt><dd><code>wcct_event_value</code><code>wcct_consent_allows</code><code>wcct_platforms</code></dd>
 									<dt>Terms</dt><dd>"Counted once" = deduplication by event ID. "Respect cookie choices" = Consent Mode v2 and the WP Consent API.</dd>
